@@ -1,31 +1,53 @@
 const board = document.querySelector<HTMLElement>('.thought-board');
-const tokens = Array.from(document.querySelectorAll<HTMLElement>('.token'));
+const files = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-file]'));
 const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('.play-controls button'));
 const agentButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-action="agent-mode"]'));
 const agentReadable = document.querySelector<HTMLElement>('.agent-readable');
+const previewTitle = document.querySelector<HTMLElement>('[data-preview-title]');
+const previewSummary = document.querySelector<HTMLElement>('[data-preview-summary]');
+const previewDate = document.querySelector<HTMLElement>('[data-preview-date]');
+const previewReading = document.querySelector<HTMLElement>('[data-preview-reading]');
 
-function randomBetween(min: number, max: number) {
-  return Math.round(min + Math.random() * (max - min));
+function selectedFile() {
+  return files.find((file) => file.classList.contains('is-selected')) ?? files[0];
 }
 
-function shuffleTokens() {
-  tokens.forEach((token) => {
-    token.style.left = randomBetween(6, 72) + '%';
-    token.style.top = randomBetween(8, 68) + '%';
-    token.style.transform = 'rotate(' + randomBetween(-10, 10) + 'deg)';
+function syncPreview(file: HTMLButtonElement) {
+  files.forEach((candidate) => {
+    candidate.classList.toggle('is-selected', candidate === file);
+    candidate.setAttribute('aria-pressed', String(candidate === file));
   });
+
+  if (previewTitle) previewTitle.textContent = file.dataset.title ?? '';
+  if (previewSummary) previewSummary.textContent = file.dataset.summary ?? '';
+  if (previewDate) previewDate.textContent = file.dataset.date ?? '';
+  if (previewReading) previewReading.textContent = file.dataset.readingTime ?? '';
 }
 
-function sparkBoard() {
-  if (!board) return;
+function spotlightPinned() {
+  const pinned = files.find((file) => file.dataset.pinned === 'true') ?? files[0];
+  if (!pinned || !board) return;
+  syncPreview(pinned);
   board.animate(
     [
-      { filter: 'saturate(1)', transform: 'scale(1)' },
-      { filter: 'saturate(1.6)', transform: 'scale(1.015)' },
-      { filter: 'saturate(1)', transform: 'scale(1)' }
+      { filter: 'saturate(1)', transform: 'translateY(0)' },
+      { filter: 'saturate(1.35)', transform: 'translateY(-4px)' },
+      { filter: 'saturate(1)', transform: 'translateY(0)' }
     ],
-    { duration: 420, easing: 'cubic-bezier(.2,.8,.2,1)' }
+    { duration: 380, easing: 'cubic-bezier(.2,.8,.2,1)' }
   );
+}
+
+function selectNextFile() {
+  if (!files.length) return;
+  const current = selectedFile();
+  const nextIndex = (files.indexOf(current) + 1) % files.length;
+  syncPreview(files[nextIndex]);
+}
+
+function openSelectedFile() {
+  const href = selectedFile()?.dataset.href;
+  if (href) window.location.href = href;
 }
 
 function setAgentMode(enabled: boolean) {
@@ -35,6 +57,12 @@ function setAgentMode(enabled: boolean) {
     button.textContent = 'Agent-readable mode';
   });
 }
+
+files.forEach((file) => {
+  file.setAttribute('aria-pressed', String(file.classList.contains('is-selected')));
+  file.addEventListener('click', () => syncPreview(file));
+  file.addEventListener('dblclick', openSelectedFile);
+});
 
 if (agentReadable && agentButtons.length) {
   const params = new URLSearchParams(window.location.search);
@@ -49,8 +77,8 @@ if (agentReadable && agentButtons.length) {
 
 buttons.forEach((button) => {
   button.addEventListener('click', () => {
-    if (button.dataset.action === 'shuffle') shuffleTokens();
-    if (button.dataset.action === 'spark') sparkBoard();
-    if (button.dataset.action === 'read') window.location.href = '/essays/';
+    if (button.dataset.action === 'spotlight') spotlightPinned();
+    if (button.dataset.action === 'next') selectNextFile();
+    if (button.dataset.action === 'open') openSelectedFile();
   });
 });

@@ -9,6 +9,11 @@ const essays = await getPublishedEssays();
 const { pinned, rest } = splitPinned(essays);
 const latest = rest.slice(0, 6);
 const desktopEssays = [...pinned, ...latest].slice(0, 4);
+const selectedEssay = desktopEssays[0];
+const totalReadingMinutes = essays.reduce((total, essay) => {
+  const minutes = Number.parseInt(essay.data.readingTime, 10);
+  return total + (Number.isFinite(minutes) ? minutes : 0);
+}, 0);
 ---
 
 <BaseLayout>
@@ -54,6 +59,14 @@ const desktopEssays = [...pinned, ...latest].slice(0, 4);
               </span>
               <span>Instagram</span>
             </a>
+            <a class="desktop-icon social-icon" href={socials.substack} target="_blank" rel="noreferrer" aria-label="Substack publication">
+              <span class="icon-tile icon-substack" aria-hidden="true">
+                <svg viewBox="0 0 32 32" role="img">
+                  <path d="M8 7h16M8 12h16M8 17h16v9l-8-4-8 4z"></path>
+                </svg>
+              </span>
+              <span>Substack</span>
+            </a>
           </div>
 
           <div class="reader-window window">
@@ -62,29 +75,52 @@ const desktopEssays = [...pinned, ...latest].slice(0, 4);
               <span class="window-controls" aria-hidden="true"><i></i><i></i><i></i></span>
             </div>
             <div class="scorebar">
-              <span>Readers<strong>10</strong></span>
-              <span>Signal<strong>98</strong></span>
-              <span>Noise<strong>0</strong></span>
+              <span>Essays<strong>{essays.length}</strong></span>
+              <span>Pinned<strong>{pinned.length}</strong></span>
+              <span>Minutes<strong>{totalReadingMinutes}</strong></span>
             </div>
-            <div class="thought-board">
-              <span class="token" data-tone="red">AI</span>
-              <span class="token" data-tone="blue">EGO</span>
-              <span class="token" data-tone="green">CODE</span>
-              <span class="token" data-tone="yellow">GOD?</span>
-            </div>
+            {selectedEssay && (
+              <div class="thought-board" aria-live="polite">
+                <p class="preview-label">Selected file</p>
+                <h2 data-preview-title>{selectedEssay.data.title}</h2>
+                <p data-preview-summary>{selectedEssay.data.summary}</p>
+                <dl>
+                  <div>
+                    <dt>Saved</dt>
+                    <dd data-preview-date>
+                      {selectedEssay.data.publishedAt.toLocaleDateString('en', { month: 'short', day: 'numeric' })}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Length</dt>
+                    <dd data-preview-reading>{selectedEssay.data.readingTime}</dd>
+                  </div>
+                </dl>
+              </div>
+            )}
             <div class="play-controls">
-              <button type="button" data-action="spark">Spark</button>
-              <button type="button" data-action="shuffle">Shuffle</button>
-              <button type="button" data-action="read">Read</button>
+              <button type="button" data-action="spotlight">Spotlight</button>
+              <button type="button" data-action="next">Next file</button>
+              <button type="button" data-action="open">Open</button>
             </div>
           </div>
 
           <div class="document-stack" aria-label="Featured essay shortcuts">
-            {desktopEssays.map((essay) => (
-              <a class="desktop-file" href={'/essays/' + essay.slug + '/'}>
+            {desktopEssays.map((essay, index) => (
+              <button
+                class:list={['desktop-file', { 'is-selected': index === 0 }]}
+                type="button"
+                data-file
+                data-href={'/essays/' + essay.slug + '/'}
+                data-title={essay.data.title}
+                data-summary={essay.data.summary}
+                data-date={essay.data.publishedAt.toLocaleDateString('en', { month: 'short', day: 'numeric' })}
+                data-reading-time={essay.data.readingTime}
+                data-pinned={essay.data.pinned ? 'true' : 'false'}
+              >
                 <span class="file-icon" aria-hidden="true"></span>
                 <span>{essay.data.title}</span>
-              </a>
+              </button>
             ))}
           </div>
         </aside>
@@ -143,6 +179,7 @@ const desktopEssays = [...pinned, ...latest].slice(0, 4);
         <li><a href="/essays/">Essays index</a></li>
         <li><a href={socials.linkedin}>LinkedIn profile</a></li>
         <li><a href={socials.instagram}>Instagram profile</a></li>
+        <li><a href={socials.substack}>Substack publication</a></li>
       </ul>
 
       <h2>Pinned essays</h2>
