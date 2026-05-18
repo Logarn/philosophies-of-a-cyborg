@@ -69,6 +69,14 @@ h1, h2, h3, p { margin-top: 0; }
 .window-controls i { display: block; width: 0.72rem; height: 0.72rem; border: 2px solid var(--ink); background: var(--panel); }
 .hero-window { align-self: center; }
 .hero-window-body { padding: 1.35rem; }
+.hero-kicker {
+  margin-bottom: 0.65rem;
+  color: var(--green);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
 .hero-window h1 { max-width: 100%; margin-bottom: 1rem; font-size: 4.45rem; line-height: 0.88; letter-spacing: 0; }
 .hero-copy {
   max-width: 42rem; color: #342b22; font-family: Georgia, "Times New Roman", serif;

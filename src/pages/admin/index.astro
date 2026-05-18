@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { homepageCopy } from '../../lib/siteCopy';
 
 const essays = await getCollection('essays');
 const sortedEssays = essays.sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
@@ -10,13 +11,7 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10);
 
 const adminSeed = {
   storageKey: 'poc-admin-cms-editor-v1',
-  homepage: {
-    eyebrow: 'Public brain, low tolerance',
-    headline: 'Logarn writes.',
-    intro:
-      'Essays on AI, agency, software, ambition, and the awkward moment where the machine starts finishing your sentences better than your friends.',
-    cta: 'Read essays'
-  },
+  homepage: homepageCopy,
   articles: sortedEssays.map((essay) => ({
     slug: essay.slug,
     title: essay.data.title,
@@ -63,25 +58,31 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
   <main class="admin-cms" data-admin-app>
     <header class="admin-hero">
       <div>
-        <p class="admin-kicker">Static authoring console</p>
-        <h1>Admin CMS</h1>
+        <p class="admin-kicker">Writing studio</p>
+        <h1>Write. Preview. Ship.</h1>
         <p class="admin-intro">
-          Draft locally, preview instantly, then export markdown with frontmatter for the repository.
+          A tiny local CMS: draft in the browser, preview the reader output, then export the exact files the repo needs.
         </p>
       </div>
-      <div class="admin-meter" aria-label="Current draft state">
-        <span>
-          <strong id="metric-status">Draft</strong>
-          Status
-        </span>
-        <span>
-          <strong id="metric-pin">No</strong>
-          Pinned
-        </span>
-        <span>
-          <strong id="metric-path">new-essay.md</strong>
-          Export
-        </span>
+      <div class="admin-console">
+        <div class="admin-actions" aria-label="Studio commands">
+          <button class="solid-command" type="button" id="focus-mode">Focus editor</button>
+          <a class="text-command command-link" href="/" target="_blank" rel="noreferrer">View site</a>
+        </div>
+        <div class="admin-meter" aria-label="Current draft state">
+          <span>
+            <strong id="metric-status">Draft</strong>
+            Status
+          </span>
+          <span>
+            <strong id="metric-pin">No</strong>
+            Pinned
+          </span>
+          <span>
+            <strong id="metric-path">new-essay.md</strong>
+            Export
+          </span>
+        </div>
       </div>
     </header>
 
@@ -96,7 +97,10 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
         </div>
 
         <section class="home-controls" aria-label="Homepage copy controls">
-          <h3>Homepage copy</h3>
+          <div class="section-title">
+            <h3>Homepage copy</h3>
+            <small>Exports to src/lib/siteCopy.ts</small>
+          </div>
           <label>
             Eyebrow
             <input id="home-eyebrow" type="text" autocomplete="off" />
@@ -131,6 +135,11 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
             <h2>Article draft</h2>
           </div>
           <span class="save-state" id="save-state" aria-live="polite">Local draft ready</span>
+        </div>
+
+        <div class="readiness-bar" id="readiness-bar" aria-live="polite">
+          <strong id="ready-state">Checking draft</strong>
+          <span id="ready-detail">Title, slug, date, and export path will be validated here.</span>
         </div>
 
         <div class="metadata-grid">
@@ -231,8 +240,14 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
             <output id="export-path">src/content/essays/new-essay.md</output>
           </label>
           <textarea id="export-output" readonly spellcheck="false"></textarea>
+          <label class="path-label home-export-label" for="home-export-output">
+            Homepage copy target
+            <output id="home-export-path">src/lib/siteCopy.ts</output>
+          </label>
+          <textarea id="home-export-output" readonly spellcheck="false"></textarea>
           <div class="export-actions">
-            <button class="solid-command" type="button" id="copy-markdown">Copy markdown</button>
+            <button class="solid-command" type="button" id="copy-markdown">Copy article</button>
+            <button class="text-command" type="button" id="copy-homepage">Copy homepage</button>
             <button class="text-command" type="button" id="download-markdown">Export .md</button>
           </div>
           <p class="copy-feedback" id="copy-feedback" aria-live="polite">
@@ -251,9 +266,14 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
 
     const els = {
       articleList: document.getElementById('article-list'),
+      app: document.querySelector('[data-admin-app]'),
+      focusMode: document.getElementById('focus-mode'),
       resetDraft: document.getElementById('reset-draft'),
       newDraft: document.getElementById('new-draft'),
       saveState: document.getElementById('save-state'),
+      readyState: document.getElementById('ready-state'),
+      readyDetail: document.getElementById('ready-detail'),
+      readinessBar: document.getElementById('readiness-bar'),
       metricStatus: document.getElementById('metric-status'),
       metricPin: document.getElementById('metric-pin'),
       metricPath: document.getElementById('metric-path'),
@@ -279,7 +299,10 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       previewBody: document.getElementById('preview-body'),
       exportPath: document.getElementById('export-path'),
       exportOutput: document.getElementById('export-output'),
+      homeExportPath: document.getElementById('home-export-path'),
+      homeExportOutput: document.getElementById('home-export-output'),
       copyMarkdown: document.getElementById('copy-markdown'),
+      copyHomepage: document.getElementById('copy-homepage'),
       downloadMarkdown: document.getElementById('download-markdown'),
       copyFeedback: document.getElementById('copy-feedback')
     };
@@ -465,6 +488,34 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       return lines.join('\n');
     }
 
+    function buildHomepageModule() {
+      return `export const homepageCopy = ${JSON.stringify(appState.homepage, null, 2)} as const;\n`;
+    }
+
+    function validateDraft(slug) {
+      const issues = [];
+      if (!appState.draft.title.trim()) issues.push('title');
+      if (!slug) issues.push('slug');
+      if (!appState.draft.publishedAt) issues.push('published date');
+
+      const duplicate = seed.articles.some((article) => {
+        return article.slug === slug && article.title !== appState.draft.title;
+      });
+      if (duplicate) issues.push('duplicate slug');
+
+      if (issues.length) {
+        els.readinessBar.dataset.state = 'needs-work';
+        els.readyState.textContent = 'Needs work';
+        els.readyDetail.textContent = `Fix ${issues.join(', ')} before exporting.`;
+        return false;
+      }
+
+      els.readinessBar.dataset.state = 'ready';
+      els.readyState.textContent = 'Ready to export';
+      els.readyDetail.textContent = `${slug}.md and src/lib/siteCopy.ts are generated below.`;
+      return true;
+    }
+
     function renderArticleList() {
       els.articleList.innerHTML = '';
       seed.articles.forEach((article) => {
@@ -491,7 +542,9 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     function render() {
       const slug = appState.draft.slug || slugify(appState.draft.title);
       const exportPath = `src/content/essays/${slug}.md`;
+      const homeExportPath = 'src/lib/siteCopy.ts';
       const markdown = buildMarkdown();
+      const homepageModule = buildHomepageModule();
       const pinText = appState.draft.pinned ? 'Yes' : 'No';
       const metaParts = [
         appState.draft.publishedAt,
@@ -513,6 +566,9 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       els.previewBody.innerHTML = markdownToHtml(appState.draft.body);
       els.exportPath.textContent = exportPath;
       els.exportOutput.value = markdown;
+      els.homeExportPath.textContent = homeExportPath;
+      els.homeExportOutput.value = homepageModule;
+      validateDraft(slug);
     }
 
     function persistAndRender() {
@@ -619,11 +675,22 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     els.copyMarkdown.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(els.exportOutput.value);
-        els.copyFeedback.textContent = 'Markdown copied to clipboard.';
+        els.copyFeedback.textContent = 'Article markdown copied.';
       } catch {
         els.exportOutput.focus();
         els.exportOutput.select();
         els.copyFeedback.textContent = 'Clipboard blocked. Export text selected for manual copy.';
+      }
+    });
+
+    els.copyHomepage.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(els.homeExportOutput.value);
+        els.copyFeedback.textContent = 'Homepage copy module copied.';
+      } catch {
+        els.homeExportOutput.focus();
+        els.homeExportOutput.select();
+        els.copyFeedback.textContent = 'Clipboard blocked. Homepage export selected for manual copy.';
       }
     });
 
@@ -636,6 +703,12 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       link.click();
       URL.revokeObjectURL(url);
       els.copyFeedback.textContent = 'Markdown file exported from the browser.';
+    });
+
+    els.focusMode.addEventListener('click', () => {
+      const enabled = !els.app.classList.contains('focus-mode');
+      els.app.classList.toggle('focus-mode', enabled);
+      els.focusMode.textContent = enabled ? 'Show panels' : 'Focus editor';
     });
 
     renderArticleList();
@@ -664,10 +737,9 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
 
     .admin-hero {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(20rem, 0.58fr);
+      grid-template-columns: minmax(0, 1fr) minmax(26rem, 0.72fr);
       gap: 1rem;
       align-items: stretch;
-      min-height: 16rem;
       margin-bottom: 1rem;
       border: 2px solid var(--ink);
       border-radius: 8px;
@@ -679,7 +751,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     }
 
     .admin-hero > div:first-child {
-      padding: 1.5rem;
+      padding: 1.15rem 1.25rem;
     }
 
     .admin-kicker,
@@ -694,19 +766,41 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
 
     .admin-hero h1 {
       margin: 0;
-      max-width: 9ch;
-      font-size: 4.4rem;
-      line-height: 0.86;
+      max-width: 17ch;
+      font-size: clamp(2.35rem, 5vw, 4.15rem);
+      line-height: 0.92;
       letter-spacing: 0;
     }
 
     .admin-intro {
-      max-width: 36rem;
-      margin: 1rem 0 0;
+      max-width: 44rem;
+      margin: 0.85rem 0 0;
       color: #e7dfd1;
       font-family: Georgia, "Times New Roman", serif;
-      font-size: 1.35rem;
-      line-height: 1.28;
+      font-size: clamp(1.02rem, 1.8vw, 1.24rem);
+      line-height: 1.35;
+    }
+
+    .admin-console {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      border-left: 2px solid #f5f1e633;
+      background: #f5f1e60c;
+    }
+
+    .admin-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 0.75fr);
+      gap: 0.6rem;
+      padding: 0.9rem;
+      border-bottom: 1px solid #f5f1e624;
+    }
+
+    .command-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
     }
 
     .admin-meter {
@@ -714,8 +808,6 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       grid-template-columns: repeat(3, minmax(0, 1fr));
       align-content: end;
       min-height: 100%;
-      border-left: 2px solid #f5f1e633;
-      background: #f5f1e60c;
     }
 
     .admin-meter span {
@@ -745,9 +837,22 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
 
     .admin-grid {
       display: grid;
-      grid-template-columns: minmax(18rem, 0.74fr) minmax(31rem, 1.34fr) minmax(23rem, 0.92fr);
+      grid-template-columns: minmax(17rem, 0.62fr) minmax(33rem, 1.42fr) minmax(24rem, 0.9fr);
       gap: 1rem;
       align-items: start;
+    }
+
+    .admin-cms.focus-mode .inventory-panel,
+    .admin-cms.focus-mode .export-panel {
+      display: none;
+    }
+
+    .admin-cms.focus-mode .admin-grid {
+      grid-template-columns: minmax(0, 1.2fr) minmax(22rem, 0.8fr);
+    }
+
+    .admin-cms.focus-mode .preview-column {
+      grid-template-columns: 1fr;
     }
 
     .admin-panel {
@@ -790,6 +895,17 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       margin: 0;
       font-size: 1.42rem;
       line-height: 1;
+    }
+
+    .section-title {
+      display: grid;
+      gap: 0.25rem;
+    }
+
+    .section-title small {
+      color: var(--admin-muted);
+      font-size: 0.74rem;
+      font-weight: 850;
     }
 
     .home-controls,
@@ -848,6 +964,37 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       display: grid;
       gap: 0.5rem;
       align-content: end;
+    }
+
+    .readiness-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.85rem;
+      margin-bottom: 0.9rem;
+      border: 1.5px solid var(--admin-line);
+      border-radius: 8px;
+      padding: 0.7rem 0.78rem;
+      background: #fffaf0;
+      color: var(--admin-muted);
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .readiness-bar strong {
+      color: var(--admin-ink);
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .readiness-bar[data-state="ready"] {
+      border-color: #119c684f;
+      background: #e9f7ef;
+    }
+
+    .readiness-bar[data-state="needs-work"] {
+      border-color: #f14a3657;
+      background: #fff0eb;
     }
 
     .toggle-row {
@@ -939,7 +1086,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     }
 
     .body-editor {
-      min-height: 31rem;
+      min-height: 34rem;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       font-size: 0.95rem;
       line-height: 1.55;
@@ -1079,17 +1226,26 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       text-transform: none;
     }
 
-    #export-output {
-      min-height: 18rem;
+    #export-output,
+    #home-export-output {
+      min-height: 15rem;
       margin-top: 0.75rem;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       font-size: 0.8rem;
       line-height: 1.45;
     }
 
+    #home-export-output {
+      min-height: 10rem;
+    }
+
+    .home-export-label {
+      margin-top: 1rem;
+    }
+
     .export-actions {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 0.72fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 0.6rem;
       margin-top: 0.75rem;
     }
@@ -1104,6 +1260,10 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     @media (max-width: 1180px) {
       .admin-grid {
         grid-template-columns: minmax(18rem, 0.85fr) minmax(0, 1.15fr);
+      }
+
+      .admin-cms.focus-mode .admin-grid {
+        grid-template-columns: 1fr;
       }
 
       .preview-column {
@@ -1123,8 +1283,12 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
         grid-template-columns: 1fr;
       }
 
-      .admin-meter {
+      .admin-console {
         border-top: 2px solid #f5f1e633;
+        border-left: 0;
+      }
+
+      .admin-meter {
         border-left: 0;
       }
 
@@ -1143,6 +1307,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
 
     @media (max-width: 520px) {
       .admin-meter,
+      .admin-actions,
       .export-actions {
         grid-template-columns: 1fr;
       }

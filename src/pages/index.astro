@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import EssayCard from '../components/EssayCard.astro';
 import { getPublishedEssays, splitPinned } from '../lib/essays';
 import { socials } from '../lib/socials';
+import { homepageCopy } from '../lib/siteCopy';
 
 const essays = await getPublishedEssays();
 const { pinned, rest } = splitPinned(essays);
@@ -20,12 +21,13 @@ const desktopEssays = [...pinned, ...latest].slice(0, 4);
             <span class="window-controls" aria-hidden="true"><i></i><i></i><i></i></span>
           </div>
           <div class="hero-window-body">
-            <h1>Philosophies of a Cyborg</h1>
+            <p class="hero-kicker">{homepageCopy.eyebrow}</p>
+            <h1>{homepageCopy.headline}</h1>
             <p class="hero-copy">
-              Essays on AI, agency, software, ambition, and the strange business of becoming partially machine.
+              {homepageCopy.intro}
             </p>
             <div class="hero-actions">
-              <a class="button primary" href="/essays/">Open essays</a>
+              <a class="button primary" href="/essays/">{homepageCopy.cta}</a>
               <button class="button" type="button" data-action="agent-mode">Agent-readable mode</button>
             </div>
           </div>
