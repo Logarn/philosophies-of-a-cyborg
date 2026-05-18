@@ -7,85 +7,162 @@ import { socials } from '../lib/socials';
 const essays = await getPublishedEssays();
 const { pinned, rest } = splitPinned(essays);
 const latest = rest.slice(0, 6);
+const desktopEssays = [...pinned, ...latest].slice(0, 4);
 ---
 
 <BaseLayout>
-  <main class="page">
-    <section class="hero">
-      <div>
-        <p class="eyebrow">Public brain, low tolerance</p>
-        <h1>Logarn writes.</h1>
-        <p class="hero-copy">
-          Essays on AI, agency, software, ambition, and the awkward moment where the machine starts finishing your sentences better than your friends.
-        </p>
-        <div id="socials" class="socials" aria-label="Social links">
-          <a class="button primary" href={socials.linkedin}>LinkedIn</a>
-          <a class="button" href={socials.instagram}>Instagram</a>
-          <a class="button" href="/essays/">Read essays</a>
+  <main class="page home-page">
+    <div class="visual-home">
+      <section class="desktop-hero" aria-label="Reader desktop">
+        <div class="hero-window window">
+          <div class="window-bar">
+            <span class="window-title">PHILOSOPHIES.TXT</span>
+            <span class="window-controls" aria-hidden="true"><i></i><i></i><i></i></span>
+          </div>
+          <div class="hero-window-body">
+            <h1>Philosophies of a Cyborg</h1>
+            <p class="hero-copy">
+              Essays on AI, agency, software, ambition, and the strange business of becoming partially machine.
+            </p>
+            <div class="hero-actions">
+              <a class="button primary" href="/essays/">Open essays</a>
+              <button class="button" type="button" data-action="agent-mode">Plain text mode</button>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <aside class="playbox" aria-label="Interactive homepage toy">
-        <div class="scorebar">
-          <span>Readers<strong>10</strong></span>
-          <span>Signal<strong>98</strong></span>
-          <span>Noise<strong>0</strong></span>
-        </div>
-        <div class="thought-board">
-          <span class="token" data-tone="red">AI</span>
-          <span class="token" data-tone="blue">EGO</span>
-          <span class="token" data-tone="green">CODE</span>
-          <span class="token" data-tone="yellow">GOD?</span>
-        </div>
-        <div class="play-controls">
-          <button type="button" data-action="spark">Spark</button>
-          <button type="button" data-action="shuffle">Shuffle</button>
-          <button type="button" data-action="read">Read</button>
-        </div>
-      </aside>
-      <script>
-        import '../scripts/home-game';
-      </script>
-    </section>
+        <aside class="desktop-stage" aria-label="Retro desktop preview">
+          <div id="socials" class="desktop-icons" aria-label="Social links">
+            <a class="desktop-icon social-icon" href={socials.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn profile">
+              <span class="icon-tile icon-linkedin" aria-hidden="true">
+                <svg viewBox="0 0 32 32" role="img">
+                  <rect x="5" y="5" width="22" height="22" rx="2"></rect>
+                  <path d="M11 14v10M11 10.2v.1M16 24v-9.7M16 18.1c.8-2.4 5-2.7 5 1.4V24"></path>
+                </svg>
+              </span>
+              <span>LinkedIn</span>
+            </a>
+            <a class="desktop-icon social-icon" href={socials.instagram} target="_blank" rel="noreferrer" aria-label="Instagram profile">
+              <span class="icon-tile icon-instagram" aria-hidden="true">
+                <svg viewBox="0 0 32 32" role="img">
+                  <rect x="7" y="7" width="18" height="18" rx="5"></rect>
+                  <circle cx="16" cy="16" r="4"></circle>
+                  <circle cx="21.5" cy="10.5" r="1.2"></circle>
+                </svg>
+              </span>
+              <span>Instagram</span>
+            </a>
+          </div>
 
-    <section class="section">
-      <div class="section-head">
-        <h2>Pinned</h2>
-        <p class="section-note">The favorites sit up top. No search bar. No fake discovery stack. Just the best hooks first.</p>
-      </div>
-      <div class="essay-grid">
+          <div class="reader-window window">
+            <div class="window-bar">
+              <span class="window-title">READER.EXE</span>
+              <span class="window-controls" aria-hidden="true"><i></i><i></i><i></i></span>
+            </div>
+            <div class="scorebar">
+              <span>Readers<strong>10</strong></span>
+              <span>Signal<strong>98</strong></span>
+              <span>Noise<strong>0</strong></span>
+            </div>
+            <div class="thought-board">
+              <span class="token" data-tone="red">AI</span>
+              <span class="token" data-tone="blue">EGO</span>
+              <span class="token" data-tone="green">CODE</span>
+              <span class="token" data-tone="yellow">GOD?</span>
+            </div>
+            <div class="play-controls">
+              <button type="button" data-action="spark">Spark</button>
+              <button type="button" data-action="shuffle">Shuffle</button>
+              <button type="button" data-action="read">Read</button>
+            </div>
+          </div>
+
+          <div class="document-stack" aria-label="Featured essay shortcuts">
+            {desktopEssays.map((essay) => (
+              <a class="desktop-file" href={'/essays/' + essay.slug + '/'}>
+                <span class="file-icon" aria-hidden="true"></span>
+                <span>{essay.data.title}</span>
+              </a>
+            ))}
+          </div>
+        </aside>
+      </section>
+
+      <section class="section pinned-section">
+        <div class="section-head">
+          <h2>Pinned</h2>
+          <p class="section-note">The favorites sit up top. No search bar. No fake discovery stack. Just the best hooks first.</p>
+        </div>
+        <div class="essay-grid">
+          {pinned.map((essay) => (
+            <EssayCard
+              href={'/essays/' + essay.slug + '/'}
+              title={essay.data.title}
+              summary={essay.data.summary}
+              date={essay.data.publishedAt}
+              readingTime={essay.data.readingTime}
+              pinned
+            />
+          ))}
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Latest</h2>
+          <p class="section-note">The rest can scroll. A long page is fine. No control tower required.</p>
+        </div>
+        <div class="essay-list">
+          {latest.map((essay) => (
+            <a class="essay-row" href={'/essays/' + essay.slug + '/'}>
+              <time datetime={essay.data.publishedAt.toISOString()}>
+                {essay.data.publishedAt.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' })}
+              </time>
+              <span>
+                <h3>{essay.data.title}</h3>
+                <p>{essay.data.summary}</p>
+              </span>
+              <span class="read-time">{essay.data.readingTime}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    </div>
+
+    <section class="agent-readable" aria-label="Agent-readable homepage summary">
+      <h1>Philosophies of a Cyborg</h1>
+      <p>Essays from Logarn on AI, agency, software, ambition, and becoming partially machine.</p>
+
+      <h2>Primary routes</h2>
+      <ul>
+        <li><a href="/essays/">Essays index</a></li>
+        <li><a href={socials.linkedin}>LinkedIn profile</a></li>
+        <li><a href={socials.instagram}>Instagram profile</a></li>
+      </ul>
+
+      <h2>Pinned essays</h2>
+      <ul>
         {pinned.map((essay) => (
-          <EssayCard
-            href={'/essays/' + essay.slug + '/'}
-            title={essay.data.title}
-            summary={essay.data.summary}
-            date={essay.data.publishedAt}
-            readingTime={essay.data.readingTime}
-            pinned
-          />
+          <li>
+            <a href={'/essays/' + essay.slug + '/'}>{essay.data.title}</a>
+            <p>{essay.data.summary}</p>
+          </li>
         ))}
-      </div>
+      </ul>
+
+      <h2>Latest essays</h2>
+      <ul>
+        {latest.map((essay) => (
+          <li>
+            <a href={'/essays/' + essay.slug + '/'}>{essay.data.title}</a>
+            <p>{essay.data.summary}</p>
+          </li>
+        ))}
+      </ul>
     </section>
 
-    <section class="section">
-      <div class="section-head">
-        <h2>Latest</h2>
-        <p class="section-note">The rest can scroll. A long page is fine. George Hotz survived without a control tower.</p>
-      </div>
-      <div class="essay-list">
-        {latest.map((essay) => (
-          <a class="essay-row" href={'/essays/' + essay.slug + '/'}>
-            <time datetime={essay.data.publishedAt.toISOString()}>
-              {essay.data.publishedAt.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' })}
-            </time>
-            <span>
-              <h3>{essay.data.title}</h3>
-              <p>{essay.data.summary}</p>
-            </span>
-            <span class="read-time">{essay.data.readingTime}</span>
-          </a>
-        ))}
-      </div>
-    </section>
+    <script>
+      import '../scripts/home-game';
+    </script>
   </main>
 </BaseLayout>
