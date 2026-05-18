@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { contact } from '../../lib/contact';
 
 export async function getStaticPaths() {
   const essays = await getCollection('essays', ({ data }) => data.status === 'published');
@@ -14,7 +15,7 @@ const { essay } = Astro.props;
 const { Content } = await render(essay);
 ---
 
-<BaseLayout title={essay.data.title + ' | Philosophies of a Cyborg'} description={essay.data.summary}>
+<BaseLayout title={`${essay.data.title} | ${contact.siteName}`} description={essay.data.summary}>
   <article class="article">
     <span class="pin">{essay.data.pinned ? 'Pinned essay' : essay.data.readingTime}</span>
     <h1>{essay.data.title}</h1>

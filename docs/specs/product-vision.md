@@ -2,7 +2,7 @@
 
 ## Summary
 
-**Philosophies of a Cyborg** is Logarn's public thinking engine: part blog, part
+**Philosophy of a Cyborg** is Ositu Kengere's public thinking engine: part blog, part
 field notebook, part intellectual archive. It should make serious ideas feel
 sharp and personal without becoming academic wallpaper or startup thought-leader
 porridge.
@@ -18,8 +18,8 @@ finding older work, and reading deeply.
   automation, and the weird edge where humans start outsourcing pieces of
   themselves to machines.
 - Friends, collaborators, clients, and internet strangers who need a fast way to
-  understand Logarn's taste, thinking, and standards.
-- Future Logarn, using the archive as memory, portfolio, and idea warehouse.
+  understand Ositu Kengere's taste, thinking, and standards.
+- Future Ositu Kengere, using the archive as memory, portfolio, and idea warehouse.
 
 ## Positioning
 
@@ -51,7 +51,7 @@ The site is:
 
 - A reader can find and finish a long essay comfortably on desktop and mobile.
 - A reader can browse by topic, series, and date without getting lost.
-- Logarn can publish a new note or essay without touching app code.
+- Ositu Kengere can publish a new note or essay without touching app code.
 - The visual system feels custom and memorable while staying quiet around prose.
 - Pages pass baseline performance, accessibility, and metadata checks.
 
@@ -66,4 +66,3 @@ The site is:
 - Heavy animated spectacle on every page.
 
 Those can come later. V1 earns trust by making the writing experience excellent.
-

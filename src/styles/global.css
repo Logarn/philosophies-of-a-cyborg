@@ -40,7 +40,9 @@ button { cursor: pointer; }
 .brand-mark {
   display: grid; width: 2.15rem; height: 2.15rem; place-items: center;
   border: 2px solid var(--ink); border-radius: 6px; background: var(--yellow); box-shadow: 3px 3px 0 var(--ink);
+  overflow: hidden;
 }
+.brand-mark img { width: 100%; height: 100%; object-fit: cover; }
 .nav { display: flex; align-items: center; gap: 0.4rem; }
 .nav a, .nav-toggle {
   border: 1px solid transparent; border-radius: 6px; padding: 0.52rem 0.85rem;
@@ -110,16 +112,35 @@ body.home-desktop-page .topbar {
   gap: clamp(1rem, 2vw, 2.15rem);
   min-width: 0;
 }
-.posthog-nav nav a {
+.site-logo {
+  overflow: hidden;
+  border: 2px solid #1f201b;
+  border-radius: 0.28rem;
+  background: #f7f9f5;
+}
+.site-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.posthog-nav nav a,
+.posthog-nav nav button {
   color: #25251f;
   font-size: clamp(0.98rem, 1.35vw, 1.34rem);
   font-weight: 740;
   white-space: nowrap;
 }
 .posthog-nav nav a:hover,
-.posthog-nav nav a:focus-visible {
+.posthog-nav nav a:focus-visible,
+.posthog-nav nav button:hover,
+.posthog-nav nav button:focus-visible {
   text-decoration: underline;
   outline: none;
+}
+.posthog-nav nav button {
+  border: 0;
+  padding: 0;
+  background: transparent;
 }
 .nav-tools {
   display: flex;
@@ -225,6 +246,8 @@ body.home-desktop-page .topbar {
 }
 .icon-rail-left {
   left: clamp(0.75rem, 2vw, 2rem);
+  grid-template-columns: repeat(2, minmax(0, 6.8rem));
+  width: 14.1rem;
 }
 .icon-rail-right {
   right: clamp(0.75rem, 2vw, 2rem);
@@ -339,7 +362,8 @@ body.home-desktop-page .topbar {
 }
 .icon-linkedin::before,
 .icon-instagram::before,
-.icon-substack::before {
+.icon-substack::before,
+.icon-reddit::before {
   inset: 0.36rem;
   border: 2px solid #12120f;
   border-radius: 0.24rem;
@@ -359,6 +383,26 @@ body.home-desktop-page .topbar {
     #f68b21;
 }
 .icon-substack > span { color: #fff; font-size: 1rem; }
+.icon-reddit::before {
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 63% 38%, #ff4500 0 0.18rem, transparent 0.2rem),
+    radial-gradient(circle at 50% 55%, #fff 0 0.72rem, transparent 0.74rem),
+    #ff4500;
+}
+.icon-reddit::after {
+  left: 1.64rem;
+  top: 0.34rem;
+  width: 0.72rem;
+  height: 0.44rem;
+  border-top: 2px solid #12120f;
+  border-right: 2px solid #12120f;
+  transform: rotate(-18deg);
+}
+.icon-reddit > span {
+  color: #12120f;
+  font-size: 0.72rem;
+}
 .icon-mail::before {
   inset: 0.9rem 0.35rem 0.34rem;
   border: 2px solid #12120f;
@@ -723,47 +767,114 @@ body.home-desktop-page .topbar {
   border-top: 3px solid #15130e;
   transform: translateX(-50%);
 }
-.desktop-dock {
+.desktop-modal-layer {
   position: absolute;
-  right: clamp(1rem, 14vw, 15rem);
-  bottom: clamp(1rem, 2.5vh, 2rem);
-  z-index: 5;
-  width: min(46vw, 620px);
-  min-width: 420px;
-  height: 108px;
-  border: 1px solid #b8b4a9;
-  border-radius: 0.62rem;
-  background: #fff;
-  box-shadow: 0 9px 22px #0000001a;
-}
-.desktop-dock button {
-  position: absolute;
-  left: 2.2rem;
-  top: 50%;
+  inset: 0;
+  z-index: 12;
   display: grid;
-  width: 2rem;
-  height: 2rem;
   place-items: center;
-  border: 0;
-  background: transparent;
-  transform: translateY(-50%);
+  padding: 1rem;
+  background: #1d190f36;
 }
-.desktop-dock button span,
-.desktop-dock button span::after {
-  display: block;
+.desktop-modal-layer[hidden],
+.desktop-modal[hidden] {
+  display: none;
+}
+.desktop-modal {
+  width: min(430px, calc(100vw - 2rem));
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: var(--panel-strong);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.desktop-modal .window-bar button {
+  position: relative;
   width: 1.65rem;
+  height: 1.65rem;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  background: var(--panel);
+}
+.desktop-modal .window-bar button span,
+.desktop-modal .window-bar button span::after {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1rem;
   height: 2px;
-  background: #57544a;
+  background: var(--ink);
   content: "";
 }
-.desktop-dock button span {
-  transform: rotate(45deg);
+.desktop-modal .window-bar button span { transform: translate(-50%, -50%) rotate(45deg); }
+.desktop-modal .window-bar button span::after { transform: rotate(90deg); transform-origin: center; }
+.calc-body {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem;
+  background:
+    linear-gradient(#15120d12 1px, transparent 1px),
+    linear-gradient(90deg, #15120d12 1px, transparent 1px),
+    #fff8e7;
+  background-size: 18px 18px;
 }
-.desktop-dock button span::after {
-  transform: rotate(90deg);
+.calc-screen {
+  display: grid;
+  gap: 0.45rem;
+  min-height: 6.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  padding: 0.85rem;
+  background: #111;
+  color: #f6f2dc;
+  box-shadow: inset 0 0 0 3px #323022;
 }
-.desktop-dock.is-hidden {
-  display: none;
+.calc-screen strong {
+  overflow: hidden;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 2rem;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.calc-screen span {
+  color: #e6d99b;
+  font-size: 0.85rem;
+  font-weight: 750;
+  line-height: 1.25;
+}
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.calc-key {
+  min-height: 3rem;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  background: #fffdf3;
+  box-shadow: 3px 3px 0 var(--ink);
+  color: var(--ink);
+  font-weight: 900;
+}
+.calc-key:hover,
+.calc-key:focus-visible {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 var(--ink);
+  outline: none;
+}
+.calc-key.is-easter {
+  background: var(--yellow);
+}
+.calc-key.is-equals {
+  background: var(--green);
+  color: white;
+}
+.calc-wide {
+  grid-column: span 5;
+  min-height: 2.75rem;
+  text-align: left;
+  padding-inline: 1rem;
 }
 .home-reading-strip {
   width: min(1180px, calc(100% - 2rem));
@@ -894,11 +1005,18 @@ h1, h2, h3, p { margin-top: 0; }
 .section h2 { margin: 0; font-size: 4rem; line-height: 0.92; }
 .section-note { max-width: 28rem; margin: 0; color: var(--muted); font-weight: 650; }
 .essay-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.essay-grid-wide { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .essay-card, .admin-panel {
   border: 2px solid var(--ink); border-radius: 8px; padding: 1rem; background: var(--panel); box-shadow: 5px 5px 0 var(--ink);
 }
+.essay-card {
+  display: grid;
+  gap: 0.65rem;
+  align-content: start;
+  min-height: 15rem;
+}
 .essay-card time, .essay-row time { color: var(--muted); font-size: 0.82rem; font-weight: 800; }
-.essay-card h3 { margin: 0.7rem 0; font-size: 1.45rem; line-height: 1; }
+.essay-card h3 { margin: 0; font-size: 1.45rem; line-height: 1; }
 .essay-card p, .essay-row p { color: var(--muted); line-height: 1.45; }
 .pin {
   display: inline-flex; border: 1px solid var(--ink); border-radius: 4px; padding: 0.25rem 0.5rem;
@@ -961,6 +1079,9 @@ body.agent-mode .agent-readable { display: block; }
     width: 760px;
     min-width: 760px;
   }
+  .essay-grid-wide {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 @media (max-width: 1040px) {
   .posthog-nav {
@@ -983,10 +1104,6 @@ body.agent-mode .agent-readable { display: block; }
     width: 720px;
     min-width: 720px;
     height: 610px;
-  }
-  .desktop-dock {
-    right: 1rem;
-    width: min(68vw, 620px);
   }
   .desktop-hero { grid-template-columns: 1fr; min-height: auto; }
   .hero-window h1 { max-width: 12ch; font-size: 4.2rem; }
@@ -1014,8 +1131,7 @@ body.agent-mode .agent-readable { display: block; }
     padding: 1rem 1rem 2rem;
   }
   .icon-rail,
-  .garden-scene,
-  .desktop-dock {
+  .garden-scene {
     position: relative;
     inset: auto;
   }
@@ -1040,19 +1156,12 @@ body.agent-mode .agent-readable { display: block; }
     height: 520px;
     margin: 0 auto;
   }
-  .desktop-dock {
-    order: 4;
-    width: 100%;
-    min-width: 0;
-    height: 84px;
-    margin-top: 1rem;
-  }
   .topbar { align-items: flex-start; flex-direction: column; }
   .desktop-stage { display: block; }
   .reader-window { width: 100%; margin-top: 1rem; }
   .document-stack { width: 100%; margin-top: 1rem; }
   .desktop-stage { min-height: auto; }
-  .essay-grid, .admin-actions { grid-template-columns: 1fr; }
+  .essay-grid, .essay-grid-wide, .admin-actions { grid-template-columns: 1fr; }
   .essay-row { grid-template-columns: 1fr; }
   .read-time { text-align: left; }
   .section-head { align-items: start; flex-direction: column; }

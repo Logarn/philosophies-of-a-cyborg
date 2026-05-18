@@ -1,7 +1,7 @@
 export const homepageCopy = {
-  eyebrow: 'Public brain, low tolerance',
-  headline: 'Logarn writes.',
+  eyebrow: 'Rough notes, mostly for me',
+  headline: 'Ositu Kengere writes.',
   intro:
-    'Essays on AI, agency, software, ambition, and the awkward moment where the machine starts finishing your sentences better than your friends.',
-  cta: 'Read essays'
+    'A small place for thoughts on software, agency, AI, ambition, and whatever else keeps refusing to leave my head.',
+  cta: 'Read the rough notes'
 } as const;

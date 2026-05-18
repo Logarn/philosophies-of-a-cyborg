@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { contact } from '../../lib/contact';
+---
+
+<BaseLayout title={`Handbook | ${contact.siteName}`}>
+  <main class="page">
+    <section class="section quiet-page">
+      <div class="section-head">
+        <h2>Company handbook</h2>
+        <p class="section-note">A deliberately empty shelf for now. The rules can wait until they are real.</p>
+      </div>
+      <article class="essay-card handbook-card">
+        <span class="pin">Placeholder</span>
+        <h3>Nothing official yet</h3>
+        <p>{contact.name} has not written the handbook. That is fine. A blank page is better than fake policy.</p>
+      </article>
+    </section>
+  </main>
+</BaseLayout>

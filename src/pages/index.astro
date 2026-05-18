@@ -2,49 +2,65 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import EssayCard from '../components/EssayCard.astro';
 import { getPublishedEssays, splitPinned } from '../lib/essays';
+import { contact, contactHref } from '../lib/contact';
 import { socials } from '../lib/socials';
 
 const essays = await getPublishedEssays();
 const { pinned, rest } = splitPinned(essays);
-const latest = rest.slice(0, 6);
 
-const navItems = ['Product OS', 'Pricing', 'Docs', 'Community', 'Company', 'More'];
+const navItems = [
+  { label: 'Project OS', href: '/projects/' },
+  { label: 'Calculator', modal: 'calculator' },
+  { label: 'Essays', href: '/essays/' },
+  { label: 'Values', href: '/values/' },
+  { label: 'Archive', href: '/archive/' },
+  { label: 'Handbook', href: '/handbook/' },
+  { label: 'Substack', href: socials.substack, external: true }
+];
 
 const leftIcons = [
-  { label: 'home.mdx', href: '/', icon: 'doc', mark: 'Aa' },
-  { label: 'Product OS', href: '/essays/', icon: 'book', mark: 'P' },
-  { label: 'Pricing', href: '/essays/', icon: 'calculator', mark: '$' },
-  { label: 'customers.mdx', href: '/essays/', icon: 'sheet', mark: '▦' },
-  { label: 'demo.mov', href: '/essays/', icon: 'video', mark: 'DEMO' },
-  { label: 'Docs', href: '/essays/', icon: 'book', mark: 'D' },
-  { label: 'Talk to a human', href: socials.linkedin, external: true, icon: 'mail', mark: 'in' },
-  { label: 'Ask a question', href: socials.instagram, external: true, icon: 'chat', mark: '◎' },
-  { label: 'Sign up ↗', href: socials.substack, external: true, icon: 'compass', mark: 'S' },
-  { label: 'Switch to website mode', action: 'agent-mode', icon: 'switch', mark: 'T' }
+  { label: 'home', href: '/', icon: 'doc', mark: 'Aa' },
+  { label: 'Project OS', href: '/projects/', icon: 'book', mark: 'P' },
+  { label: 'Calculator', modal: 'calculator', icon: 'calculator', mark: '$' },
+  { label: 'Video', href: contactHref.youtube, external: true, icon: 'video', mark: 'PLAY' },
+  { label: 'Essays', href: '/essays/', icon: 'book', mark: 'E' },
+  { label: 'LinkedIn', href: socials.linkedin, external: true, icon: 'linkedin', mark: 'in' },
+  { label: 'Instagram', href: socials.instagram, external: true, icon: 'instagram', mark: '◎' },
+  { label: 'Substack', href: socials.substack, external: true, icon: 'substack', mark: 'S' },
+  { label: 'Reddit', href: contactHref.reddit, external: true, icon: 'reddit', mark: 'r/' },
+  { label: 'talk2', href: contactHref.email, icon: 'mail', mark: '@', ariaLabel: `talk2 ${contact.name}` },
+  { label: 'Call me', href: contactHref.phone, icon: 'chat', mark: '☎', ariaLabel: `Call ${contact.name}` },
+  { label: 'Switch to agent mode', action: 'agent-mode', icon: 'switch', mark: 'T' }
 ];
 
 const rightIcons = [
-  { label: 'Why PostHog?', href: '/essays/', icon: 'bookshelf', mark: 'W' },
-  { label: 'Changelog', href: '/essays/', icon: 'calendar', mark: '!' },
-  { label: 'Company handbook', href: '/essays/', icon: 'openbook', mark: 'H' },
-  { label: 'Store', href: socials.substack, external: true, icon: 'bag', mark: 'S' },
-  { label: 'Work here', href: socials.linkedin, external: true, icon: 'typewriter', mark: '⌁' },
-  { label: 'Trash', href: '/essays/', icon: 'trash', mark: '↻' }
+  { label: 'My values', href: '/values/', icon: 'bookshelf', mark: 'V', external: false },
+  { label: 'Company handbook', href: '/handbook/', icon: 'openbook', mark: 'H', external: false },
+  { label: 'Store', href: '/store/', icon: 'bag', mark: 'S', external: false },
+  { label: 'Archive', href: '/archive/', icon: 'trash', mark: 'A', external: false }
 ];
 ---
 
 <BaseLayout bodyClass="home-desktop-page">
   <main class="posthog-home">
-    <section class="retro-desktop" aria-label="Philosophies of a Cyborg reader desktop">
+    <section class="retro-desktop" aria-label={`${contact.siteName} reader desktop`}>
       <header class="posthog-nav" aria-label="Homepage navigation">
-        <a class="posthog-logo" href="/" aria-label="Philosophies of a Cyborg home">
-          <span aria-hidden="true"></span>
+        <a class="posthog-logo site-logo" href="/" aria-label={`${contact.siteName} home`}>
+          <img src="/logo.svg" alt="" />
         </a>
         <nav aria-label="Desktop navigation">
-          {navItems.map((item) => <a href="/essays/">{item}</a>)}
+          {navItems.map((item) => (
+            item.modal ? (
+              <button type="button" data-modal={item.modal}>{item.label}</button>
+            ) : (
+              <a href={item.href} target={item.external ? '_blank' : undefined} rel={item.external ? 'noreferrer' : undefined}>
+                {item.label}
+              </a>
+            )
+          ))}
         </nav>
         <div class="nav-tools" aria-label="Homepage tools">
-          <a class="nav-cta" href="/essays/">Get started - free</a>
+          <a class="nav-cta" href="/essays/">Read the rough notes</a>
           <button type="button" aria-label="Search">
             <span class="tool-search" aria-hidden="true"></span>
           </button>
@@ -68,10 +84,18 @@ const rightIcons = [
                 </span>
                 <span class="desktop-label">{item.label}</span>
               </button>
+            ) : item.modal ? (
+              <button class="desktop-object" type="button" data-modal={item.modal}>
+                <span class:list={['desktop-glyph', `icon-${item.icon}`]} aria-hidden="true">
+                  <span>{item.mark}</span>
+                </span>
+                <span class="desktop-label">{item.label}</span>
+              </button>
             ) : (
               <a
                 class="desktop-object"
                 href={item.href}
+                aria-label={item.ariaLabel}
                 target={item.external ? '_blank' : undefined}
                 rel={item.external ? 'noreferrer' : undefined}
               >
@@ -132,18 +156,37 @@ const rightIcons = [
           ))}
         </div>
 
-        <aside class="desktop-dock" aria-label="Desktop drawer">
-          <button type="button" data-action="close-dock" aria-label="Close desktop drawer">
-            <span aria-hidden="true"></span>
-          </button>
-        </aside>
+        <div class="desktop-modal-layer" data-modal-layer hidden>
+          <section class="desktop-modal calc-modal" data-modal-panel="calculator" role="dialog" aria-modal="true" aria-labelledby="calculator-title">
+            <div class="window-bar">
+              <span id="calculator-title" class="window-title">CALCULATOR.EXE</span>
+              <button type="button" data-modal-close aria-label="Close calculator"><span aria-hidden="true"></span></button>
+            </div>
+            <div class="calc-body">
+              <div class="calc-screen" aria-live="polite">
+                <strong data-calc-display>0</strong>
+                <span data-calc-lesson>Tap constants and operators. This one rewards curiosity.</span>
+              </div>
+              <div class="calc-grid">
+                {['7', '8', '9', '/', 'π', '4', '5', '6', '*', 'φ', '1', '2', '3', '-', 'c', '0', '.', '=', '+', 'E'].map((key) => (
+                  <button type="button" class:list={['calc-key', { 'is-easter': ['π', 'φ', 'c', 'E'].includes(key), 'is-equals': key === '=' }]} data-key={key}>
+                    {key}
+                  </button>
+                ))}
+                <button type="button" class="calc-key calc-wide" data-key="F=ma">F=ma</button>
+                <button type="button" class="calc-key calc-wide" data-key="∫">Integral</button>
+                <button type="button" class="calc-key calc-wide" data-key="clear">Clear</button>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </section>
 
     <section class="home-reading-strip" aria-label="Pinned essays">
       <div class="section-head">
         <h2>Pinned</h2>
-        <p class="section-note">The desktop is the front door. The writing starts here.</p>
+        <p class="section-note">A few notes I would probably point someone to first.</p>
       </div>
       <div class="essay-grid">
         {pinned.map((essay) => (
@@ -159,41 +202,48 @@ const rightIcons = [
       </div>
     </section>
 
-    <section class="home-reading-strip" aria-label="Latest essays">
+    <section class="home-reading-strip" aria-label="All essays">
       <div class="section-head">
-        <h2>Latest</h2>
-        <p class="section-note">No admin dashboard here. Just the reader-facing shelf.</p>
+        <h2>All essays</h2>
+        <p class="section-note">A long card wall for the public archive. No list view, no admin dashboard.</p>
       </div>
-      <div class="essay-list">
-        {latest.map((essay) => (
-          <a class="essay-row" href={'/essays/' + essay.slug + '/'}>
-            <time datetime={essay.data.publishedAt.toISOString()}>
-              {essay.data.publishedAt.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' })}
-            </time>
-            <span>
-              <h3>{essay.data.title}</h3>
-              <p>{essay.data.summary}</p>
-            </span>
-            <span class="read-time">{essay.data.readingTime}</span>
-          </a>
+      <div class="essay-grid essay-grid-wide">
+        {rest.map((essay) => (
+          <EssayCard
+            href={'/essays/' + essay.slug + '/'}
+            title={essay.data.title}
+            summary={essay.data.summary}
+            date={essay.data.publishedAt}
+            readingTime={essay.data.readingTime}
+          />
         ))}
       </div>
     </section>
   </main>
 
   <section class="agent-readable" aria-label="Agent-readable homepage summary">
-    <h1>Philosophies of a Cyborg</h1>
-    <p>Essays from Logarn on AI, agency, software, ambition, and becoming partially machine.</p>
+    <h1>{contact.siteName}</h1>
+    <p>Rough essays from {contact.name} on AI, agency, software, ambition, and becoming partially machine.</p>
 
     <h2>Canonical reader page</h2>
     <p><a href="/">Human website homepage</a></p>
+    <p><a href="/">Human mode</a></p>
 
     <h2>Primary routes</h2>
     <ul>
       <li><a href="/essays/">Essays index</a></li>
+      <li><a href="/projects/">Project OS</a></li>
+      <li><a href="/values/">My values</a></li>
+      <li><a href="/store/">Store coming soon</a></li>
+      <li><a href="/archive/">Archive</a></li>
       <li><a href={socials.linkedin}>LinkedIn profile</a></li>
       <li><a href={socials.instagram}>Instagram profile</a></li>
       <li><a href={socials.substack}>Substack publication</a></li>
+      <li><a href={contactHref.reddit}>Reddit profile</a></li>
+      <li><a href={contactHref.youtube}>YouTube search</a></li>
+      <li><a href={contactHref.email}>Email {contact.name}</a></li>
+      <li><a href={contactHref.phone}>Call {contact.name}</a></li>
+      <li>Calculator: open the human homepage and choose Calculator.</li>
     </ul>
 
     <h2>Pinned essays</h2>
@@ -206,9 +256,9 @@ const rightIcons = [
       ))}
     </ul>
 
-    <h2>Latest essays</h2>
+    <h2>All essays</h2>
     <ul>
-      {latest.map((essay) => (
+      {rest.map((essay) => (
         <li>
           <a href={'/essays/' + essay.slug + '/'}>{essay.data.title}</a>
           <p>{essay.data.summary}</p>

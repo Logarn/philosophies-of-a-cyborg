@@ -1,7 +1,7 @@
-# Philosophies of a Cyborg Specs
+# Philosophy of a Cyborg Specs
 
 This directory holds the product and feature specs for the first public version
-of **Philosophies of a Cyborg**: a high-end personal blog for Logarn's writing,
+of **Philosophy of a Cyborg**: a personal publication for Ositu Kengere's writing,
 thinking, research, and experiments.
 
 The standard is not "a blog template with posts." The standard is a publication
@@ -22,8 +22,8 @@ that feels authored, fast, durable, memorable, and unusually alive.
 
 1. **The writing is the product.** Visual design must sharpen attention, not
    perform circus tricks over the prose.
-2. **The site should feel like Logarn.** Direct, intelligent, funny, dark around
-   the edges, and allergic to beige internet sludge.
+2. **The site should feel like Ositu Kengere.** Direct, intelligent, funny,
+   rough where it needs to be, and allergic to beige internet sludge.
 3. **Fast by default.** Reading pages must load quickly, stay stable, and work
    without JavaScript where possible.
 4. **Built for a long archive.** The system should still make sense after 500

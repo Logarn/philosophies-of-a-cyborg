@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { contact } from '../../lib/contact';
 import { homepageCopy } from '../../lib/siteCopy';
 
 const essays = await getCollection('essays');
@@ -54,7 +55,7 @@ const adminSeed = {
 const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
 ---
 
-<BaseLayout title="Admin CMS | Philosophies of a Cyborg">
+<BaseLayout title={`Admin CMS | ${contact.siteName}`}>
   <main class="admin-cms" data-admin-app>
     <header class="admin-hero">
       <div>

@@ -33,7 +33,7 @@ Notes:
 Link posts:
 
 - External title and URL.
-- Logarn's annotation.
+- Ositu Kengere's annotation.
 - Source domain.
 - Date and topics.
 
@@ -68,4 +68,3 @@ Link posts:
 - The page remains useful with JavaScript disabled except progressive features.
 - Lighthouse accessibility and performance are in the green for representative
   article pages.
-

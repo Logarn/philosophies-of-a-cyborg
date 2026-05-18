@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { contact } from '../lib/contact';
 
 interface Props {
   title?: string;
@@ -8,8 +9,8 @@ interface Props {
 }
 
 const {
-  title = 'Philosophies of a Cyborg',
-  description = 'Essays from Logarn on AI, agency, software, and the strange business of becoming partially machine.',
+  title = contact.siteName,
+  description = `Essays from ${contact.name} on AI, agency, software, and the strange business of becoming partially machine.`,
   bodyClass = ''
 } = Astro.props;
 ---
@@ -20,14 +21,15 @@ const {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <link rel="icon" href="/logo.svg" />
     <title>{title}</title>
   </head>
   <body class={bodyClass}>
     <div class="site-shell">
       <header class="topbar">
-        <a class="brand" href="/" aria-label="Philosophies of a Cyborg home">
-          <span class="brand-mark">P</span>
-          <span>Philosophies of a Cyborg</span>
+        <a class="brand" href="/" aria-label={`${contact.siteName} home`}>
+          <span class="brand-mark"><img src="/logo.svg" alt="" /></span>
+          <span>{contact.siteName}</span>
         </a>
         <nav class="nav" aria-label="Primary navigation">
           <a href="/essays/">Essays</a>
@@ -36,7 +38,7 @@ const {
       </header>
       <slot />
       <footer class="footer">
-        <strong>Philosophies of a Cyborg.</strong> Light mode only. Search-free. Tiny readership, sharp knives.
+        <strong>{contact.siteName}.</strong> Light mode only. Search-free. A room for {contact.name}'s rough notes.
       </footer>
     </div>
   </body>

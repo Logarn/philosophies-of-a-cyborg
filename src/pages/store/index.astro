@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { contact } from '../../lib/contact';
+---
+
+<BaseLayout title={`Store | ${contact.siteName}`}>
+  <main class="page">
+    <section class="section quiet-page merch-page">
+      <div class="section-head">
+        <h2>Store</h2>
+        <p class="section-note">Merch is not here yet. If it shows up, it should feel like an object from this little world, not a billboard.</p>
+      </div>
+      <div class="essay-grid">
+        {[
+          ['Cyborg field notebook', 'A small notebook for bad first thoughts and good second thoughts.'],
+          ['Agent-readable sticker pack', 'Tiny labels for laptops, notebooks, and machines that pretend not to be machines.'],
+          ['Desktop garden print', 'A print of the weird little homepage world once it grows into itself.']
+        ].map(([title, summary]) => (
+          <article class="essay-card">
+            <span class="pin">Coming soon</span>
+            <h3>{title}</h3>
+            <p>{summary}</p>
+            <span class="read-time">no checkout yet</span>
+          </article>
+        ))}
+      </div>
+    </section>
+  </main>
+</BaseLayout>

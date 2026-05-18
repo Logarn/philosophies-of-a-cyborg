@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EssayCard from '../../components/EssayCard.astro';
+import { getPublishedEssays } from '../../lib/essays';
+import { contact } from '../../lib/contact';
+
+const essays = await getPublishedEssays();
+---
+
+<BaseLayout title={`Archive | ${contact.siteName}`}>
+  <main class="page">
+    <section class="section quiet-page">
+      <div class="section-head">
+        <h2>Archive</h2>
+        <p class="section-note">Everything public, newest first. Old thoughts do not need a dramatic graveyard.</p>
+      </div>
+      <div class="essay-grid essay-grid-wide">
+        {essays.map((essay) => (
+          <EssayCard
+            href={'/essays/' + essay.slug + '/'}
+            title={essay.data.title}
+            summary={essay.data.summary}
+            date={essay.data.publishedAt}
+            readingTime={essay.data.readingTime}
+            pinned={essay.data.pinned}
+          />
+        ))}
+      </div>
+    </section>
+  </main>
+</BaseLayout>

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Philosophy of a Cyborg logo</title>
+  <desc id="desc">Black and white illustrated face with glasses and halftone texture.</desc>
+  <defs>
+    <pattern id="dots" width="6" height="6" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1.1" fill="#111"/>
+    </pattern>
+  </defs>
+  <rect width="256" height="256" fill="#f7f9f5"/>
+  <path d="M79 76c3-28 25-42 51-42 31 0 54 18 58 50 10 7 18 21 18 40 0 44-30 78-76 78-48 0-80-34-80-78 0-20 12-38 29-48Z" fill="#fff" stroke="#050505" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M79 78c9-27 31-39 58-35 22 4 40 16 49 40-12-4-31-9-54-9-21 0-38 2-53 4Z" fill="#050505"/>
+  <path d="M85 91c32-6 66-6 99 0v42H85Z" fill="url(#dots)" opacity=".95"/>
+  <path d="M79 109c-9 1-17 12-17 27 0 16 9 29 22 32M190 109c10 2 18 13 18 28 0 16-9 29-22 31" fill="none" stroke="#050505" stroke-width="8" stroke-linecap="round"/>
+  <path d="M89 115c8-5 23-6 33-2M145 113c11-4 26-4 34 2" fill="none" stroke="#050505" stroke-width="7" stroke-linecap="round"/>
+  <rect x="76" y="116" width="53" height="44" rx="12" fill="#fff" stroke="#050505" stroke-width="8"/>
+  <rect x="139" y="116" width="53" height="44" rx="12" fill="#fff" stroke="#050505" stroke-width="8"/>
+  <path d="M129 135h10" fill="none" stroke="#050505" stroke-width="7" stroke-linecap="round"/>
+  <path d="M134 134c-7 17-7 24 5 26" fill="none" stroke="#050505" stroke-width="6" stroke-linecap="round"/>
+  <path d="M111 178c12 8 27 8 39 0" fill="none" stroke="#050505" stroke-width="7" stroke-linecap="round" stroke-dasharray="6 9"/>
+  <path d="M88 168c-2 8-2 17 1 25M105 185c1 7 3 13 7 18M171 169c2 8 1 17-2 25M154 185c-1 7-3 13-7 18" fill="none" stroke="#050505" stroke-width="6" stroke-linecap="round"/>
+  <path d="M107 70c19-10 39-10 58 0M95 83c24-12 56-13 82 1" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { contact } from '../../lib/contact';
+---
+
+<BaseLayout title={`Project OS | ${contact.siteName}`}>
+  <main class="page">
+    <section class="section quiet-page">
+      <div class="section-head">
+        <h2>Project OS</h2>
+        <p class="section-note">A parking lot for the things I am building, breaking, or quietly thinking about.</p>
+      </div>
+      <div class="essay-grid">
+        {['Gas Town', 'Philosophy of a Cyborg', 'Tiny CMS', 'Agent-readable web'].map((project) => (
+          <article class="essay-card">
+            <span class="pin">Project</span>
+            <h3>{project}</h3>
+            <p>Notes, links, and the real shape of this will land here once it is worth showing.</p>
+            <span class="read-time">soon-ish</span>
+          </article>
+        ))}
+      </div>
+    </section>
+  </main>
+</BaseLayout>

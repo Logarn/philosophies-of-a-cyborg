@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { contact } from '../../lib/contact';
+---
+
+<BaseLayout title={`My values | ${contact.siteName}`}>
+  <main class="page">
+    <section class="section quiet-page">
+      <div class="section-head">
+        <h2>My values</h2>
+        <p class="section-note">Nothing fancy. Just the rules I keep noticing I care about.</p>
+      </div>
+      <div class="essay-grid">
+        {[
+          ['Taste beats volume', 'I would rather ship one thing that feels considered than ten things that feel sprayed at a wall.'],
+          ['Tools should lower noise', 'If software makes me feel more scattered, it is probably asking for too much attention.'],
+          ['Be human in public', 'A weird sentence is better than a fake one. A rough thought is better than a dead slogan.']
+        ].map(([title, summary]) => (
+          <article class="essay-card">
+            <h3>{title}</h3>
+            <p>{summary}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  </main>
+</BaseLayout>

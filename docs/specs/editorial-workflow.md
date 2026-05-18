@@ -63,8 +63,7 @@ npm run build
 
 ## Acceptance Criteria
 
-- Logarn can create a new post from a template in under a minute.
+- Ositu Kengere can create a new post from a template in under a minute.
 - Invalid frontmatter fails before deployment.
 - Draft content cannot leak into public feeds or listings.
 - A post can be updated while preserving canonical URL and showing updated date.
-
