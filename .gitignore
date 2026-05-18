@@ -3,3 +3,14 @@
 .dolt/
 *.db
 .beads-credential-key
+.DS_Store
+
+# Gas City
+.beads/*
+!.beads/config.yaml
+!.beads/metadata.json
+
+# Astro / Node
+node_modules/
+dist/
+.astro/

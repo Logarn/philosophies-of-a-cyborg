@@ -1,0 +1,29 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const essays = await getCollection('essays', ({ data }) => data.status === 'published');
+  return essays.map((essay) => ({
+    params: { slug: essay.slug },
+    props: { essay }
+  }));
+}
+
+const { essay } = Astro.props;
+const { Content } = await render(essay);
+---
+
+<BaseLayout title={essay.data.title + ' | Philosophies of a Cyborg'} description={essay.data.summary}>
+  <article class="article">
+    <span class="pin">{essay.data.pinned ? 'Pinned essay' : essay.data.readingTime}</span>
+    <h1>{essay.data.title}</h1>
+    <p class="dek">{essay.data.summary}</p>
+    <time datetime={essay.data.publishedAt.toISOString()}>
+      {essay.data.publishedAt.toLocaleDateString('en', { month: 'long', day: 'numeric', year: 'numeric' })}
+    </time>
+    <div class="article-body">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>

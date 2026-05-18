@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EssayCard from '../../components/EssayCard.astro';
+import { getPublishedEssays, splitPinned } from '../../lib/essays';
+
+const essays = await getPublishedEssays();
+const { pinned, rest } = splitPinned(essays);
+---
+
+<BaseLayout title="Essays | Philosophies of a Cyborg">
+  <main class="page">
+    <section class="section">
+      <div class="section-head">
+        <h2>Essays</h2>
+        <p class="section-note">Pinned favorites first. Everything else in one long scroll. No search, no filters, no taxonomy junk drawer.</p>
+      </div>
+      <div class="essay-grid">
+        {pinned.map((essay) => (
+          <EssayCard
+            href={'/essays/' + essay.slug + '/'}
+            title={essay.data.title}
+            summary={essay.data.summary}
+            date={essay.data.publishedAt}
+            readingTime={essay.data.readingTime}
+            pinned
+          />
+        ))}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="essay-list">
+        {rest.map((essay) => (
+          <a class="essay-row" href={'/essays/' + essay.slug + '/'}>
+            <time datetime={essay.data.publishedAt.toISOString()}>
+              {essay.data.publishedAt.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </time>
+            <span>
+              <h3>{essay.data.title}</h3>
+              <p>{essay.data.summary}</p>
+            </span>
+            <span class="read-time">{essay.data.readingTime}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  </main>
+</BaseLayout>

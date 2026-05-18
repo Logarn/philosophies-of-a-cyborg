@@ -1,0 +1,20 @@
+---
+interface Props {
+  href: string;
+  title: string;
+  summary: string;
+  date: Date;
+  readingTime: string;
+  pinned?: boolean;
+}
+
+const { href, title, summary, date, readingTime, pinned = false } = Astro.props;
+---
+
+<a class="essay-card" href={href}>
+  {pinned && <span class="pin">Pinned</span>}
+  <h3>{title}</h3>
+  <time datetime={date.toISOString()}>{date.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' })}</time>
+  <p>{summary}</p>
+  <span class="read-time">{readingTime}</span>
+</a>
