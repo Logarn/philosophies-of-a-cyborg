@@ -200,9 +200,11 @@ h1, h2, h3, p { margin-top: 0; }
 body.agent-mode {
   background: #fffef8; color: #121212;
 }
+body.agent-mode .topbar,
+body.agent-mode .footer { display: none; }
+body.agent-mode button { display: none !important; }
 body.agent-mode .visual-home { display: none; }
 body.agent-mode .agent-readable { display: block; }
-body.agent-mode .footer { border-top-color: #12121233; }
 @keyframes bob { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-14px) rotate(2deg); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; transition: none !important; } }
 @media (max-width: 1040px) {
