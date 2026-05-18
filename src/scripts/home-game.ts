@@ -1,4 +1,6 @@
 const agentButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-action="agent-mode"]'));
+const dock = document.querySelector<HTMLElement>('.desktop-dock');
+const closeDock = document.querySelector<HTMLButtonElement>('[data-action="close-dock"]');
 const modalLayer = document.querySelector<HTMLElement>('[data-modal-layer]');
 const modalButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-modal]'));
 const modalPanels = Array.from(document.querySelectorAll<HTMLElement>('[data-modal-panel]'));
@@ -33,6 +35,10 @@ agentButtons.forEach((button) => {
     window.history.replaceState({}, '', '/?mode=agent');
     setAgentMode(true);
   });
+});
+
+closeDock?.addEventListener('click', () => {
+  dock?.classList.add('is-hidden');
 });
 
 function openModal(name: string) {
