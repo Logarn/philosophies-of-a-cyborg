@@ -4,11 +4,13 @@ import '../styles/global.css';
 interface Props {
   title?: string;
   description?: string;
+  bodyClass?: string;
 }
 
 const {
   title = 'Philosophies of a Cyborg',
-  description = 'Essays from Logarn on AI, agency, software, and the strange business of becoming partially machine.'
+  description = 'Essays from Logarn on AI, agency, software, and the strange business of becoming partially machine.',
+  bodyClass = ''
 } = Astro.props;
 ---
 
@@ -20,7 +22,7 @@ const {
     <meta name="description" content={description} />
     <title>{title}</title>
   </head>
-  <body>
+  <body class={bodyClass}>
     <div class="site-shell">
       <header class="topbar">
         <a class="brand" href="/" aria-label="Philosophies of a Cyborg home">
