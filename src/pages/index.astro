@@ -264,24 +264,5 @@ const leftIcons = [
 
   <script>
     import '../scripts/home-game';
-
-    const routeModalLayer = document.querySelector<HTMLElement>('[data-modal-layer]');
-    const routeModalPanels = Array.from(document.querySelectorAll<HTMLElement>('[data-modal-panel]'));
-
-    function openRouteModal(name: string) {
-      if (!routeModalLayer) return;
-      routeModalLayer.hidden = false;
-      routeModalPanels.forEach((panel) => {
-        panel.hidden = panel.dataset.modalPanel !== name;
-      });
-      routeModalPanels.find((panel) => panel.dataset.modalPanel === name)?.querySelector<HTMLElement>('button')?.focus();
-    }
-
-    function openRouteHash() {
-      if (window.location.hash === '#calculator') openRouteModal('calculator');
-    }
-
-    window.addEventListener('hashchange', openRouteHash);
-    openRouteHash();
   </script>
 </BaseLayout>

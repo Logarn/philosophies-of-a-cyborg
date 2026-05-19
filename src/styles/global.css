@@ -1821,6 +1821,10 @@ body.agent-mode .agent-readable {
   .desktop-stage { min-height: 560px; }
 }
 @media (max-width: 860px) {
+  .retro-desktop {
+    height: auto;
+    min-height: 100svh;
+  }
   .posthog-nav {
     min-height: 68px;
   }

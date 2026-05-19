@@ -1,8 +1,7 @@
-const agentButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-action="agent-mode"]'));
 const homeButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-action="home"]'));
 const desktopHome = document.querySelector<HTMLElement>('#desktop-home');
 const modalLayer = document.querySelector<HTMLElement>('[data-modal-layer]');
-const modalButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-modal]'));
+const modalButtons = Array.from(document.querySelectorAll<HTMLElement>('[data-modal]'));
 const modalPanels = Array.from(document.querySelectorAll<HTMLElement>('[data-modal-panel]'));
 const modalCloseButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-modal-close]'));
 const calcDisplay = document.querySelector<HTMLElement>('[data-calc-display]');
@@ -29,23 +28,6 @@ const lessons: Record<string, string> = {
   '∫': 'An integral adds tiny pieces until the whole shape admits what it is.'
 };
 
-function setAgentMode(enabled: boolean) {
-  document.body.classList.toggle('agent-mode', enabled);
-  agentButtons.forEach((button) => {
-    button.setAttribute('aria-pressed', String(enabled));
-  });
-}
-
-const params = new URLSearchParams(window.location.search);
-setAgentMode(params.get('mode') === 'agent');
-
-agentButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    window.history.replaceState({}, '', '/?mode=agent');
-    setAgentMode(true);
-  });
-});
-
 function openModal(name: string) {
   if (!modalLayer) return;
   modalLayer.hidden = false;
@@ -71,6 +53,81 @@ function setDisplay(value: string) {
   if (calcDisplay) calcDisplay.textContent = value || '0';
 }
 
+function parseArithmetic(input: string) {
+  let index = 0;
+
+  function skipSpaces() {
+    while (input[index] === ' ') index += 1;
+  }
+
+  function parseNumber() {
+    skipSpaces();
+    const start = index;
+    while (/\d|\./.test(input[index] ?? '')) index += 1;
+    if (start === index) throw new Error('Expected number.');
+    const text = input.slice(start, index);
+    if ((text.match(/\./g) ?? []).length > 1) throw new Error('Invalid decimal.');
+    const value = Number(text);
+    if (!Number.isFinite(value)) throw new Error('Invalid number.');
+    return value;
+  }
+
+  function parseFactor(): number {
+    skipSpaces();
+    const char = input[index];
+    if (char === '+') {
+      index += 1;
+      return parseFactor();
+    }
+    if (char === '-') {
+      index += 1;
+      return -parseFactor();
+    }
+    if (char === '(') {
+      index += 1;
+      const value = parseExpression();
+      skipSpaces();
+      if (input[index] !== ')') throw new Error('Expected closing parenthesis.');
+      index += 1;
+      return value;
+    }
+    return parseNumber();
+  }
+
+  function parseTerm() {
+    let value = parseFactor();
+    while (true) {
+      skipSpaces();
+      const operator = input[index];
+      if (operator !== '*' && operator !== '/') break;
+      index += 1;
+      const right = parseFactor();
+      value = operator === '*' ? value * right : value / right;
+      if (!Number.isFinite(value)) throw new Error('Non-finite result.');
+    }
+    return value;
+  }
+
+  function parseExpression() {
+    let value = parseTerm();
+    while (true) {
+      skipSpaces();
+      const operator = input[index];
+      if (operator !== '+' && operator !== '-') break;
+      index += 1;
+      const right = parseTerm();
+      value = operator === '+' ? value + right : value - right;
+    }
+    return value;
+  }
+
+  const result = parseExpression();
+  skipSpaces();
+  if (index !== input.length) throw new Error('Unexpected input.');
+  if (!Number.isFinite(result)) throw new Error('Non-finite result.');
+  return result;
+}
+
 function evaluateExpression() {
   if (!expression) return;
   if (!/^[\d+\-*/. ()]+$/.test(expression)) {
@@ -81,8 +138,8 @@ function evaluateExpression() {
   }
 
   try {
-    const result = Function(`"use strict"; return (${expression})`)();
-    expression = Number.isFinite(result) ? String(Number(result.toFixed(8))) : '';
+    const result = parseArithmetic(expression);
+    expression = String(Number(result.toFixed(8)));
     setDisplay(expression || '0');
     setLesson('The arithmetic worked. Suspicious, but acceptable.');
   } catch {
@@ -148,6 +205,13 @@ modalCloseButtons.forEach((button) => {
 modalLayer?.addEventListener('click', (event) => {
   if (event.target === modalLayer) closeModal();
 });
+
+function openHashTarget() {
+  if (window.location.hash === '#calculator') openModal('calculator');
+}
+
+window.addEventListener('hashchange', openHashTarget);
+openHashTarget();
 
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') closeModal();
