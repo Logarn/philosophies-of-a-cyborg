@@ -19,12 +19,12 @@ const navItems = [
 ];
 
 const leftIcons = [
-  { label: 'home', href: '/', icon: 'doc', mark: 'Aa' },
-  { label: 'Project OS', href: '/projects/', icon: 'book', mark: 'P' },
+  { label: 'home', action: 'home', icon: 'home', mark: '' },
+  { label: 'Project OS', href: '/projects/', icon: 'compass', mark: 'OS' },
   { label: 'Calculator', modal: 'calculator', icon: 'calculator', mark: '$' },
   { label: 'Clock', action: 'open-clock', icon: 'clock', mark: 'EAT' },
   { label: 'Video', href: contactHref.youtube, external: true, icon: 'video', mark: 'PLAY' },
-  { label: 'Essays', href: '/essays/', icon: 'book', mark: 'E' },
+  { label: 'Essays', href: '/essays/', icon: 'typewriter', mark: 'E' },
   { label: 'LinkedIn', href: socials.linkedin, external: true, icon: 'linkedin', mark: 'in' },
   { label: 'Instagram', href: socials.instagram, external: true, icon: 'instagram', mark: '◎' },
   { label: 'Substack', href: socials.substack, external: true, icon: 'substack', mark: 'S' },
@@ -53,9 +53,9 @@ const conversionZones = [
 
 <BaseLayout bodyClass="home-desktop-page">
   <main class="posthog-home">
-    <section class="retro-desktop" aria-label={`${contact.siteName} reader desktop`}>
+    <section id="desktop-home" class="retro-desktop" aria-label={`${contact.siteName} reader desktop`}>
       <header class="posthog-nav" aria-label="Homepage navigation">
-        <a class="posthog-logo site-logo" href="/" aria-label={`${contact.siteName} home`}>
+        <a class="posthog-logo site-logo" href="/#desktop-home" aria-label={`${contact.siteName} home`}>
           <img src="/logo-mark.png" alt="" />
         </a>
         <nav aria-label="Desktop navigation">

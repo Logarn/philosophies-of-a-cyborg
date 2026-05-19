@@ -1,4 +1,6 @@
 const agentButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-action="agent-mode"]'));
+const homeButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-action="home"]'));
+const desktopHome = document.querySelector<HTMLElement>('#desktop-home');
 const modalLayer = document.querySelector<HTMLElement>('[data-modal-layer]');
 const modalButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-modal]'));
 const modalPanels = Array.from(document.querySelectorAll<HTMLElement>('[data-modal-panel]'));
@@ -310,6 +312,19 @@ calcKeys.forEach((button) => {
   button.addEventListener('click', () => pressCalculatorKey(button.dataset.key ?? ''));
 });
 
+homeButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    closeModal();
+    prizeDialog?.close();
+    loseDialog?.close();
+    if (loseDialog) loseDialog.hidden = true;
+    desktopHome?.scrollIntoView({ block: 'start' });
+    if (window.location.hash) {
+      window.history.replaceState(null, '', window.location.pathname || '/');
+    }
+  });
+});
+
 clockButtons.forEach((button) => {
   button.addEventListener('click', () => {
     clockWindow?.classList.add('is-awake');
@@ -416,7 +431,12 @@ if (letterTray && letterSlots) {
       slot.type = 'button';
       slot.className = `letter-slot${index === 3 ? ' word-break' : ''}${tile ? ' is-planted' : ''}`;
       slot.dataset.slotIndex = String(index);
-      slot.textContent = tile?.letter ?? '';
+      if (tile) {
+        const face = document.createElement('span');
+        face.className = 'letter-face';
+        face.textContent = tile.letter;
+        slot.append(face);
+      }
       if (tile) slot.style.setProperty('--piece-color', tile.color);
       slot.setAttribute('aria-label', tile ? `Remove ${tile.letter} from bed ${index + 1}` : `Empty answer bed ${index + 1}`);
       slot.addEventListener('click', () => {
@@ -446,7 +466,10 @@ if (letterTray && letterSlots) {
       button.type = 'button';
       button.className = 'letter-tile';
       button.draggable = true;
-      button.textContent = tile.letter;
+      const face = document.createElement('span');
+      face.className = 'letter-face';
+      face.textContent = tile.letter;
+      button.append(face);
       button.style.setProperty('--piece-color', tile.color);
       button.setAttribute('aria-label', `Move garden piece ${tile.letter}`);
       button.addEventListener('dragstart', (event) => {
