@@ -353,6 +353,11 @@ if (letterTray && letterSlots) {
   const grassColors = ['#8fb247', '#5f9e5f', '#bb9b42', '#58a6a9', '#9aa64b', '#7fb85a', '#d78b3b', '#e3c44e'];
   let scrambled = prizeLetters.map((letter, index) => ({ id: `${letter}-${index}`, letter, color: grassColors[index] }));
   let selected: Array<(typeof scrambled)[number] | null> = Array.from({ length: prizeLetters.length }, () => null);
+  let draggingTileId: string | null = null;
+  let draggingButton: HTMLButtonElement | null = null;
+  let dragOrigin = { x: 0, y: 0 };
+  let pointerMoved = false;
+  let suppressClickTileId: string | null = null;
 
   function shuffle<T>(items: T[]) {
     const copy = [...items];
@@ -365,6 +370,85 @@ if (letterTray && letterSlots) {
 
   function setLetterStatus(text: string) {
     if (letterStatus) letterStatus.textContent = text;
+  }
+
+  function clearSlotHover() {
+    slots.querySelectorAll('.letter-slot.is-hovered').forEach((slot) => {
+      slot.classList.remove('is-hovered');
+    });
+  }
+
+  function slotIndexFromPoint(x: number, y: number) {
+    const previousPointerEvents = draggingButton?.style.pointerEvents ?? '';
+    if (draggingButton) draggingButton.style.pointerEvents = 'none';
+    const slot = document.elementsFromPoint(x, y).find((element) => (
+      element instanceof HTMLButtonElement && element.classList.contains('letter-slot')
+    ));
+    if (draggingButton) draggingButton.style.pointerEvents = previousPointerEvents;
+    const slotIndex = Number((slot as HTMLButtonElement | undefined)?.dataset.slotIndex);
+    return Number.isInteger(slotIndex) ? slotIndex : null;
+  }
+
+  function hoverSlotFromPoint(x: number, y: number) {
+    clearSlotHover();
+    const slotIndex = slotIndexFromPoint(x, y);
+    if (slotIndex === null) return;
+    slots.querySelector<HTMLElement>(`.letter-slot[data-slot-index="${slotIndex}"]`)?.classList.add('is-hovered');
+  }
+
+  function resetPointerDrag() {
+    clearSlotHover();
+    if (!draggingButton) return;
+    draggingButton.classList.remove('is-pointer-dragging');
+    draggingButton.style.transform = '';
+    draggingButton.style.zIndex = '';
+    draggingButton.style.pointerEvents = '';
+    draggingButton = null;
+    draggingTileId = null;
+    pointerMoved = false;
+  }
+
+  function beginPointerDrag(event: PointerEvent, button: HTMLButtonElement, tileId: string) {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    draggingTileId = tileId;
+    draggingButton = button;
+    dragOrigin = { x: event.clientX, y: event.clientY };
+    pointerMoved = false;
+    button.setPointerCapture(event.pointerId);
+  }
+
+  function movePointerDrag(event: PointerEvent, button: HTMLButtonElement, tileId: string) {
+    if (draggingTileId !== tileId || draggingButton !== button) return;
+    const dx = event.clientX - dragOrigin.x;
+    const dy = event.clientY - dragOrigin.y;
+    if (!pointerMoved && Math.hypot(dx, dy) < 6) return;
+    pointerMoved = true;
+    event.preventDefault();
+    button.classList.add('is-pointer-dragging');
+    button.style.zIndex = '50';
+    button.style.transform = `translate(${dx}px, ${dy}px) rotate(0deg) scale(1.04)`;
+    hoverSlotFromPoint(event.clientX, event.clientY);
+  }
+
+  function endPointerDrag(event: PointerEvent, button: HTMLButtonElement, tileId: string) {
+    if (draggingTileId !== tileId || draggingButton !== button) return;
+    if (button.hasPointerCapture(event.pointerId)) button.releasePointerCapture(event.pointerId);
+    if (!pointerMoved) {
+      resetPointerDrag();
+      return;
+    }
+    event.preventDefault();
+    suppressClickTileId = tileId;
+    const slotIndex = slotIndexFromPoint(event.clientX, event.clientY);
+    resetPointerDrag();
+    if (slotIndex === null) {
+      setLetterStatus('Drop the piece into one of the answer beds.');
+    } else {
+      placeTile(tileId, slotIndex);
+    }
+    window.setTimeout(() => {
+      if (suppressClickTileId === tileId) suppressClickTileId = null;
+    }, 0);
   }
 
   function showPrizeDialog() {
@@ -456,19 +540,21 @@ if (letterTray && letterSlots) {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'letter-tile';
-      button.draggable = true;
       const face = document.createElement('span');
       face.className = 'letter-face';
       face.textContent = tile.letter;
       button.append(face);
       button.style.setProperty('--piece-color', tile.color);
       button.setAttribute('aria-label', `Move garden piece ${tile.letter}`);
-      button.addEventListener('dragstart', (event) => {
-        event.dataTransfer?.setData('text/plain', tile.id);
-        button.classList.add('is-dragging');
-      });
-      button.addEventListener('dragend', () => button.classList.remove('is-dragging'));
+      button.addEventListener('pointerdown', (event) => beginPointerDrag(event, button, tile.id));
+      button.addEventListener('pointermove', (event) => movePointerDrag(event, button, tile.id));
+      button.addEventListener('pointerup', (event) => endPointerDrag(event, button, tile.id));
+      button.addEventListener('pointercancel', () => resetPointerDrag());
       button.addEventListener('click', () => {
+        if (suppressClickTileId === tile.id) {
+          suppressClickTileId = null;
+          return;
+        }
         placeTile(tile.id);
       });
       tray.append(button);

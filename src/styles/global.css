@@ -1078,6 +1078,8 @@ body.home-desktop-page .topbar {
   font-size: clamp(2rem, 3.65vw, 3rem);
   font-weight: 1000;
   line-height: 1;
+  touch-action: none;
+  user-select: none;
   animation: garden-piece-idle 3.6s ease-in-out infinite;
   transition: transform 160ms ease, filter 160ms ease;
 }
@@ -1132,11 +1134,16 @@ body.home-desktop-page .topbar {
 }
 .letter-tile:hover,
 .letter-tile:focus-visible,
-.letter-tile.is-dragging {
+.letter-tile.is-dragging,
+.letter-tile.is-pointer-dragging {
   filter: saturate(1.18) brightness(1.04);
   outline: 3px solid #f2bd22;
   outline-offset: 3px;
   transform: translateY(-7px) rotate(0deg);
+}
+.letter-tile.is-pointer-dragging {
+  cursor: grabbing;
+  transition: none;
 }
 .garden-status {
   position: absolute;
