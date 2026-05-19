@@ -56,12 +56,21 @@ function authRequired(message = 'Admin auth required') {
   });
 }
 
+function isAdminRoute(pathname: string) {
+  return (
+    pathname === '/admin' ||
+    pathname.startsWith('/admin/') ||
+    pathname === '/api/admin' ||
+    pathname.startsWith('/api/admin/')
+  );
+}
+
 function secureResponse(response: Response, pathname: string) {
   Object.entries(SECURITY_HEADERS).forEach(([key, value]) => {
     response.headers.set(key, value);
   });
 
-  if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
+  if (isAdminRoute(pathname)) {
     response.headers.set('Cache-Control', 'no-store, max-age=0');
     response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
   }
@@ -71,7 +80,7 @@ function secureResponse(response: Response, pathname: string) {
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const pathname = context.url.pathname;
-  const isAdminPath = pathname.startsWith('/admin') || pathname.startsWith('/api/admin');
+  const isAdminPath = isAdminRoute(pathname);
 
   if (isAdminPath) {
     const configuredUser = import.meta.env.ADMIN_USERNAME;

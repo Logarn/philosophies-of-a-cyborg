@@ -53,7 +53,7 @@ const articleJsonLd = {
     <h1>{essay.data.title}</h1>
     <p class="dek">{essay.data.summary}</p>
     <time datetime={essay.data.publishedAt.toISOString()}>
-      {essay.data.publishedAt.toLocaleDateString('en', { month: 'long', day: 'numeric', year: 'numeric' })}
+      {essay.data.publishedAt.toLocaleDateString('en', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}
     </time>
     <div class="article-body">
       <Content />

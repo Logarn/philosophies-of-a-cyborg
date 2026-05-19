@@ -12,7 +12,7 @@ const isAgentMode = Astro.url.searchParams.get('mode') === 'agent';
 
 const navItems = [
   { label: 'Project OS', href: '/projects/' },
-  { label: 'Calculator', modal: 'calculator' },
+  { label: 'Calculator', href: '/#calculator', modal: 'calculator' },
   { label: 'Essays', href: '/essays/' },
   { label: 'Values', href: '/values/' },
   { label: 'Archive', href: '/archive/' },
@@ -23,7 +23,7 @@ const navItems = [
 const leftIcons = [
   { label: 'home', action: 'home', icon: 'home', mark: '' },
   { label: 'Project OS', href: '/projects/', icon: 'compass', mark: 'OS' },
-  { label: 'Calculator', modal: 'calculator', icon: 'calculator', mark: '$' },
+  { label: 'Calculator', href: '/#calculator', modal: 'calculator', icon: 'calculator', mark: '$' },
   { label: 'Movie List', href: movieListUrl, external: true, icon: 'movie', mark: 'MOV' },
   { label: 'Video', href: contactHref.youtube, external: true, icon: 'video', mark: 'PLAY' },
   { label: 'Essays', href: '/essays/', icon: 'typewriter', mark: 'E' },
@@ -51,7 +51,7 @@ const leftIcons = [
         <nav aria-label="Desktop navigation">
           {navItems.map((item) => (
             item.modal ? (
-              <button type="button" data-modal={item.modal}>{item.label}</button>
+              <a href={item.href} data-modal={item.modal}>{item.label}</a>
             ) : (
               <a href={item.href} target={item.external ? '_blank' : undefined} rel={item.external ? 'noreferrer' : undefined}>
                 {item.label}
@@ -65,7 +65,7 @@ const leftIcons = [
       </header>
 
       <div class="desktop-canvas">
-        <div class="icon-rail icon-rail-left" aria-label="Primary desktop shortcuts">
+        <div id="socials" class="icon-rail icon-rail-left" aria-label="Primary desktop shortcuts and socials">
           {leftIcons.map((item) => (
             item.action ? (
               <button class="desktop-object" type="button" data-action={item.action}>
@@ -75,12 +75,12 @@ const leftIcons = [
                 <span class="desktop-label">{item.label}</span>
               </button>
             ) : item.modal ? (
-              <button class="desktop-object" type="button" data-modal={item.modal}>
+              <a class="desktop-object" href={item.href} data-modal={item.modal}>
                 <span class:list={['desktop-glyph', `icon-${item.icon}`]} aria-hidden="true">
                   <span>{item.mark}</span>
                 </span>
                 <span class="desktop-label">{item.label}</span>
-              </button>
+              </a>
             ) : (
               <a
                 class="desktop-object"
@@ -150,7 +150,7 @@ const leftIcons = [
         </section>
 
         <div class="desktop-modal-layer" data-modal-layer hidden>
-          <section class="desktop-modal calc-modal" data-modal-panel="calculator" role="dialog" aria-modal="true" aria-labelledby="calculator-title">
+          <section id="calculator" class="desktop-modal calc-modal" data-modal-panel="calculator" role="dialog" aria-modal="true" aria-labelledby="calculator-title">
             <div class="window-bar">
               <span id="calculator-title" class="window-title">CALCULATOR.EXE</span>
               <button type="button" data-modal-close aria-label="Close calculator"><span aria-hidden="true"></span></button>
@@ -264,5 +264,24 @@ const leftIcons = [
 
   <script>
     import '../scripts/home-game';
+
+    const routeModalLayer = document.querySelector<HTMLElement>('[data-modal-layer]');
+    const routeModalPanels = Array.from(document.querySelectorAll<HTMLElement>('[data-modal-panel]'));
+
+    function openRouteModal(name: string) {
+      if (!routeModalLayer) return;
+      routeModalLayer.hidden = false;
+      routeModalPanels.forEach((panel) => {
+        panel.hidden = panel.dataset.modalPanel !== name;
+      });
+      routeModalPanels.find((panel) => panel.dataset.modalPanel === name)?.querySelector<HTMLElement>('button')?.focus();
+    }
+
+    function openRouteHash() {
+      if (window.location.hash === '#calculator') openRouteModal('calculator');
+    }
+
+    window.addEventListener('hashchange', openRouteHash);
+    openRouteHash();
   </script>
 </BaseLayout>
