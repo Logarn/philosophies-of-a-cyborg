@@ -21,14 +21,16 @@ const {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <link rel="icon" href="/logo.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicons/favicon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
     <title>{title}</title>
   </head>
   <body class={bodyClass}>
     <div class="site-shell">
       <header class="topbar">
         <a class="brand" href="/" aria-label={`${contact.siteName} home`}>
-          <span class="brand-mark"><img src="/logo.svg" alt="" /></span>
+          <span class="brand-mark"><img src="/logo-mark.png" alt="" /></span>
           <span>{contact.siteName}</span>
         </a>
         <nav class="nav" aria-label="Primary navigation">
