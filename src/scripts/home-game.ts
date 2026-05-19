@@ -13,9 +13,7 @@ const eatDate = document.querySelector<HTMLElement>('[data-eat-date]');
 const eatDateInput = document.querySelector<HTMLInputElement>('[data-eat-date-input]');
 const eatInput = document.querySelector<HTMLInputElement>('[data-eat-input]');
 const eatNowButton = document.querySelector<HTMLButtonElement>('[data-eat-now]');
-const clockWindow = document.querySelector<HTMLElement>('[data-clock-window]');
 const zoneOutputs = Array.from(document.querySelectorAll<HTMLOutputElement>('[data-zone]'));
-const clockButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-action="open-clock"]'));
 const letterTray = document.querySelector<HTMLElement>('[data-letter-tray]');
 const letterSlots = document.querySelector<HTMLElement>('[data-letter-slots]');
 const letterShuffle = document.querySelector<HTMLButtonElement>('[data-letter-shuffle]');
@@ -325,14 +323,6 @@ homeButtons.forEach((button) => {
   });
 });
 
-clockButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    clockWindow?.classList.add('is-awake');
-    clockWindow?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-    window.setTimeout(() => clockWindow?.classList.remove('is-awake'), 900);
-  });
-});
-
 eatDateInput?.addEventListener('input', () => {
   converterLocked = true;
   const date = eatInputDate();
@@ -394,15 +384,13 @@ if (letterTray && letterSlots) {
 
   function checkGardenAnswer() {
     const answer = selected.map((item) => item?.letter ?? '').join('');
+    const plantedCount = selected.filter(Boolean).length;
     if (!answer) {
       setLetterStatus('Drag the garden pieces into the answer beds.');
       return;
     }
-    if (!targetWord.startsWith(answer)) {
-      setLetterStatus('BETTER LUCK NEXT TIME, SUCKER!');
-      letterGame?.classList.add('garden-shake');
-      window.setTimeout(() => letterGame?.classList.remove('garden-shake'), 420);
-      showLoseDialog();
+    if (plantedCount < prizeLetters.length) {
+      setLetterStatus(`${plantedCount}/${prizeLetters.length} planted. Fill every bed, then the garden will judge.`);
       return;
     }
     if (answer === targetWord) {
@@ -410,7 +398,10 @@ if (letterTray && letterSlots) {
       showPrizeDialog();
       return;
     }
-    setLetterStatus(answer.length < 3 ? 'Keep planting.' : 'Hint still holds: You C***');
+    setLetterStatus('BETTER LUCK NEXT TIME, SUCKER!');
+    letterGame?.classList.add('garden-shake');
+    window.setTimeout(() => letterGame?.classList.remove('garden-shake'), 420);
+    showLoseDialog();
   }
 
   function placeTile(tileId: string, slotIndex = selected.findIndex((item) => item === null)) {

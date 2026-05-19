@@ -50,7 +50,7 @@ function authRequired(message = 'Admin auth required') {
   return new Response(message, {
     status: 401,
     headers: {
-      'WWW-Authenticate': 'Basic realm="Philosophy of a Cyborg Admin", charset="UTF-8"',
+      'WWW-Authenticate': 'Basic realm="Philosophies Of A Cyborg Admin", charset="UTF-8"',
       'Cache-Control': 'no-store'
     }
   });

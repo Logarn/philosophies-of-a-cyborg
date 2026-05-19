@@ -3,7 +3,7 @@ import type { APIRoute } from 'astro';
 export const GET: APIRoute = () =>
   new Response(
     JSON.stringify({
-      name: 'Philosophy of a Cyborg',
+      name: 'Philosophies Of A Cyborg',
       short_name: 'Cyborg',
       description: 'Essays from Ositu Kengere on AI, agency, software, and becoming partially machine.',
       start_url: '/',

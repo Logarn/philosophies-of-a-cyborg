@@ -1,7 +1,7 @@
-# Philosophy of a Cyborg Specs
+# Philosophies Of A Cyborg Specs
 
 This directory holds the product and feature specs for the first public version
-of **Philosophy of a Cyborg**: a personal publication for Ositu Kengere's writing,
+of **Philosophies Of A Cyborg**: a personal publication for Ositu Kengere's writing,
 thinking, research, and experiments.
 
 The standard is not "a blog template with posts." The standard is a publication

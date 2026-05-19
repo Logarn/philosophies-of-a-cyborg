@@ -7,6 +7,7 @@ import { socials } from '../lib/socials';
 
 const essays = await getPublishedEssays();
 const { pinned, rest } = splitPinned(essays);
+const movieListUrl = 'https://rogue-toothbrush-725.notion.site/Movie-List-eec453938bc74522a29891050746f375';
 
 const navItems = [
   { label: 'Project OS', href: '/projects/' },
@@ -22,7 +23,7 @@ const leftIcons = [
   { label: 'home', action: 'home', icon: 'home', mark: '' },
   { label: 'Project OS', href: '/projects/', icon: 'compass', mark: 'OS' },
   { label: 'Calculator', modal: 'calculator', icon: 'calculator', mark: '$' },
-  { label: 'Clock', action: 'open-clock', icon: 'clock', mark: 'EAT' },
+  { label: 'Movie List', href: movieListUrl, external: true, icon: 'movie', mark: 'MOV' },
   { label: 'Video', href: contactHref.youtube, external: true, icon: 'video', mark: 'PLAY' },
   { label: 'Essays', href: '/essays/', icon: 'typewriter', mark: 'E' },
   { label: 'LinkedIn', href: socials.linkedin, external: true, icon: 'linkedin', mark: 'in' },

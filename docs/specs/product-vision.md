@@ -2,7 +2,7 @@
 
 ## Summary
 
-**Philosophy of a Cyborg** is Ositu Kengere's public thinking engine: part blog, part
+**Philosophies Of A Cyborg** is Ositu Kengere's public thinking engine: part blog, part
 field notebook, part intellectual archive. It should make serious ideas feel
 sharp and personal without becoming academic wallpaper or startup thought-leader
 porridge.
