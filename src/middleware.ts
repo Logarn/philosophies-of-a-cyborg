@@ -61,7 +61,7 @@ function secureResponse(response: Response, pathname: string) {
     response.headers.set(key, value);
   });
 
-  if (pathname.startsWith('/admin')) {
+  if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
     response.headers.set('Cache-Control', 'no-store, max-age=0');
     response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
   }
@@ -71,8 +71,9 @@ function secureResponse(response: Response, pathname: string) {
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const pathname = context.url.pathname;
+  const isAdminPath = pathname.startsWith('/admin') || pathname.startsWith('/api/admin');
 
-  if (pathname.startsWith('/admin')) {
+  if (isAdminPath) {
     const configuredUser = import.meta.env.ADMIN_USERNAME;
     const configuredHash = import.meta.env.ADMIN_PASSWORD_SHA256;
 

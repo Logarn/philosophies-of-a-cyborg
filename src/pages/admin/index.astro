@@ -259,12 +259,13 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
             <textarea id="home-export-output" readonly spellcheck="false"></textarea>
           </details>
           <div class="export-actions">
+            <button class="solid-command" type="button" id="save-site">Save to site</button>
             <button class="solid-command" type="button" id="copy-markdown">Copy article</button>
             <button class="text-command" type="button" id="copy-homepage">Copy homepage</button>
             <button class="text-command" type="button" id="download-markdown">Export .md</button>
           </div>
           <p class="copy-feedback" id="copy-feedback" aria-live="polite">
-            Browser storage only. Copy or export this file for a real repository commit.
+            Server save is enabled. Copy/export remains here as a fallback.
           </p>
         </section>
       </aside>
@@ -319,6 +320,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       exportOutput: document.getElementById('export-output'),
       homeExportPath: document.getElementById('home-export-path'),
       homeExportOutput: document.getElementById('home-export-output'),
+      saveSite: document.getElementById('save-site'),
       copyMarkdown: document.getElementById('copy-markdown'),
       copyHomepage: document.getElementById('copy-homepage'),
       downloadMarkdown: document.getElementById('download-markdown'),
@@ -487,6 +489,10 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       return `"${String(value).replace(/\\\\/g, '\\\\\\\\').replace(/"/g, '\\"')}"`;
     }
 
+    function tsString(value) {
+      return `'${String(value).replace(/\\\\/g, '\\\\\\\\').replace(/'/g, "\\'")}'`;
+    }
+
     function buildMarkdown() {
       const lines = [
         '---',
@@ -510,7 +516,15 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     }
 
     function buildHomepageModule() {
-      return `export const homepageCopy = ${JSON.stringify(appState.homepage, null, 2)} as const;\n`;
+      return [
+        'export const homepageCopy = {',
+        `  eyebrow: ${tsString(appState.homepage.eyebrow)},`,
+        `  headline: ${tsString(appState.homepage.headline)},`,
+        `  intro: ${tsString(appState.homepage.intro)},`,
+        `  cta: ${tsString(appState.homepage.cta)}`,
+        '} as const;',
+        ''
+      ].join('\n');
     }
 
     function validateDraft(slug) {
@@ -572,6 +586,38 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       renderArticleList();
       render();
       els.copyFeedback.textContent = message;
+    }
+
+    async function writeToBackend(action = 'save', draftOverride = appState.draft, message = 'Saved to site files.') {
+      const response = await fetch('/api/admin/content', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-POC-Admin-Action': 'save-content'
+        },
+        body: JSON.stringify({
+          action,
+          homepage: appState.homepage,
+          draft: draftOverride
+        })
+      });
+      const result = await response.json().catch(() => ({ ok: false, error: 'Server returned invalid JSON.' }));
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || 'Server save failed.');
+      }
+
+      els.copyFeedback.textContent = `${message} ${result.paths?.essay ? result.paths.essay : ''}`;
+      return result;
+    }
+
+    async function saveCurrentEssayToBackend(message) {
+      saveCurrentEssay('Saving to site files...');
+      try {
+        await writeToBackend('save', appState.draft, message);
+      } catch (error) {
+        els.copyFeedback.textContent = error.message;
+      }
     }
 
     function render() {
@@ -709,25 +755,27 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       persistAndRender();
     });
 
-    els.saveEssay.addEventListener('click', () => saveCurrentEssay());
+    els.saveEssay.addEventListener('click', () => saveCurrentEssayToBackend('Essay saved to site files.'));
 
     els.publishEssay.addEventListener('click', () => {
       els.status.value = 'published';
-      saveCurrentEssay('Essay saved and marked published.');
+      saveCurrentEssayToBackend('Essay saved and marked published in site files.');
     });
 
     els.draftEssay.addEventListener('click', () => {
       els.status.value = 'draft';
-      saveCurrentEssay('Essay saved and moved to draft.');
+      saveCurrentEssayToBackend('Essay saved and moved to draft in site files.');
     });
 
     els.pinEssay.addEventListener('click', () => {
       els.pinned.checked = !els.pinned.checked;
-      saveCurrentEssay(els.pinned.checked ? 'Essay pinned locally.' : 'Essay unpinned locally.');
+      saveCurrentEssayToBackend(els.pinned.checked ? 'Essay pinned in site files.' : 'Essay unpinned in site files.');
     });
 
-    els.deleteEssay.addEventListener('click', () => {
+    els.deleteEssay.addEventListener('click', async () => {
       if (!window.confirm(`Delete "${appState.draft.title}" from local admin state?`)) return;
+      readFields();
+      const draftToDelete = { ...appState.draft };
       appState.articles = appState.articles.filter((article) => article.slug !== appState.draft.slug);
       appState.draft = { ...blankDraft };
       els.slug.dataset.touched = '';
@@ -735,8 +783,14 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       saveState();
       renderArticleList();
       render();
-      els.copyFeedback.textContent = 'Essay deleted from local admin state.';
+      try {
+        await writeToBackend('delete', draftToDelete, 'Essay deleted from site files.');
+      } catch (error) {
+        els.copyFeedback.textContent = error.message;
+      }
     });
+
+    els.saveSite.addEventListener('click', () => saveCurrentEssayToBackend('Essay and homepage copy saved to site files.'));
 
     els.copyMarkdown.addEventListener('click', async () => {
       try {
