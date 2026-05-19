@@ -104,7 +104,20 @@ function safeEssayPath(slug: string) {
 }
 
 function yamlString(value: string) {
-  return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+  const normalized = value.replace(/\r\n?/g, '\n');
+  if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/u.test(normalized)) {
+    throw new Error('frontmatter text contains unsupported control characters.');
+  }
+
+  if (normalized.includes('\n')) {
+    const indented = normalized
+      .split('\n')
+      .map((line) => `  ${line}`)
+      .join('\n');
+    return `|-\n${indented}`;
+  }
+
+  return JSON.stringify(normalized);
 }
 
 function buildMarkdown(draft: DraftPayload) {
@@ -126,7 +139,7 @@ function buildMarkdown(draft: DraftPayload) {
 }
 
 function tsString(value: string) {
-  return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+  return JSON.stringify(value);
 }
 
 function buildHomepageModule(homepage: HomepagePayload) {
