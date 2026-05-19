@@ -1040,6 +1040,7 @@ body.home-desktop-page .topbar {
   opacity: 0.7;
 }
 .letter-slot.is-hovered,
+.letter-slot.is-targetable,
 .letter-slot:focus-visible {
   outline: 5px solid #f2bd22;
   outline-offset: 4px;
@@ -1134,12 +1135,17 @@ body.home-desktop-page .topbar {
 }
 .letter-tile:hover,
 .letter-tile:focus-visible,
+.letter-tile.is-selected,
 .letter-tile.is-dragging,
 .letter-tile.is-pointer-dragging {
   filter: saturate(1.18) brightness(1.04);
   outline: 3px solid #f2bd22;
   outline-offset: 3px;
   transform: translateY(-7px) rotate(0deg);
+}
+.letter-tile.is-selected {
+  cursor: pointer;
+  animation: bed-ready 0.62s ease-in-out infinite alternate;
 }
 .letter-tile.is-pointer-dragging {
   cursor: grabbing;

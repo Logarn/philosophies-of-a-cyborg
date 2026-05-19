@@ -358,6 +358,7 @@ if (letterTray && letterSlots) {
   let dragOrigin = { x: 0, y: 0 };
   let pointerMoved = false;
   let suppressClickTileId: string | null = null;
+  let selectedTileId: string | null = null;
 
   function shuffle<T>(items: T[]) {
     const copy = [...items];
@@ -495,6 +496,7 @@ if (letterTray && letterSlots) {
     const existingIndex = selected.findIndex((item) => item?.id === tileId);
     if (existingIndex >= 0) selected[existingIndex] = null;
     selected[slotIndex] = tile;
+    selectedTileId = null;
     renderLetterGame();
     checkGardenAnswer();
   }
@@ -504,7 +506,7 @@ if (letterTray && letterSlots) {
     selected.forEach((tile, index) => {
       const slot = document.createElement('button');
       slot.type = 'button';
-      slot.className = `letter-slot${index === 3 ? ' word-break' : ''}${tile ? ' is-planted' : ''}`;
+      slot.className = `letter-slot${index === 3 ? ' word-break' : ''}${tile ? ' is-planted' : ''}${selectedTileId && !tile ? ' is-targetable' : ''}`;
       slot.dataset.slotIndex = String(index);
       if (tile) {
         const face = document.createElement('span');
@@ -513,9 +515,16 @@ if (letterTray && letterSlots) {
         slot.append(face);
       }
       if (tile) slot.style.setProperty('--piece-color', tile.color);
-      slot.setAttribute('aria-label', tile ? `Remove ${tile.letter} from bed ${index + 1}` : `Empty answer bed ${index + 1}`);
+      slot.setAttribute('aria-label', tile ? `Remove ${tile.letter} from bed ${index + 1}` : `Place selected letter in bed ${index + 1}`);
       slot.addEventListener('click', () => {
-        if (!selected[index]) return;
+        if (!selected[index] && selectedTileId) {
+          placeTile(selectedTileId, index);
+          return;
+        }
+        if (!selected[index]) {
+          setLetterStatus('Pick a letter first, then tap an answer bed.');
+          return;
+        }
         selected[index] = null;
         renderLetterGame();
         checkGardenAnswer();
@@ -539,13 +548,14 @@ if (letterTray && letterSlots) {
     scrambled.filter((tile) => !plantedIds.has(tile.id)).forEach((tile) => {
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = 'letter-tile';
+      button.className = `letter-tile${selectedTileId === tile.id ? ' is-selected' : ''}`;
       const face = document.createElement('span');
       face.className = 'letter-face';
       face.textContent = tile.letter;
       button.append(face);
       button.style.setProperty('--piece-color', tile.color);
       button.setAttribute('aria-label', `Move garden piece ${tile.letter}`);
+      button.setAttribute('aria-pressed', String(selectedTileId === tile.id));
       button.addEventListener('pointerdown', (event) => beginPointerDrag(event, button, tile.id));
       button.addEventListener('pointermove', (event) => movePointerDrag(event, button, tile.id));
       button.addEventListener('pointerup', (event) => endPointerDrag(event, button, tile.id));
@@ -555,7 +565,9 @@ if (letterTray && letterSlots) {
           suppressClickTileId = null;
           return;
         }
-        placeTile(tile.id);
+        selectedTileId = selectedTileId === tile.id ? null : tile.id;
+        renderLetterGame();
+        setLetterStatus(selectedTileId ? `Selected ${tile.letter}. Tap an answer bed to plant it.` : 'Selection cleared. Pick another letter.');
       });
       tray.append(button);
     });
@@ -563,10 +575,11 @@ if (letterTray && letterSlots) {
 
   function resetLetterGame(reshuffle = false) {
     selected = Array.from({ length: prizeLetters.length }, () => null);
+    selectedTileId = null;
     if (reshuffle) scrambled = shuffle(scrambled);
     letterGame?.classList.remove('garden-won');
     letterGame?.classList.remove('garden-lost');
-    setLetterStatus('Drag the garden pieces into the answer beds.');
+    setLetterStatus('Tap a letter, then tap an answer bed. Dragging also works.');
     renderLetterGame();
   }
 
