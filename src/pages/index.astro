@@ -30,25 +30,12 @@ const leftIcons = [
   { label: 'Instagram', href: socials.instagram, external: true, icon: 'instagram', mark: '◎' },
   { label: 'Substack', href: socials.substack, external: true, icon: 'substack', mark: 'S' },
   { label: 'Reddit', href: contactHref.reddit, external: true, icon: 'reddit', mark: 'r/' },
-  { label: 'talk2', href: contactHref.email, icon: 'mail', mark: '@', ariaLabel: `talk2 ${contact.name}` },
-  { label: 'Call me', href: contactHref.phone, icon: 'chat', mark: '☎', ariaLabel: `Call ${contact.name}` },
-  { label: 'Switch to agent mode', action: 'agent-mode', icon: 'switch', mark: 'T' }
-];
-
-const rightIcons = [
+  { label: 'talk2me', href: contactHref.email, icon: 'mail', mark: '@', ariaLabel: `talk2me ${contact.name}` },
+  { label: 'Switch to agent mode', action: 'agent-mode', icon: 'switch', mark: 'T' },
   { label: 'My values', href: '/values/', icon: 'bookshelf', mark: 'V', external: false },
   { label: 'Company handbook', href: '/handbook/', icon: 'openbook', mark: 'H', external: false },
   { label: 'Store', href: '/store/', icon: 'bag', mark: 'S', external: false },
   { label: 'Archive', href: '/archive/', icon: 'trash', mark: 'A', external: false }
-];
-
-const conversionZones = [
-  { key: 'est', label: 'Eastern', city: 'EST/EDT' },
-  { key: 'pst', label: 'Pacific', city: 'PST/PDT' },
-  { key: 'cst', label: 'Central', city: 'CST/CDT' },
-  { key: 'gmt', label: 'GMT / UTC', city: 'No DST' },
-  { key: 'cet', label: 'Central Europe', city: 'CET/CEST' },
-  { key: 'sast', label: 'South Africa', city: 'SAST' }
 ];
 ---
 
@@ -161,55 +148,6 @@ const conversionZones = [
           </dialog>
         </section>
 
-        <div class="icon-rail icon-rail-right" aria-label="Secondary desktop shortcuts">
-          {rightIcons.map((item) => (
-            <a
-              class="desktop-object"
-              href={item.href}
-              target={item.external ? '_blank' : undefined}
-              rel={item.external ? 'noreferrer' : undefined}
-            >
-              <span class:list={['desktop-glyph', `icon-${item.icon}`]} aria-hidden="true">
-                <span>{item.mark}</span>
-              </span>
-              <span class="desktop-label">{item.label}</span>
-            </a>
-          ))}
-        </div>
-
-        <section class="desktop-widget time-console" data-clock-window aria-label="East African Time clock and converter">
-          <div class="widget-bar">
-            <span>EAT CLOCK</span>
-            <span data-eat-date>--</span>
-          </div>
-          <strong data-eat-clock>--:--:-- EAT</strong>
-          <p class="time-note">Pick a Nairobi date and time. The rows show the actual local clock, including daylight saving.</p>
-          <div class="time-converter">
-            <div class="time-field">
-              <label for="eat-date-input">EAT date</label>
-              <input id="eat-date-input" type="date" data-eat-date-input />
-            </div>
-            <div class="time-field">
-              <label for="eat-time-input">EAT time</label>
-              <input id="eat-time-input" type="time" data-eat-input />
-            </div>
-            <div class="time-input-row">
-              <button type="button" data-eat-now>Now</button>
-            </div>
-          </div>
-          <div class="zone-grid" aria-label="Converted times">
-            {conversionZones.map((zone) => (
-              <div class="zone-row">
-                <span>
-                  <strong>{zone.label}</strong>
-                  <small>{zone.city}</small>
-                </span>
-                <output data-zone={zone.key}>--:--</output>
-              </div>
-            ))}
-          </div>
-        </section>
-
         <div class="desktop-modal-layer" data-modal-layer hidden>
           <section class="desktop-modal calc-modal" data-modal-panel="calculator" role="dialog" aria-modal="true" aria-labelledby="calculator-title">
             <div class="window-bar">
@@ -296,8 +234,7 @@ const conversionZones = [
       <li><a href={contactHref.reddit}>Reddit profile</a></li>
       <li><a href={contactHref.youtube}>YouTube search</a></li>
       <li><a href={contactHref.email}>Email {contact.name}</a></li>
-      <li><a href={contactHref.phone}>Call {contact.name}</a></li>
-      <li>Calculator: open the human homepage and choose Calculator.</li>
+      <li><a href="/#calculator">Calculator on human homepage</a></li>
     </ul>
 
     <h2>Pinned essays</h2>

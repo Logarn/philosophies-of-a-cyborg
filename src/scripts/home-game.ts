@@ -8,12 +8,6 @@ const modalCloseButtons = Array.from(document.querySelectorAll<HTMLButtonElement
 const calcDisplay = document.querySelector<HTMLElement>('[data-calc-display]');
 const calcLesson = document.querySelector<HTMLElement>('[data-calc-lesson]');
 const calcKeys = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-key]'));
-const eatClock = document.querySelector<HTMLElement>('[data-eat-clock]');
-const eatDate = document.querySelector<HTMLElement>('[data-eat-date]');
-const eatDateInput = document.querySelector<HTMLInputElement>('[data-eat-date-input]');
-const eatInput = document.querySelector<HTMLInputElement>('[data-eat-input]');
-const eatNowButton = document.querySelector<HTMLButtonElement>('[data-eat-now]');
-const zoneOutputs = Array.from(document.querySelectorAll<HTMLOutputElement>('[data-zone]'));
 const letterTray = document.querySelector<HTMLElement>('[data-letter-tray]');
 const letterSlots = document.querySelector<HTMLElement>('[data-letter-slots]');
 const letterShuffle = document.querySelector<HTMLButtonElement>('[data-letter-shuffle]');
@@ -26,7 +20,6 @@ const loseDialog = document.querySelector<HTMLDialogElement>('[data-lose-dialog]
 const loseClose = document.querySelector<HTMLButtonElement>('[data-lose-close]');
 
 let expression = '';
-let converterLocked = false;
 
 const lessons: Record<string, string> = {
   'π': 'Pi is what circles keep whispering: circumference divided by diameter.',
@@ -36,151 +29,6 @@ const lessons: Record<string, string> = {
   'F=ma': 'Force equals mass times acceleration. Push more, or move smarter.',
   '∫': 'An integral adds tiny pieces until the whole shape admits what it is.'
 };
-
-const conversionZones: Record<string, string> = {
-  est: 'America/New_York',
-  pst: 'America/Los_Angeles',
-  cst: 'America/Chicago',
-  gmt: 'Etc/GMT',
-  cet: 'Europe/Berlin',
-  sast: 'Africa/Johannesburg'
-};
-
-const eatFormatter = new Intl.DateTimeFormat('en-GB', {
-  timeZone: 'Africa/Nairobi',
-  hour: '2-digit',
-  minute: '2-digit',
-  second: '2-digit',
-  hour12: false
-});
-
-const eatDateFormatter = new Intl.DateTimeFormat('en-GB', {
-  timeZone: 'Africa/Nairobi',
-  weekday: 'short',
-  day: '2-digit',
-  month: 'short'
-});
-
-function getEatParts(date = new Date()) {
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Africa/Nairobi',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  }).formatToParts(date);
-
-  return Object.fromEntries(parts.map((part) => [part.type, part.value]));
-}
-
-function formatZoneTime(date: Date, timeZone: string) {
-  return new Intl.DateTimeFormat('en-US', {
-    timeZone,
-    month: 'short',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZoneName: 'short',
-    hourCycle: 'h23'
-  }).format(date);
-}
-
-function zoneOffsetMinutes(date: Date, timeZone: string) {
-  const parts = Object.fromEntries(
-    new Intl.DateTimeFormat('en-GB', {
-      timeZone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hourCycle: 'h23'
-    }).formatToParts(date).map((part) => [part.type, part.value])
-  );
-  return Math.round(
-    (Date.UTC(
-      Number(parts.year),
-      Number(parts.month) - 1,
-      Number(parts.day),
-      Number(parts.hour),
-      Number(parts.minute)
-    ) - date.getTime()) / 60000
-  );
-}
-
-function relativeToEat(date: Date, timeZone: string) {
-  const diff = zoneOffsetMinutes(date, timeZone) - zoneOffsetMinutes(date, 'Africa/Nairobi');
-  if (diff === 0) return 'same as EAT';
-  const sign = diff > 0 ? '+' : '-';
-  const abs = Math.abs(diff);
-  const hours = Math.floor(abs / 60);
-  const minutes = abs % 60;
-  return `EAT ${sign}${hours}${minutes ? `h ${minutes}m` : 'h'}`;
-}
-
-function dayShiftFromEat(date: Date, timeZone: string) {
-  const stamp = (zone: string) => {
-    const parts = Object.fromEntries(
-      new Intl.DateTimeFormat('en-GB', {
-        timeZone: zone,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      }).formatToParts(date).map((part) => [part.type, part.value])
-    );
-    return Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day));
-  };
-  const eatDay = stamp('Africa/Nairobi');
-  const zoneDay = stamp(timeZone);
-  if (eatDay === zoneDay) return 'same day';
-  return zoneDay < eatDay ? 'previous day' : 'next day';
-}
-
-function eatInputDate() {
-  if (!eatInput?.value || !eatDateInput?.value) return new Date();
-  const [yearValue, monthValue, dayValue] = eatDateInput.value.split('-').map(Number);
-  const [hourValue, minuteValue] = eatInput.value.split(':').map(Number);
-  if (!yearValue || !monthValue || !dayValue || Number.isNaN(hourValue) || Number.isNaN(minuteValue)) return new Date();
-  return new Date(Date.UTC(yearValue, monthValue - 1, dayValue, hourValue - 3, minuteValue));
-}
-
-function eatInputLabel(date: Date) {
-  return `${new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Africa/Nairobi',
-    weekday: 'short',
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
-  }).format(date)} EAT`;
-}
-
-function updateZoneOutputs(date: Date) {
-  zoneOutputs.forEach((output) => {
-    const zone = output.dataset.zone;
-    if (!zone || !conversionZones[zone]) return;
-    const timeZone = conversionZones[zone];
-    output.value = `${formatZoneTime(date, timeZone)} · ${relativeToEat(date, timeZone)} · ${dayShiftFromEat(date, timeZone)}`;
-    output.textContent = output.value;
-  });
-}
-
-function updateEatClock() {
-  const now = new Date();
-  const parts = getEatParts(now);
-  if (eatClock) eatClock.textContent = `${eatFormatter.format(now)} EAT`;
-  if (eatDate) eatDate.textContent = eatDateFormatter.format(now);
-  if (eatDateInput && eatInput && !converterLocked) {
-    eatDateInput.value = `${parts.year}-${parts.month}-${parts.day}`;
-    eatInput.value = `${parts.hour}:${parts.minute}`;
-    updateZoneOutputs(now);
-  }
-}
 
 function setAgentMode(enabled: boolean) {
   document.body.classList.toggle('agent-mode', enabled);
@@ -322,28 +170,6 @@ homeButtons.forEach((button) => {
     }
   });
 });
-
-eatDateInput?.addEventListener('input', () => {
-  converterLocked = true;
-  const date = eatInputDate();
-  if (eatDate) eatDate.textContent = eatInputLabel(date);
-  updateZoneOutputs(date);
-});
-
-eatInput?.addEventListener('input', () => {
-  converterLocked = true;
-  const date = eatInputDate();
-  if (eatDate) eatDate.textContent = eatInputLabel(date);
-  updateZoneOutputs(date);
-});
-
-eatNowButton?.addEventListener('click', () => {
-  converterLocked = false;
-  updateEatClock();
-});
-
-updateEatClock();
-window.setInterval(updateEatClock, 1000);
 
 if (letterTray && letterSlots) {
   const tray = letterTray;
