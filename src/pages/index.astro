@@ -8,6 +8,7 @@ import { socials } from '../lib/socials';
 const essays = await getPublishedEssays();
 const { pinned, rest } = splitPinned(essays);
 const movieListUrl = 'https://rogue-toothbrush-725.notion.site/Movie-List-eec453938bc74522a29891050746f375';
+const isAgentMode = Astro.url.searchParams.get('mode') === 'agent';
 
 const navItems = [
   { label: 'Project OS', href: '/projects/' },
@@ -31,7 +32,7 @@ const leftIcons = [
   { label: 'Substack', href: socials.substack, external: true, icon: 'substack', mark: 'S' },
   { label: 'Reddit', href: contactHref.reddit, external: true, icon: 'reddit', mark: 'r/' },
   { label: 'talk2me', href: contactHref.email, icon: 'mail', mark: '@', ariaLabel: `talk2me ${contact.name}` },
-  { label: 'Switch to agent mode', action: 'agent-mode', icon: 'switch', mark: 'T' },
+  { label: 'Switch to agent mode', href: '/?mode=agent', icon: 'switch', mark: 'T' },
   { label: 'My values', href: '/values/', icon: 'bookshelf', mark: 'V', external: false },
   { label: 'Company handbook', href: '/handbook/', icon: 'openbook', mark: 'H', external: false },
   { label: 'Store', href: '/store/', icon: 'bag', mark: 'S', external: false },
@@ -39,7 +40,8 @@ const leftIcons = [
 ];
 ---
 
-<BaseLayout bodyClass="home-desktop-page">
+<BaseLayout bodyClass={`home-desktop-page${isAgentMode ? ' agent-mode' : ''}`}>
+  {!isAgentMode && (
   <main class="posthog-home">
     <section id="desktop-home" class="retro-desktop" aria-label={`${contact.siteName} reader desktop`}>
       <header class="posthog-nav" aria-label="Homepage navigation">
@@ -211,7 +213,9 @@ const leftIcons = [
       </div>
     </section>
   </main>
+  )}
 
+  {isAgentMode && (
   <section class="agent-readable" aria-label="Agent-readable homepage summary">
     <h1>{contact.siteName}</h1>
     <p>Rough essays from {contact.name} on AI, agency, software, ambition, and becoming partially machine.</p>
@@ -256,6 +260,7 @@ const leftIcons = [
       ))}
     </ul>
   </section>
+  )}
 
   <script>
     import '../scripts/home-game';
