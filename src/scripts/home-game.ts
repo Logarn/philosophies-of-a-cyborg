@@ -12,6 +12,7 @@ const letterTray = document.querySelector<HTMLElement>('[data-letter-tray]');
 const letterSlots = document.querySelector<HTMLElement>('[data-letter-slots]');
 const letterShuffle = document.querySelector<HTMLButtonElement>('[data-letter-shuffle]');
 const letterUndo = document.querySelector<HTMLButtonElement>('[data-letter-undo]');
+const letterCheck = document.querySelector<HTMLButtonElement>('[data-letter-check]');
 const letterStatus = document.querySelector<HTMLOutputElement>('[data-letter-status]');
 const letterGame = document.querySelector<HTMLElement>('[data-letter-game]');
 const prizeDialog = document.querySelector<HTMLDialogElement>('[data-prize-dialog]');
@@ -416,6 +417,7 @@ if (letterTray && letterSlots) {
     renderLetterGame();
     checkGardenAnswer();
   });
+  letterCheck?.addEventListener('click', checkGardenAnswer);
   prizeClose?.addEventListener('click', () => prizeDialog?.close());
   loseClose?.addEventListener('click', () => {
     loseDialog?.close();
