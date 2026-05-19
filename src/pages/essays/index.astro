@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import EssayCard from '../../components/EssayCard.astro';
-import { getPublishedEssays, splitPinned } from '../../lib/essays';
+import { essaySlug, getPublishedEssays, splitPinned } from '../../lib/essays';
 import { contact } from '../../lib/contact';
 
 const essays = await getPublishedEssays();
@@ -18,7 +18,7 @@ const { pinned, rest } = splitPinned(essays);
       <div class="essay-grid">
         {pinned.map((essay) => (
           <EssayCard
-            href={'/essays/' + essay.slug + '/'}
+            href={'/essays/' + essaySlug(essay) + '/'}
             title={essay.data.title}
             summary={essay.data.summary}
             date={essay.data.publishedAt}
@@ -33,7 +33,7 @@ const { pinned, rest } = splitPinned(essays);
       <div class="essay-grid essay-grid-wide">
         {rest.map((essay) => (
           <EssayCard
-            href={'/essays/' + essay.slug + '/'}
+            href={'/essays/' + essaySlug(essay) + '/'}
             title={essay.data.title}
             summary={essay.data.summary}
             date={essay.data.publishedAt}

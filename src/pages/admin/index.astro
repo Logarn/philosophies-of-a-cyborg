@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { contact } from '../../lib/contact';
+import { essaySlug } from '../../lib/essays';
 import { homepageCopy } from '../../lib/siteCopy';
 
 const essays = await getCollection('essays');
@@ -14,7 +15,7 @@ const adminSeed = {
   storageKey: 'poc-admin-cms-editor-v1',
   homepage: homepageCopy,
   articles: sortedEssays.map((essay) => ({
-    slug: essay.slug,
+    slug: essaySlug(essay),
     title: essay.data.title,
     summary: essay.data.summary,
     publishedAt: formatDate(essay.data.publishedAt),
@@ -27,7 +28,7 @@ const adminSeed = {
   })),
   draft: primaryEssay
     ? {
-        slug: primaryEssay.slug,
+        slug: essaySlug(primaryEssay),
         title: primaryEssay.data.title,
         summary: primaryEssay.data.summary,
         publishedAt: formatDate(primaryEssay.data.publishedAt),
@@ -55,7 +56,7 @@ const adminSeed = {
 const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
 ---
 
-<BaseLayout title={`Admin CMS | ${contact.siteName}`}>
+<BaseLayout title={`Admin CMS | ${contact.siteName}`} robots="noindex,nofollow,noarchive">
   <main class="admin-cms" data-admin-app>
     <header class="admin-hero">
       <div>
@@ -123,7 +124,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
         <section aria-label="Existing articles">
           <div class="subhead">
             <h3>Articles</h3>
-            <button class="text-command" type="button" id="new-draft">New</button>
+            <button class="solid-command" type="button" id="new-draft">New essay</button>
           </div>
           <div class="article-list" id="article-list"></div>
         </section>
@@ -136,6 +137,14 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
             <h2>Article draft</h2>
           </div>
           <span class="save-state" id="save-state" aria-live="polite">Local draft ready</span>
+        </div>
+
+        <div class="essential-actions" aria-label="Essential essay actions">
+          <button class="solid-command" type="button" id="save-essay">Save essay</button>
+          <button class="text-command" type="button" id="publish-essay">Publish</button>
+          <button class="text-command" type="button" id="draft-essay">Move to draft</button>
+          <button class="text-command" type="button" id="pin-essay">Pin</button>
+          <button class="danger-command" type="button" id="delete-essay">Delete</button>
         </div>
 
         <div class="readiness-bar" id="readiness-bar" aria-live="polite">
@@ -236,16 +245,19 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
               <h2>Frontmatter</h2>
             </div>
           </div>
-          <label class="path-label" for="export-output">
-            Target path
-            <output id="export-path">src/content/essays/new-essay.md</output>
-          </label>
-          <textarea id="export-output" readonly spellcheck="false"></textarea>
-          <label class="path-label home-export-label" for="home-export-output">
-            Homepage copy target
-            <output id="home-export-path">src/lib/siteCopy.ts</output>
-          </label>
-          <textarea id="home-export-output" readonly spellcheck="false"></textarea>
+          <details class="export-details">
+            <summary>Show generated files</summary>
+            <label class="path-label" for="export-output">
+              Target path
+              <output id="export-path">src/content/essays/new-essay.md</output>
+            </label>
+            <textarea id="export-output" readonly spellcheck="false"></textarea>
+            <label class="path-label home-export-label" for="home-export-output">
+              Homepage copy target
+              <output id="home-export-path">src/lib/siteCopy.ts</output>
+            </label>
+            <textarea id="home-export-output" readonly spellcheck="false"></textarea>
+          </details>
           <div class="export-actions">
             <button class="solid-command" type="button" id="copy-markdown">Copy article</button>
             <button class="text-command" type="button" id="copy-homepage">Copy homepage</button>
@@ -292,6 +304,11 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       status: document.getElementById('field-status'),
       pinned: document.getElementById('field-pinned'),
       quickPublish: document.getElementById('quick-publish'),
+      saveEssay: document.getElementById('save-essay'),
+      publishEssay: document.getElementById('publish-essay'),
+      draftEssay: document.getElementById('draft-essay'),
+      pinEssay: document.getElementById('pin-essay'),
+      deleteEssay: document.getElementById('delete-essay'),
       body: document.getElementById('field-body'),
       previewStatus: document.getElementById('preview-status'),
       previewMeta: document.getElementById('preview-meta'),
@@ -330,6 +347,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
         if (saved && saved.draft) {
           return {
             homepage: { ...seed.homepage, ...saved.homepage },
+            articles: Array.isArray(saved.articles) ? saved.articles : seed.articles,
             draft: { ...seed.draft, ...saved.draft }
           };
         }
@@ -339,6 +357,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
 
       return {
         homepage: { ...seed.homepage },
+        articles: [...seed.articles],
         draft: { ...seed.draft }
       };
     }
@@ -372,6 +391,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
 
     function readFields() {
       appState = {
+        articles: appState.articles,
         homepage: {
           eyebrow: els.homeEyebrow.value.trim(),
           headline: els.homeHeadline.value.trim(),
@@ -499,7 +519,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       if (!slug) issues.push('slug');
       if (!appState.draft.publishedAt) issues.push('published date');
 
-      const duplicate = seed.articles.some((article) => {
+      const duplicate = appState.articles.some((article) => {
         return article.slug === slug && article.title !== appState.draft.title;
       });
       if (duplicate) issues.push('duplicate slug');
@@ -519,7 +539,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
 
     function renderArticleList() {
       els.articleList.innerHTML = '';
-      seed.articles.forEach((article) => {
+      appState.articles.forEach((article) => {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'article-row';
@@ -538,6 +558,20 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
         });
         els.articleList.append(button);
       });
+    }
+
+    function saveCurrentEssay(message = 'Essay saved locally.') {
+      readFields();
+      const index = appState.articles.findIndex((article) => article.slug === appState.draft.slug);
+      if (index >= 0) {
+        appState.articles[index] = { ...appState.draft };
+      } else {
+        appState.articles = [{ ...appState.draft }, ...appState.articles];
+      }
+      saveState();
+      renderArticleList();
+      render();
+      els.copyFeedback.textContent = message;
     }
 
     function render() {
@@ -560,6 +594,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       els.metricPin.textContent = pinText;
       els.metricPath.textContent = `${slug}.md`;
       els.quickPublish.checked = appState.draft.status === 'published';
+      els.pinEssay.textContent = appState.draft.pinned ? 'Unpin' : 'Pin';
       els.previewStatus.textContent = appState.draft.status;
       els.previewTitle.textContent = appState.draft.title || 'Untitled';
       els.previewSummary.textContent = appState.draft.summary;
@@ -659,6 +694,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       localStorage.removeItem(storageKey);
       appState = {
         homepage: { ...seed.homepage },
+        articles: [...seed.articles],
         draft: { ...seed.draft }
       };
       els.slug.dataset.touched = '';
@@ -671,6 +707,35 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       els.slug.dataset.touched = '';
       writeFields();
       persistAndRender();
+    });
+
+    els.saveEssay.addEventListener('click', () => saveCurrentEssay());
+
+    els.publishEssay.addEventListener('click', () => {
+      els.status.value = 'published';
+      saveCurrentEssay('Essay saved and marked published.');
+    });
+
+    els.draftEssay.addEventListener('click', () => {
+      els.status.value = 'draft';
+      saveCurrentEssay('Essay saved and moved to draft.');
+    });
+
+    els.pinEssay.addEventListener('click', () => {
+      els.pinned.checked = !els.pinned.checked;
+      saveCurrentEssay(els.pinned.checked ? 'Essay pinned locally.' : 'Essay unpinned locally.');
+    });
+
+    els.deleteEssay.addEventListener('click', () => {
+      if (!window.confirm(`Delete "${appState.draft.title}" from local admin state?`)) return;
+      appState.articles = appState.articles.filter((article) => article.slug !== appState.draft.slug);
+      appState.draft = { ...blankDraft };
+      els.slug.dataset.touched = '';
+      writeFields();
+      saveState();
+      renderArticleList();
+      render();
+      els.copyFeedback.textContent = 'Essay deleted from local admin state.';
     });
 
     els.copyMarkdown.addEventListener('click', async () => {
@@ -890,6 +955,15 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       margin-bottom: 0.75rem;
     }
 
+    .essential-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin: -0.3rem 0 0.9rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--admin-line);
+    }
+
     .panel-head h2,
     .subhead h3,
     .home-controls h3 {
@@ -1027,6 +1101,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     .toolbar button,
     .text-command,
     .solid-command,
+    .danger-command,
     .article-row {
       min-height: 2.55rem;
       border: 1.5px solid var(--ink);
@@ -1047,6 +1122,8 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     .text-command:focus-visible,
     .solid-command:hover,
     .solid-command:focus-visible,
+    .danger-command:hover,
+    .danger-command:focus-visible,
     .article-row:hover,
     .article-row:focus-visible {
       transform: translate(1px, 1px);
@@ -1063,6 +1140,11 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
 
     .solid-command {
       background: var(--admin-green);
+      color: white;
+    }
+
+    .danger-command {
+      background: var(--admin-red);
       color: white;
     }
 
@@ -1238,6 +1320,20 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
 
     #home-export-output {
       min-height: 10rem;
+    }
+
+    .export-details {
+      margin-bottom: 0.85rem;
+    }
+
+    .export-details summary {
+      min-height: 2.4rem;
+      border: 1.5px solid var(--ink);
+      border-radius: 6px;
+      padding: 0.55rem 0.7rem;
+      background: var(--admin-panel-strong);
+      font-weight: 900;
+      cursor: pointer;
     }
 
     .home-export-label {

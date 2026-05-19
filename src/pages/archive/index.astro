@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import EssayCard from '../../components/EssayCard.astro';
-import { getPublishedEssays } from '../../lib/essays';
+import { essaySlug, getPublishedEssays } from '../../lib/essays';
 import { contact } from '../../lib/contact';
 
 const essays = await getPublishedEssays();
@@ -17,7 +17,7 @@ const essays = await getPublishedEssays();
       <div class="essay-grid essay-grid-wide">
         {essays.map((essay) => (
           <EssayCard
-            href={'/essays/' + essay.slug + '/'}
+            href={'/essays/' + essaySlug(essay) + '/'}
             title={essay.data.title}
             summary={essay.data.summary}
             date={essay.data.publishedAt}

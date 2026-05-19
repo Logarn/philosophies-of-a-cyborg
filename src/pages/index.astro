@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import EssayCard from '../components/EssayCard.astro';
-import { getPublishedEssays, splitPinned } from '../lib/essays';
+import { essaySlug, getPublishedEssays, splitPinned } from '../lib/essays';
 import { contact, contactHref } from '../lib/contact';
 import { socials } from '../lib/socials';
 
@@ -45,9 +45,9 @@ const conversionZones = [
   { key: 'est', label: 'Eastern', city: 'EST/EDT' },
   { key: 'pst', label: 'Pacific', city: 'PST/PDT' },
   { key: 'cst', label: 'Central', city: 'CST/CDT' },
-  { key: 'gmt', label: 'GMT', city: 'London' },
+  { key: 'gmt', label: 'GMT / UTC', city: 'No DST' },
   { key: 'cet', label: 'Central Europe', city: 'CET/CEST' },
-  { key: 'sast', label: 'SAST', city: 'Johannesburg' }
+  { key: 'sast', label: 'South Africa', city: 'SAST' }
 ];
 ---
 
@@ -108,44 +108,56 @@ const conversionZones = [
           ))}
         </div>
 
-        <section class="garden-scene garden-game" data-letter-game aria-label="Letter prize garden game">
-          <div class="garden-plot plot-back" aria-hidden="true">
-            <i class="flower-row flowers-blue"></i>
-            <i class="flower-row flowers-red"></i>
-            <i class="flower-row flowers-yellow"></i>
+        <section class="garden-scene garden-game" data-letter-game aria-label="Draggable letter garden game">
+          <div class="garden-motes" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i>
           </div>
-          <div class="garden-plot plot-left" aria-hidden="true">
-            <i class="sprouts sprouts-a"></i>
-            <i class="sprouts sprouts-b"></i>
-          </div>
-          <div class="soil-plot plot-center">
-            <i></i><i></i><i></i><i></i><i></i><i></i>
-          </div>
-          <div class="wood-bed">
-            <span></span><span></span><span></span><span></span>
-          </div>
-          <div class="water-plot" aria-hidden="true">
-            <i></i><i></i><i></i>
-          </div>
-          <div class="garden-plot plot-front" aria-hidden="true">
-            <i class="sprouts sprouts-c"></i>
-          </div>
+          <div class="garden-path" aria-hidden="true"></div>
           <div class="reader-figure">
             <span></span>
           </div>
           <div class="garden-shadow"></div>
-          <div class="garden-game-panel">
+          <div class="garden-sign">
             <h2>Play Game to win prize</h2>
             <p>Organize these letters to reveal your prize.</p>
             <span class="game-hint">Hint: You C***</span>
-            <div class="letter-slots" data-letter-slots aria-label="Prize answer slots"></div>
-            <div class="letter-tray" data-letter-tray aria-label="Scrambled letters"></div>
             <div class="letter-actions">
-              <button type="button" data-letter-shuffle>Scramble</button>
-              <button type="button" data-letter-undo>Undo</button>
-              <output data-letter-status>Tap letters in order.</output>
+              <button type="button" data-letter-shuffle>Replant</button>
+              <button type="button" data-letter-undo>Pull last</button>
             </div>
           </div>
+          <div class="letter-slots" data-letter-slots aria-label="Prize answer garden beds"></div>
+          <div class="letter-tray" data-letter-tray aria-label="Draggable scrambled garden letters"></div>
+          <output class="garden-status" data-letter-status>Drag the garden pieces into the answer beds.</output>
+          <dialog class="prize-dialog" data-prize-dialog aria-labelledby="prize-dialog-title">
+            <div class="prize-window">
+              <div class="einstein-dance" role="img" aria-label="Cartoon Albert Einstein dancing">
+                <span class="einstein-hair hair-left"></span>
+                <span class="einstein-hair hair-right"></span>
+                <span class="einstein-head">
+                  <i></i>
+                </span>
+                <span class="einstein-body"></span>
+                <span class="einstein-arm arm-left"></span>
+                <span class="einstein-arm arm-right"></span>
+                <span class="einstein-leg leg-left"></span>
+                <span class="einstein-leg leg-right"></span>
+              </div>
+              <h2 id="prize-dialog-title">CONGRATULATIONS!</h2>
+              <p>YOU HAVE WON A PRIZE - STUPID CUNT OF THE YEAR AWARD. TO CELEBRATE, GO TOUCH GRASS, GET OFF THE SCREEN...</p>
+              <button type="button" data-prize-close>Fine, grass.</button>
+            </div>
+          </dialog>
+          <dialog class="prize-dialog lose-dialog" data-lose-dialog aria-labelledby="lose-dialog-title" hidden>
+            <div class="prize-window lose-window">
+              <div class="fail-burst" aria-hidden="true">
+                <span></span><span></span><span></span><span></span>
+              </div>
+              <h2 id="lose-dialog-title">BETTER LUCK NEXT TIME, SUCKER!</h2>
+              <p>Wrong garden. The grass has declined your application.</p>
+              <button type="button" data-lose-close>Try again</button>
+            </div>
+          </dialog>
         </section>
 
         <div class="icon-rail icon-rail-right" aria-label="Secondary desktop shortcuts">
@@ -232,7 +244,7 @@ const conversionZones = [
       <div class="essay-grid">
         {pinned.map((essay) => (
           <EssayCard
-            href={'/essays/' + essay.slug + '/'}
+            href={'/essays/' + essaySlug(essay) + '/'}
             title={essay.data.title}
             summary={essay.data.summary}
             date={essay.data.publishedAt}
@@ -251,7 +263,7 @@ const conversionZones = [
       <div class="essay-grid essay-grid-wide">
         {rest.map((essay) => (
           <EssayCard
-            href={'/essays/' + essay.slug + '/'}
+            href={'/essays/' + essaySlug(essay) + '/'}
             title={essay.data.title}
             summary={essay.data.summary}
             date={essay.data.publishedAt}
@@ -291,7 +303,7 @@ const conversionZones = [
     <ul>
       {pinned.map((essay) => (
         <li>
-          <a href={'/essays/' + essay.slug + '/'}>{essay.data.title}</a>
+          <a href={'/essays/' + essaySlug(essay) + '/'}>{essay.data.title}</a>
           <p>{essay.data.summary}</p>
         </li>
       ))}
@@ -301,7 +313,7 @@ const conversionZones = [
     <ul>
       {rest.map((essay) => (
         <li>
-          <a href={'/essays/' + essay.slug + '/'}>{essay.data.title}</a>
+          <a href={'/essays/' + essaySlug(essay) + '/'}>{essay.data.title}</a>
           <p>{essay.data.summary}</p>
         </li>
       ))}

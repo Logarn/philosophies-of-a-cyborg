@@ -19,6 +19,11 @@ const letterSlots = document.querySelector<HTMLElement>('[data-letter-slots]');
 const letterShuffle = document.querySelector<HTMLButtonElement>('[data-letter-shuffle]');
 const letterUndo = document.querySelector<HTMLButtonElement>('[data-letter-undo]');
 const letterStatus = document.querySelector<HTMLOutputElement>('[data-letter-status]');
+const letterGame = document.querySelector<HTMLElement>('[data-letter-game]');
+const prizeDialog = document.querySelector<HTMLDialogElement>('[data-prize-dialog]');
+const prizeClose = document.querySelector<HTMLButtonElement>('[data-prize-close]');
+const loseDialog = document.querySelector<HTMLDialogElement>('[data-lose-dialog]');
+const loseClose = document.querySelector<HTMLButtonElement>('[data-lose-close]');
 
 let expression = '';
 let converterLocked = false;
@@ -74,7 +79,6 @@ function getEatParts(date = new Date()) {
 function formatZoneTime(date: Date, timeZone: string) {
   return new Intl.DateTimeFormat('en-US', {
     timeZone,
-    weekday: 'short',
     month: 'short',
     day: '2-digit',
     hour: '2-digit',
@@ -82,6 +86,57 @@ function formatZoneTime(date: Date, timeZone: string) {
     timeZoneName: 'short',
     hourCycle: 'h23'
   }).format(date);
+}
+
+function zoneOffsetMinutes(date: Date, timeZone: string) {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23'
+    }).formatToParts(date).map((part) => [part.type, part.value])
+  );
+  return Math.round(
+    (Date.UTC(
+      Number(parts.year),
+      Number(parts.month) - 1,
+      Number(parts.day),
+      Number(parts.hour),
+      Number(parts.minute)
+    ) - date.getTime()) / 60000
+  );
+}
+
+function relativeToEat(date: Date, timeZone: string) {
+  const diff = zoneOffsetMinutes(date, timeZone) - zoneOffsetMinutes(date, 'Africa/Nairobi');
+  if (diff === 0) return 'same as EAT';
+  const sign = diff > 0 ? '+' : '-';
+  const abs = Math.abs(diff);
+  const hours = Math.floor(abs / 60);
+  const minutes = abs % 60;
+  return `EAT ${sign}${hours}${minutes ? `h ${minutes}m` : 'h'}`;
+}
+
+function dayShiftFromEat(date: Date, timeZone: string) {
+  const stamp = (zone: string) => {
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat('en-GB', {
+        timeZone: zone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).formatToParts(date).map((part) => [part.type, part.value])
+    );
+    return Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day));
+  };
+  const eatDay = stamp('Africa/Nairobi');
+  const zoneDay = stamp(timeZone);
+  if (eatDay === zoneDay) return 'same day';
+  return zoneDay < eatDay ? 'previous day' : 'next day';
 }
 
 function eatInputDate() {
@@ -109,7 +164,8 @@ function updateZoneOutputs(date: Date) {
   zoneOutputs.forEach((output) => {
     const zone = output.dataset.zone;
     if (!zone || !conversionZones[zone]) return;
-    output.value = formatZoneTime(date, conversionZones[zone]);
+    const timeZone = conversionZones[zone];
+    output.value = `${formatZoneTime(date, timeZone)} · ${relativeToEat(date, timeZone)} · ${dayShiftFromEat(date, timeZone)}`;
     output.textContent = output.value;
   });
 }
@@ -287,10 +343,11 @@ window.setInterval(updateEatClock, 1000);
 if (letterTray && letterSlots) {
   const tray = letterTray;
   const slots = letterSlots;
-  const prizeLetters = ['Y', 'O', 'U', 'C', 'U', 'N', 'T', '!'];
-  const prizePattern: Array<number | null> = [0, 1, 2, null, 3, 4, 5, 6, 7];
-  let scrambled = prizeLetters.map((letter, index) => ({ id: `${letter}-${index}`, letter }));
-  let selected: typeof scrambled = [];
+  const targetWord = 'YOUCUNT!';
+  const prizeLetters = targetWord.split('');
+  const grassColors = ['#8fb247', '#5f9e5f', '#bb9b42', '#58a6a9', '#9aa64b', '#7fb85a', '#d78b3b', '#e3c44e'];
+  let scrambled = prizeLetters.map((letter, index) => ({ id: `${letter}-${index}`, letter, color: grassColors[index] }));
+  let selected: Array<(typeof scrambled)[number] | null> = Array.from({ length: prizeLetters.length }, () => null);
 
   function shuffle<T>(items: T[]) {
     const copy = [...items];
@@ -305,49 +362,126 @@ if (letterTray && letterSlots) {
     if (letterStatus) letterStatus.textContent = text;
   }
 
+  function showPrizeDialog() {
+    letterGame?.classList.add('garden-won');
+    if (prizeDialog && !prizeDialog.open) {
+      prizeDialog.showModal();
+    }
+  }
+
+  function showLoseDialog() {
+    letterGame?.classList.add('garden-lost');
+    if (loseDialog && !loseDialog.open) {
+      loseDialog.hidden = false;
+      loseDialog.showModal();
+    }
+  }
+
+  function checkGardenAnswer() {
+    const answer = selected.map((item) => item?.letter ?? '').join('');
+    if (!answer) {
+      setLetterStatus('Drag the garden pieces into the answer beds.');
+      return;
+    }
+    if (!targetWord.startsWith(answer)) {
+      setLetterStatus('BETTER LUCK NEXT TIME, SUCKER!');
+      letterGame?.classList.add('garden-shake');
+      window.setTimeout(() => letterGame?.classList.remove('garden-shake'), 420);
+      showLoseDialog();
+      return;
+    }
+    if (answer === targetWord) {
+      setLetterStatus('Prize unlocked. The grass is judging you.');
+      showPrizeDialog();
+      return;
+    }
+    setLetterStatus(answer.length < 3 ? 'Keep planting.' : 'Hint still holds: You C***');
+  }
+
+  function placeTile(tileId: string, slotIndex = selected.findIndex((item) => item === null)) {
+    if (slotIndex < 0) return;
+    const tile = scrambled.find((item) => item.id === tileId);
+    if (!tile) return;
+    const existingIndex = selected.findIndex((item) => item?.id === tileId);
+    if (existingIndex >= 0) selected[existingIndex] = null;
+    selected[slotIndex] = tile;
+    renderLetterGame();
+    checkGardenAnswer();
+  }
+
   function renderLetterGame() {
     slots.innerHTML = '';
-    prizePattern.forEach((letterIndex) => {
-      const slot = document.createElement('span');
-      slot.className = letterIndex === null ? 'letter-slot letter-space' : 'letter-slot';
-      slot.textContent = letterIndex === null ? '' : selected[letterIndex]?.letter ?? '';
+    selected.forEach((tile, index) => {
+      const slot = document.createElement('button');
+      slot.type = 'button';
+      slot.className = `letter-slot${index === 3 ? ' word-break' : ''}${tile ? ' is-planted' : ''}`;
+      slot.dataset.slotIndex = String(index);
+      slot.textContent = tile?.letter ?? '';
+      if (tile) slot.style.setProperty('--piece-color', tile.color);
+      slot.setAttribute('aria-label', tile ? `Remove ${tile.letter} from bed ${index + 1}` : `Empty answer bed ${index + 1}`);
+      slot.addEventListener('click', () => {
+        if (!selected[index]) return;
+        selected[index] = null;
+        renderLetterGame();
+        checkGardenAnswer();
+      });
+      slot.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        slot.classList.add('is-hovered');
+      });
+      slot.addEventListener('dragleave', () => slot.classList.remove('is-hovered'));
+      slot.addEventListener('drop', (event) => {
+        event.preventDefault();
+        slot.classList.remove('is-hovered');
+        const tileId = event.dataTransfer?.getData('text/plain');
+        if (tileId) placeTile(tileId, index);
+      });
       slots.append(slot);
     });
 
     tray.innerHTML = '';
-    scrambled.forEach((tile) => {
+    const plantedIds = new Set(selected.filter(Boolean).map((item) => item?.id));
+    scrambled.filter((tile) => !plantedIds.has(tile.id)).forEach((tile) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'letter-tile';
+      button.draggable = true;
       button.textContent = tile.letter;
-      button.disabled = selected.some((item) => item.id === tile.id);
+      button.style.setProperty('--piece-color', tile.color);
+      button.setAttribute('aria-label', `Move garden piece ${tile.letter}`);
+      button.addEventListener('dragstart', (event) => {
+        event.dataTransfer?.setData('text/plain', tile.id);
+        button.classList.add('is-dragging');
+      });
+      button.addEventListener('dragend', () => button.classList.remove('is-dragging'));
       button.addEventListener('click', () => {
-        if (selected.length >= prizeLetters.length || button.disabled) return;
-        selected = [...selected, tile];
-        const attempt = selected.map((item) => item.letter).join('');
-        if ('YOUCUNT!'.startsWith(attempt)) {
-          setLetterStatus(selected.length === prizeLetters.length ? 'Prize unlocked: YOU CUNT!' : 'Keep going.');
-        } else {
-          setLetterStatus('Wrong order. Undo, then keep it rude.');
-        }
-        renderLetterGame();
+        placeTile(tile.id);
       });
       tray.append(button);
     });
   }
 
   function resetLetterGame(reshuffle = false) {
-    selected = [];
+    selected = Array.from({ length: prizeLetters.length }, () => null);
     if (reshuffle) scrambled = shuffle(scrambled);
-    setLetterStatus('Hint: You C***');
+    letterGame?.classList.remove('garden-won');
+    letterGame?.classList.remove('garden-lost');
+    setLetterStatus('Drag the garden pieces into the answer beds.');
     renderLetterGame();
   }
 
   letterShuffle?.addEventListener('click', () => resetLetterGame(true));
   letterUndo?.addEventListener('click', () => {
-    selected = selected.slice(0, -1);
-    setLetterStatus(selected.length ? 'Keep going.' : 'Hint: You C***');
+    const lastFilled = selected.map((item, index) => (item ? index : -1)).filter((index) => index >= 0).pop();
+    if (lastFilled !== undefined) selected[lastFilled] = null;
     renderLetterGame();
+    checkGardenAnswer();
+  });
+  prizeClose?.addEventListener('click', () => prizeDialog?.close());
+  loseClose?.addEventListener('click', () => {
+    loseDialog?.close();
+    if (loseDialog) loseDialog.hidden = true;
+    resetLetterGame(true);
   });
 
   resetLetterGame(true);

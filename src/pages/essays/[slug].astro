@@ -2,20 +2,52 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { contact } from '../../lib/contact';
+import { essaySlug } from '../../lib/essays';
+
+export const prerender = true;
 
 export async function getStaticPaths() {
   const essays = await getCollection('essays', ({ data }) => data.status === 'published');
   return essays.map((essay) => ({
-    params: { slug: essay.slug },
+    params: { slug: essaySlug(essay) },
     props: { essay }
   }));
 }
 
 const { essay } = Astro.props;
 const { Content } = await render(essay);
+const slug = essaySlug(essay);
+const canonicalPath = `/essays/${slug}/`;
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: essay.data.title,
+  description: essay.data.summary,
+  datePublished: essay.data.publishedAt.toISOString(),
+  dateModified: (essay.data.updatedAt ?? essay.data.publishedAt).toISOString(),
+  author: {
+    '@type': 'Person',
+    name: contact.name
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: contact.siteName,
+    logo: {
+      '@type': 'ImageObject',
+      url: new URL('/logo-mark.png', Astro.site ?? Astro.url).toString()
+    }
+  },
+  mainEntityOfPage: new URL(canonicalPath, Astro.site ?? Astro.url).toString()
+};
 ---
 
-<BaseLayout title={`${essay.data.title} | ${contact.siteName}`} description={essay.data.summary}>
+<BaseLayout
+  title={`${essay.data.title} | ${contact.siteName}`}
+  description={essay.data.summary}
+  canonicalPath={canonicalPath}
+  ogType="article"
+>
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(articleJsonLd).replace(/</g, '\\u003c')}></script>
   <article class="article">
     <span class="pin">{essay.data.pinned ? 'Pinned essay' : essay.data.readingTime}</span>
     <h1>{essay.data.title}</h1>
