@@ -1,6 +1,16 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { contact } from '../../lib/contact';
+
+const projects = [
+  {
+    title: 'Philosophies Of A Cyborg',
+    summary: 'The live site and writing studio: homepage, essays, Project OS, and the locked admin used to manage the copy.',
+    status: 'live build',
+    domain: 'ositukenegere.xyz',
+    repo: 'https://github.com/Logarn/philosophies-of-a-cyborg'
+  }
+] as const;
 ---
 
 <BaseLayout title={`Project OS | ${contact.siteName}`}>
@@ -11,12 +21,18 @@ import { contact } from '../../lib/contact';
         <p class="section-note">A parking lot for the things I am building, breaking, or quietly thinking about.</p>
       </div>
       <div class="essay-grid">
-        {['Gas Town', 'Philosophies Of A Cyborg', 'Tiny CMS', 'Agent-readable web'].map((project) => (
+        {projects.map((project) => (
           <article class="essay-card">
             <span class="pin">Project</span>
-            <h3>{project}</h3>
-            <p>Notes, links, and the real shape of this will land here once it is worth showing.</p>
-            <span class="read-time">soon-ish</span>
+            <h3>{project.title}</h3>
+            <p>{project.summary}</p>
+            <p>
+              Domain: {project.domain}
+            </p>
+            <p>
+              <a href={project.repo}>View repo</a>
+            </p>
+            <span class="read-time">{project.status}</span>
           </article>
         ))}
       </div>
