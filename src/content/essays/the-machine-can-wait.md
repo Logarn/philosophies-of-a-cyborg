@@ -3,7 +3,7 @@ title: "The Machine Can Wait"
 summary: "A note about refusing urgency even when every tool is trying to cosplay as a crisis."
 publishedAt: 2026-05-13
 status: published
-pinned: false
+pinned: true
 readingTime: "3 min"
 mood: "slow"
 ---

@@ -1,8 +1,22 @@
 import { defineMiddleware } from 'astro:middleware';
 import { createHash, timingSafeEqual } from 'node:crypto';
 
-const SECURITY_HEADERS = {
-  'Content-Security-Policy': [
+const SECURITY_HEADER_BASE = {
+  'Cross-Origin-Opener-Policy': 'same-origin',
+  'Cross-Origin-Resource-Policy': 'same-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'X-Robots-Tag': 'index, follow'
+};
+
+function isLocalDevHost(hostname: string) {
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+}
+
+function buildSecurityHeaders(url: URL) {
+  const cspParts = [
     "default-src 'self'",
     "base-uri 'self'",
     "frame-ancestors 'none'",
@@ -12,18 +26,21 @@ const SECURITY_HEADERS = {
     "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline'",
     "connect-src 'self'",
-    "object-src 'none'",
-    'upgrade-insecure-requests'
-  ].join('; '),
-  'Cross-Origin-Opener-Policy': 'same-origin',
-  'Cross-Origin-Resource-Policy': 'same-origin',
-  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
-  'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
-  'X-Robots-Tag': 'index, follow'
-};
+    "object-src 'none'"
+  ];
+
+  const headers: Record<string, string> = {
+    ...SECURITY_HEADER_BASE,
+    'Content-Security-Policy': cspParts.join('; ')
+  };
+
+  if (!isLocalDevHost(url.hostname)) {
+    headers['Content-Security-Policy'] = `${headers['Content-Security-Policy']}; upgrade-insecure-requests`;
+    headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains; preload';
+  }
+
+  return headers;
+}
 
 function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
@@ -65,12 +82,12 @@ function isAdminRoute(pathname: string) {
   );
 }
 
-function secureResponse(response: Response, pathname: string) {
-  Object.entries(SECURITY_HEADERS).forEach(([key, value]) => {
+function secureResponse(response: Response, url: URL) {
+  Object.entries(buildSecurityHeaders(url)).forEach(([key, value]) => {
     response.headers.set(key, value);
   });
 
-  if (isAdminRoute(pathname)) {
+  if (isAdminRoute(url.pathname)) {
     response.headers.set('Cache-Control', 'no-store, max-age=0');
     response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
   }
@@ -92,7 +109,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
           status: 503,
           headers: { 'Cache-Control': 'no-store' }
         }),
-        pathname
+        context.url
       );
     }
 
@@ -102,10 +119,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
       !safeEqual(credentials.username, configuredUser) ||
       !safeEqual(sha256(credentials.password), configuredHash)
     ) {
-      return secureResponse(authRequired(), pathname);
+      return secureResponse(authRequired(), context.url);
     }
   }
 
   const response = await next();
-  return secureResponse(response, pathname);
+  return secureResponse(response, context.url);
 });

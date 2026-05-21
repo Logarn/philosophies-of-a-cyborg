@@ -103,22 +103,88 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
             <h3>Homepage copy</h3>
             <small>Exports to src/lib/siteCopy.ts</small>
           </div>
-          <label>
-            Eyebrow
-            <input id="home-eyebrow" type="text" autocomplete="off" />
-          </label>
-          <label>
-            Headline
-            <input id="home-headline" type="text" autocomplete="off" />
-          </label>
-          <label>
-            Intro
-            <textarea id="home-intro" rows="4"></textarea>
-          </label>
-          <label>
-            CTA label
-            <input id="home-cta" type="text" autocomplete="off" />
-          </label>
+          <div class="home-controls-group">
+            <div class="section-title">
+              <h3>Hero</h3>
+              <small>Main homepage headline block</small>
+            </div>
+            <label>
+              Eyebrow
+              <input id="home-eyebrow" type="text" autocomplete="off" />
+            </label>
+            <label>
+              Headline
+              <input id="home-headline" type="text" autocomplete="off" />
+            </label>
+            <label>
+              Intro
+              <textarea id="home-intro" rows="4"></textarea>
+            </label>
+          </div>
+          <div class="home-controls-group">
+            <div class="section-title">
+              <h3>Navigation</h3>
+              <small>Top-right homepage button</small>
+            </div>
+            <label>
+              CTA label
+              <input id="home-nav-cta" type="text" autocomplete="off" />
+            </label>
+          </div>
+          <div class="home-controls-group">
+            <div class="section-title">
+              <h3>Garden game</h3>
+              <small>Desktop homepage puzzle card</small>
+            </div>
+            <label>
+              Title
+              <input id="home-garden-title" type="text" autocomplete="off" />
+            </label>
+            <label>
+              Intro
+              <textarea id="home-garden-intro" rows="3"></textarea>
+            </label>
+            <label>
+              Hint
+              <input id="home-garden-hint" type="text" autocomplete="off" />
+            </label>
+            <label>
+              Button label
+              <input id="home-garden-button" type="text" autocomplete="off" />
+            </label>
+          </div>
+          <div class="home-controls-group">
+            <div class="section-title">
+              <h3>Essay sections</h3>
+              <small>Homepage archive headings and notes</small>
+            </div>
+            <label>
+              Pinned heading
+              <input id="home-pinned-heading" type="text" autocomplete="off" />
+            </label>
+            <label>
+              Pinned note
+              <textarea id="home-pinned-note" rows="3"></textarea>
+            </label>
+            <label>
+              All essays heading
+              <input id="home-all-heading" type="text" autocomplete="off" />
+            </label>
+            <label>
+              All essays note
+              <textarea id="home-all-note" rows="3"></textarea>
+            </label>
+          </div>
+          <div class="home-controls-group">
+            <div class="section-title">
+              <h3>Footer</h3>
+              <small>Site-wide footer copy</small>
+            </div>
+            <label>
+              Footer text
+              <textarea id="home-footer-text" rows="3"></textarea>
+            </label>
+          </div>
         </section>
 
         <section aria-label="Existing articles">
@@ -259,7 +325,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
             <textarea id="home-export-output" readonly spellcheck="false"></textarea>
           </details>
           <div class="export-actions">
-            <button class="solid-command" type="button" id="save-site">Save to site</button>
+            <button class="solid-command" type="button" id="save-site">Save homepage</button>
             <button class="solid-command" type="button" id="copy-markdown">Copy article</button>
             <button class="text-command" type="button" id="copy-homepage">Copy homepage</button>
             <button class="text-command" type="button" id="download-markdown">Export .md</button>
@@ -294,7 +360,16 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       homeEyebrow: document.getElementById('home-eyebrow'),
       homeHeadline: document.getElementById('home-headline'),
       homeIntro: document.getElementById('home-intro'),
-      homeCta: document.getElementById('home-cta'),
+      homeNavCta: document.getElementById('home-nav-cta'),
+      homeGardenTitle: document.getElementById('home-garden-title'),
+      homeGardenIntro: document.getElementById('home-garden-intro'),
+      homeGardenHint: document.getElementById('home-garden-hint'),
+      homeGardenButton: document.getElementById('home-garden-button'),
+      homePinnedHeading: document.getElementById('home-pinned-heading'),
+      homePinnedNote: document.getElementById('home-pinned-note'),
+      homeAllHeading: document.getElementById('home-all-heading'),
+      homeAllNote: document.getElementById('home-all-note'),
+      homeFooterText: document.getElementById('home-footer-text'),
       title: document.getElementById('field-title'),
       slug: document.getElementById('field-slug'),
       summary: document.getElementById('field-summary'),
@@ -341,6 +416,41 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       body: '# Working title\n\nOpen with the uncomfortable truth.\n\n## Make it useful\n\nThen turn the premise into something a reader can use.'
     };
 
+    function normalizeHomepage(homepage) {
+      const source = homepage && typeof homepage === 'object' ? homepage : {};
+      const hero = source.hero && typeof source.hero === 'object' ? source.hero : {};
+      const nav = source.nav && typeof source.nav === 'object' ? source.nav : {};
+      const garden = source.garden && typeof source.garden === 'object' ? source.garden : {};
+      const sections = source.sections && typeof source.sections === 'object' ? source.sections : {};
+
+      return {
+        hero: {
+          eyebrow: hero.eyebrow ?? source.eyebrow ?? '',
+          headline: hero.headline ?? source.headline ?? '',
+          intro: hero.intro ?? source.intro ?? ''
+        },
+        nav: {
+          ctaLabel: nav.ctaLabel ?? source.cta ?? ''
+        },
+        garden: {
+          title: garden.title ?? 'Play Game to win prize',
+          intro: garden.intro ?? 'Plant the shuffled blocks to wake the prize.',
+          hint: garden.hint ?? 'Hint: the chaos is on purpose',
+          buttonLabel: garden.buttonLabel ?? 'Replant'
+        },
+        sections: {
+          pinnedHeading: sections.pinnedHeading ?? 'Pinned',
+          pinnedNote: sections.pinnedNote ?? 'A few notes I would probably point someone to first.',
+          allHeading: sections.allHeading ?? 'All essays',
+          allNote: sections.allNote ?? 'A long card wall for the public archive. No list view, no admin dashboard.'
+        },
+        footer: {
+          text: source.footer?.text ?? `Light mode only. Search-free. A room for ${contact.name}'s rough notes.`
+        }
+      };
+    }
+
+    const defaultHomepage = normalizeHomepage(seed.homepage);
     let appState = loadState();
 
     function loadState() {
@@ -348,8 +458,8 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
         const saved = JSON.parse(localStorage.getItem(storageKey));
         if (saved && saved.draft) {
           return {
-            homepage: { ...seed.homepage, ...saved.homepage },
-            articles: Array.isArray(saved.articles) ? saved.articles : seed.articles,
+            homepage: normalizeHomepage(saved.homepage ?? defaultHomepage),
+            articles: [...seed.articles],
             draft: { ...seed.draft, ...saved.draft }
           };
         }
@@ -358,14 +468,20 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       }
 
       return {
-        homepage: { ...seed.homepage },
+        homepage: defaultHomepage,
         articles: [...seed.articles],
         draft: { ...seed.draft }
       };
     }
 
     function saveState() {
-      localStorage.setItem(storageKey, JSON.stringify(appState));
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          homepage: appState.homepage,
+          draft: appState.draft
+        })
+      );
       els.saveState.textContent = 'Saved to localStorage';
       window.clearTimeout(saveState.timer);
       saveState.timer = window.setTimeout(() => {
@@ -374,10 +490,19 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     }
 
     function writeFields() {
-      els.homeEyebrow.value = appState.homepage.eyebrow;
-      els.homeHeadline.value = appState.homepage.headline;
-      els.homeIntro.value = appState.homepage.intro;
-      els.homeCta.value = appState.homepage.cta;
+      els.homeEyebrow.value = appState.homepage.hero.eyebrow;
+      els.homeHeadline.value = appState.homepage.hero.headline;
+      els.homeIntro.value = appState.homepage.hero.intro;
+      els.homeNavCta.value = appState.homepage.nav.ctaLabel;
+      els.homeGardenTitle.value = appState.homepage.garden.title;
+      els.homeGardenIntro.value = appState.homepage.garden.intro;
+      els.homeGardenHint.value = appState.homepage.garden.hint;
+      els.homeGardenButton.value = appState.homepage.garden.buttonLabel;
+      els.homePinnedHeading.value = appState.homepage.sections.pinnedHeading;
+      els.homePinnedNote.value = appState.homepage.sections.pinnedNote;
+      els.homeAllHeading.value = appState.homepage.sections.allHeading;
+      els.homeAllNote.value = appState.homepage.sections.allNote;
+      els.homeFooterText.value = appState.homepage.footer.text;
       els.title.value = appState.draft.title;
       els.slug.value = appState.draft.slug;
       els.summary.value = appState.draft.summary;
@@ -395,10 +520,29 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       appState = {
         articles: appState.articles,
         homepage: {
-          eyebrow: els.homeEyebrow.value.trim(),
-          headline: els.homeHeadline.value.trim(),
-          intro: els.homeIntro.value.trim(),
-          cta: els.homeCta.value.trim()
+          hero: {
+            eyebrow: els.homeEyebrow.value.trim(),
+            headline: els.homeHeadline.value.trim(),
+            intro: els.homeIntro.value.trim()
+          },
+          nav: {
+            ctaLabel: els.homeNavCta.value.trim()
+          },
+          garden: {
+            title: els.homeGardenTitle.value.trim(),
+            intro: els.homeGardenIntro.value.trim(),
+            hint: els.homeGardenHint.value.trim(),
+            buttonLabel: els.homeGardenButton.value.trim()
+          },
+          sections: {
+            pinnedHeading: els.homePinnedHeading.value.trim(),
+            pinnedNote: els.homePinnedNote.value.trim(),
+            allHeading: els.homeAllHeading.value.trim(),
+            allNote: els.homeAllNote.value.trim()
+          },
+          footer: {
+            text: els.homeFooterText.value.trim()
+          }
         },
         draft: {
           title: els.title.value.trim(),
@@ -489,10 +633,6 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       return `"${String(value).replace(/\\\\/g, '\\\\\\\\').replace(/"/g, '\\"')}"`;
     }
 
-    function tsString(value) {
-      return `'${String(value).replace(/\\\\/g, '\\\\\\\\').replace(/'/g, "\\'")}'`;
-    }
-
     function buildMarkdown() {
       const lines = [
         '---',
@@ -516,15 +656,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     }
 
     function buildHomepageModule() {
-      return [
-        'export const homepageCopy = {',
-        `  eyebrow: ${tsString(appState.homepage.eyebrow)},`,
-        `  headline: ${tsString(appState.homepage.headline)},`,
-        `  intro: ${tsString(appState.homepage.intro)},`,
-        `  cta: ${tsString(appState.homepage.cta)}`,
-        '} as const;',
-        ''
-      ].join('\n');
+      return `export const homepageCopy = ${JSON.stringify(appState.homepage, null, 2)} as const;\n`;
     }
 
     function validateDraft(slug) {
@@ -589,17 +721,20 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     }
 
     async function writeToBackend(action = 'save', draftOverride = appState.draft, message = 'Saved to site files.') {
+      const payload = {
+        action,
+        homepage: appState.homepage
+      };
+      if (draftOverride) {
+        payload.draft = draftOverride;
+      }
       const response = await fetch('/api/admin/content', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-POC-Admin-Action': 'save-content'
         },
-        body: JSON.stringify({
-          action,
-          homepage: appState.homepage,
-          draft: draftOverride
-        })
+        body: JSON.stringify(payload)
       });
       const result = await response.json().catch(() => ({ ok: false, error: 'Server returned invalid JSON.' }));
 
@@ -615,6 +750,19 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       saveCurrentEssay('Saving to site files...');
       try {
         await writeToBackend('save', appState.draft, message);
+      } catch (error) {
+        els.copyFeedback.textContent = error.message;
+      }
+    }
+
+    async function saveHomepageToBackend() {
+      readFields();
+      saveState();
+      render();
+      els.copyFeedback.textContent = 'Saving homepage copy to site files...';
+      try {
+        const result = await writeToBackend('save-homepage', null, 'Homepage copy saved to site files.');
+        els.copyFeedback.textContent = `Homepage copy saved to site files. ${result.paths?.homepage ?? ''}`;
       } catch (error) {
         els.copyFeedback.textContent = error.message;
       }
@@ -705,7 +853,16 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       els.homeEyebrow,
       els.homeHeadline,
       els.homeIntro,
-      els.homeCta,
+      els.homeNavCta,
+      els.homeGardenTitle,
+      els.homeGardenIntro,
+      els.homeGardenHint,
+      els.homeGardenButton,
+      els.homePinnedHeading,
+      els.homePinnedNote,
+      els.homeAllHeading,
+      els.homeAllNote,
+      els.homeFooterText,
       els.slug,
       els.summary,
       els.readingTime,
@@ -739,7 +896,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     els.resetDraft.addEventListener('click', () => {
       localStorage.removeItem(storageKey);
       appState = {
-        homepage: { ...seed.homepage },
+        homepage: defaultHomepage,
         articles: [...seed.articles],
         draft: { ...seed.draft }
       };
@@ -790,7 +947,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       }
     });
 
-    els.saveSite.addEventListener('click', () => saveCurrentEssayToBackend('Essay and homepage copy saved to site files.'));
+    els.saveSite.addEventListener('click', saveHomepageToBackend);
 
     els.copyMarkdown.addEventListener('click', async () => {
       try {
@@ -1041,6 +1198,18 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     .metadata-grid {
       display: grid;
       gap: 0.78rem;
+    }
+
+    .home-controls-group {
+      display: grid;
+      gap: 0.78rem;
+      border-top: 1px solid var(--admin-line);
+      padding-top: 0.9rem;
+    }
+
+    .home-controls-group:first-of-type {
+      border-top: 0;
+      padding-top: 0;
     }
 
     label,

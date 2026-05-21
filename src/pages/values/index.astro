@@ -5,23 +5,170 @@ import { contact } from '../../lib/contact';
 
 <BaseLayout title={`My values | ${contact.siteName}`}>
   <main class="page">
-    <section class="section quiet-page">
+    <section class="section quiet-page values-page">
       <div class="section-head">
-        <h2>My values</h2>
-        <p class="section-note">Nothing fancy. Just the rules I keep noticing I care about.</p>
+        <h2>Logarn&apos;s Values &amp; Principles</h2>
       </div>
-      <div class="essay-grid">
-        {[
-          ['Taste beats volume', 'I would rather ship one thing that feels considered than ten things that feel sprayed at a wall.'],
-          ['Tools should lower noise', 'If software makes me feel more scattered, it is probably asking for too much attention.'],
-          ['Be human in public', 'A weird sentence is better than a fake one. A rough thought is better than a dead slogan.']
-        ].map(([title, summary]) => (
-          <article class="essay-card">
-            <h3>{title}</h3>
-            <p>{summary}</p>
-          </article>
-        ))}
+
+      <div class="essay-card values-card">
+        <ul class="values-list">
+          <li>Love everyone. There&apos;s too much hate in the world for you to harbor hate in your own heart. Love is, and will always be the answer.</li>
+          <li>Always know what your primary focus is
+            <ul>
+              <li>Don&apos;t commit to doing anything as your primary focus that you aren&apos;t highly motivated by for longer than 3-4 weeks if possible and 3-4 months under any circumstances</li>
+              <li>Just because you intellectually understand something, it doesn&apos;t mean you viscerally appreciate it. Most important things can only be fully understood viscerally, and not intellectually.</li>
+            </ul>
+          </li>
+          <li>All buddhist wisdom comes from visceral appreciation, not intellectual appreciation. This is why the Buddha was such a sceptic of teaching. Although the intellectual appreciation of a thing can help you get the visceral appreciation of a thing, the pudding tastes very different to its unbaked ingredients. You have to keep the lights on. Art &amp; Life Experience help you get visceral understanding of the deep stuff (reading literature, film, etc.. helps with this by speaking to your emotions), reflection+conscious investment gets you a visceral understanding of the practical stuff</li>
+          <li>Excellence is something you DO, not something you ARE: Excellence in anything is a consistently good or extremely good pattern of behaviour in some area. It isn&apos;t invalidated by a single negative dot but it is often invalidated by persistent neglect. Don&apos;t assume you are still excellent at something because you used to be. Be conscious of what things are deeply ingrained in you and are likely to persist with a minimal level of conscious investment, and what things are more fragile and hence more likely to atrophy. If you haven&apos;t had a skill or behaviour for at least 5 years and probably 10 years, it will atrophy without some level of conscious investment.</li>
+          <li>Be a Deontologist about the big things, and utilitarian about the small things.
+            <ul>
+              <li>Growth = F(reflection, conscious investment). Almost everything needs a combination of reflection and conscious investment to improve. Things that involve other people (friendships, work, love) require discussion. This includes: your career, your love life, your friendships, your spiritual development, your intellectual development, your habits, your health. Consciously investing in everything simultaneously is extremely hard. Pick your battles. Stretch yourself to failure - reflect on those failures and adjust. If you&apos;re not failing consistently but in a controlled way, your learning curve is flatter than it could be. Good conscious investment is about maximising the feedback quality, and the feedback volume.</li>
+            </ul>
+          </li>
+          <li>Stress can motivate you in the short run but in the long run, it will destroy you. Eliminate unnecessary, long-term stressors from your life as quickly as you can. Although short-term stress can help you get something over the line in a sprint, ultimately, prolonged periods of continuous stress makes you more irritable, less friendly, less loving, less thoughtful, less happy, less healthy, and less fun to be around. It reduces your ability to engage in long-term growth activities like reading, reflection and meditation. One of the biggest short &amp; long-term causes of stress is conflict. Eliminate all conflict that you can live without. Counterintuitively, often the best way to eliminate conflict is to embrace it as early as possible - have awkward conversations as soon as it is even conceivable to have them - and in a way that is honest and not attacking but open, understanding, and trying to get to a mutually satisfactory solution</li>
+          <li>The distinction between wanting something and being attached to it is perilously thin. Although it&apos;s possible to harbour wants without attachments, it is incredibly rare to see this manifested. It&apos;s incredibly hard to hold the distinction in your heart. Don&apos;t fool yourself into thinking that just because you know intellectually something doesn&apos;t really matter, that you haven&apos;t emotionally become attached to it anyway.</li>
+          <li>The only way to consistently get what you want is to eliminate your wants: One want evolves into another want as soon as it is satiated. Chasing these wants requires varying degrees of intellectual and physical exertion. In your life, you get to tell one or two epic stories. To tell a story that you think was worth telling, you probably need some wants (even if it is just to successfully eliminate all wants). Be judicious about what you let become wants and be conscious about what things you allow to become wants - unthinking habits can evolve into wants in the blink of an eye.</li>
+          <li>&gt;50% of how much most people like someone is how much they think that person likes them. The remainder is explained by the actual quality of the two people&apos;s relationship.
+            <ul>
+              <li>Many of life&apos;s best and worst experiences are driven by seemingly random, unpredictable events over which you have no control. Leave yourself open to serendipity, and work consistently on your emotional resilience.</li>
+              <li>People can and do change - but slowly. Be deliberate about the ways you want to change and be sensible about the path you are taking to change - don&apos;t be excessively ambitious on your timeframe. Measure your progress on that path in an honest way and if the change that is important to you is not happening, seek help from the people around you. Meditation helps.</li>
+            </ul>
+          </li>
+          <li>There are three things you have to make peace with - Death, Yourself, Everybody else: Happiness is a mental state that for some people is tethered closely to the external world and for others only loosely, unlike say, Joy, Euphoria, Grief, etc which are closely tethered to the external world for almost everyone. To improve your happiness, look at your actual circumstances and determine how much of your energy to spend on loosening the tether vs improving your circumstances. Work to steadily eliminate the unnecessary from the set of things you need for self-esteem, whilst simultaneously ensuring you have a stable supply of that which is currently necessary.</li>
+          <li>Start at the end. When trying to test an idea or a product, start by literally trying to concretely solve the problem for small n NOT by building a system, even if it is an awful solution taped together by blood sweat and tears. E.g. if you are trying to build a system that identified the best PI&apos;s for a trial, start with a specific trial, and figure out who are the best PI&apos;s for that trial. At least you won&apos;t waste two years finding out that the idea doesn&apos;t work, and you&apos;ll learn a lot about what will or won&apos;t make an effective system. When figuring out how to get to a destination, start by visualizing the end goal and work backwards to where you are</li>
+          <li>Prioritise people in emotional distress
+            <ul>
+              <li>Give feedback from the perspective &quot;If my job was to improve this person&apos;s career as much as possible over the next few years, what would I tell them right now? Another framing for constructive feedback is &quot;What is this person&apos;s maximal vision for themselves? How do they get there?&quot; Framed in this way, a lot of minor negative things simply don&apos;t matter, and a lot of feedback is about how people improve their strengths, rather than fix weaknesses.</li>
+            </ul>
+          </li>
+          <li>Constantly reiterate to the people on your team what the purpose of your work is - why is any of this worth doing and what is the outcome at the end of it all that they should care about. If you don&apos;t have a good answer to this question, consider carefully if you want to spend your time on something that has no obvious purpose/outcome associated with it</li>
+          <li>Make your plans logical arguments for your goal. The argument should be that given some set of explicit assumptions, the tactical steps you are taking will entail the outcome you are seeking. Who is persuaded by your argument? Who isn&apos;t? How do you persuade them? Are the detractors you can&apos;t convince articulating some fundamental risk in your plan, and if so, can you live with that risk? How can you drive it down over time?</li>
+          <li>When trying to form new habits, don&apos;t pick the optimal version of the habit, pick the version with the lowest barrier to entry (e.g. you are trying to start going to the gym. Start with an easy routine at the gym closest to home/work at a time when you have to walk past that gym anyway). It&apos;s much easier to make gradual changes to habits that improve them over time than to begin a new one entirely.</li>
+          <li>When trying to achieve consequentialist goals, reward people with promise, over people with tangible accomplishments. When trying to achieve justice, reward people with tangible accomplishments before rewarding people with promise. Be transparent when rewarding on promise of future ability &gt; current ability.</li>
+          <li>&ldquo;Most people don&apos;t believe in ideals. They believe in people who believe in ideals.&rdquo; <a href="https://twitter.com/G_S_Bhogal">[@G_S_Bhogal]</a> / Charisma is mostly having a differentiated life philosophy, and living it authentically and with success. It works best when combined with a corresponding aesthetic and persuasive speech.</li>
+          <li>To build better new relationships, often the best thing you can do is improve yourself. People want to build relationships with people that are admirable in some way: either from a traditional success perspective, ethically, artistically - it varies from relationship to relationship. If you&apos;re frustrated with the quality of the people around you; look inward, and seek to improve yourself.</li>
+          <li>To improve the quality of your existing relationships, often the best thing you can do is improve your acceptance of yourself. Negativity being attached to your Identity vs your behaviours creates discomfort in social situations and leads to a greater fraction of performative relationships. Security in a relationship leads to higher non performativity.</li>
+          <li>Two types of attachments; wanting something needless and being upset when you don&apos;t have something. Both have downsides, though they are different.</li>
+          <li>Confront reality.
+            <ul>
+              <li>Being comfortable looking stupid is an unfair advantage for the ambitious. Most people hate looking stupid. That means they bias towards not asking questions when they don&apos;t understand something, and not asking for help when they need it. Over time, this means that although they are very rarely made to look stupid, in the end, understanding takes longer (if it comes at all) and often things that could have gotten done fast got done slow. There are tradeoffs involved in this, and if what you want from life is to progress through it being broadly respected and liked, then honestly, these tradeoffs might not be worth it. But if what you&apos;re trying to do is get something incredibly hard done fast, then letting three people think you&apos;re dumb in return for 2x accelerating your understanding of a hard problem is easily worth it. Of course, being willing to tackle a problem head-on without help (or with minimal help) can also be valuable for learning how to do something, but getting the right person to ask questions from (and importantly, not getting them to solve the problem for you), is almost always a force multiplier on hard problems.</li>
+            </ul>
+          </li>
+        </ul>
+
+        <div class="values-links">
+          <h3>ESSAYS I LIKE</h3>
+          <ul>
+            <li><a href="https://paulgraham.com/greatwork.html">How to Do Great Work</a></li>
+            <li><a href="https://paulgraham.com/read.html">The Need to Read</a></li>
+            <li><a href="https://paulgraham.com/hwh.html">How to Work Hard</a></li>
+            <li><a href="https://paulgraham.com/ace.html">Billionaires Build</a></li>
+            <li><a href="https://blog.samaltman.com/what-i-wish-someone-had-told-me">What I Wish Someone Had Told Me - Sam Altman</a></li>
+            <li><a href="https://blog.samaltman.com/the-strength-of-being-misunderstood">The Strength of Being Misunderstood - Sam Altman</a></li>
+            <li><a href="https://docs.google.com/document/d/1GjHiHe8NMp8C4ZeANpsoznHJXNjM85JBEPFxXDAdPy8/edit?usp=sharing">My personal resources</a></li>
+            <li><a href="https://foundercollective.medium.com/founder-collective-101-24294a094603">Founder collective essays</a></li>
+            <li><a href="https://www.cs.virginia.edu/~robins/YouAndYourResearch.html">You and Your Research</a></li>
+            <li><a href="https://geohot.github.io/blog/jekyll/update/2023/11/04/disrupt-the-government.html">Disrupt the government</a></li>
+            <li><a href="https://paulgraham.com/hwh.html">How to Work Hard</a></li>
+            <li><a href="https://jameslin.bio/focus">Focus</a></li>
+            <li><a href="https://paulgraham.com/hs.html">What You&apos;ll Wish You&apos;d Known</a></li>
+            <li><a href="https://sigilwen.ca/questions.html">Great Questions</a></li>
+            <li><a href="https://blog.samaltman.com/productivity">Productivity - Sam Altman</a></li>
+            <li><a href="https://nav.al/hourly-rate">Hourly Rate</a></li>
+            <li><a href="https://motherfuckingwebsite.com/">Motherfucking Website</a></li>
+          </ul>
+        </div>
       </div>
     </section>
   </main>
 </BaseLayout>
+
+<style>
+  .values-page .section-head {
+    margin-bottom: 1.6rem;
+  }
+
+  .values-card {
+    display: grid;
+    gap: 2rem;
+    padding: clamp(1.35rem, 2.2vw, 2rem);
+  }
+
+  .values-page h2 {
+    font-size: clamp(2rem, 3.4vw, 2.7rem);
+    line-height: 1;
+  }
+
+  .values-card h3 {
+    margin: 0 0 0.95rem;
+    font-size: 1.2rem;
+    line-height: 1.2;
+  }
+
+  .values-card p,
+  .values-card li {
+    font-size: 1.06rem;
+    line-height: 1.72;
+  }
+
+  .values-card a {
+    color: #0000ee;
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+  }
+
+  .values-list,
+  .values-links ul {
+    display: grid;
+    gap: 0.9rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .values-list > li,
+  .values-links li {
+    position: relative;
+    padding-left: 1.9rem;
+  }
+
+  .values-list > li::before,
+  .values-links li::before {
+    content: "☐";
+    position: absolute;
+    left: 0;
+    top: 0.02rem;
+    color: #5b5345;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .values-list ul {
+    display: grid;
+    gap: 0.65rem;
+    margin: 0.7rem 0 0.2rem;
+    padding: 0 0 0 1.55rem;
+    list-style: none;
+  }
+
+  .values-list ul li {
+    position: relative;
+    padding-left: 1.45rem;
+  }
+
+  .values-list ul li::before {
+    content: "↳";
+    position: absolute;
+    left: 0;
+    top: 0.02rem;
+    color: #7b725f;
+    font-size: 0.98rem;
+    line-height: 1.6;
+  }
+
+  .values-links {
+    border-top: 1px solid #17140f22;
+    padding-top: 1.35rem;
+  }
+</style>

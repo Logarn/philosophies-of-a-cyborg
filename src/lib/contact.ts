@@ -3,9 +3,8 @@ export const contact = {
   name: 'Ositu Kengere',
   email: 'manyaos.47@gmail.com',
   phone: '' as string,
-  youtube:
-    'https://www.youtube.com/results?search_query=Ositu%20Kengere%20Philosophies%20Of%20A%20Cyborg',
-  reddit: 'https://www.reddit.com/user/Logarn/'
+  youtube: 'https://www.youtube.com/@ositukengere',
+  reddit: 'https://www.reddit.com/user/theafricancyborg/'
 } as const;
 
 export const contactHref = {

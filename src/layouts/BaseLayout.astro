@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { contact } from '../lib/contact';
+import { homepageCopy } from '../lib/siteCopy';
 
 interface Props {
   title?: string;
@@ -75,7 +76,7 @@ const jsonLd = {
       </header>
       <slot />
       <footer class="footer">
-        <strong>{contact.siteName}.</strong> Light mode only. Search-free. A room for {contact.name}'s rough notes.
+        <strong>{contact.siteName}.</strong> {homepageCopy.footer.text}
       </footer>
     </div>
   </body>

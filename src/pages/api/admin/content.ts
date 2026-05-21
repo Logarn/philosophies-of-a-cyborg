@@ -22,10 +22,29 @@ type DraftPayload = {
 };
 
 type HomepagePayload = {
-  eyebrow: string;
-  headline: string;
-  intro: string;
-  cta: string;
+  hero: {
+    eyebrow: string;
+    headline: string;
+    intro: string;
+  };
+  nav: {
+    ctaLabel: string;
+  };
+  garden: {
+    title: string;
+    intro: string;
+    hint: string;
+    buttonLabel: string;
+  };
+  sections: {
+    pinnedHeading: string;
+    pinnedNote: string;
+    allHeading: string;
+    allNote: string;
+  };
+  footer: {
+    text: string;
+  };
 };
 
 function jsonResponse(payload: unknown, status = 200) {
@@ -88,10 +107,29 @@ function parseDraft(value: Record<string, unknown>): DraftPayload {
 
 function parseHomepage(value: Record<string, unknown>): HomepagePayload {
   return {
-    eyebrow: assertText(value.eyebrow, 'homepage eyebrow', 120),
-    headline: assertText(value.headline, 'homepage headline', 180),
-    intro: assertText(value.intro, 'homepage intro', 700),
-    cta: assertText(value.cta, 'homepage cta', 80)
+    hero: {
+      eyebrow: assertText((value.hero as Record<string, unknown> | undefined)?.eyebrow, 'homepage hero eyebrow', 120),
+      headline: assertText((value.hero as Record<string, unknown> | undefined)?.headline, 'homepage hero headline', 180),
+      intro: assertText((value.hero as Record<string, unknown> | undefined)?.intro, 'homepage hero intro', 700)
+    },
+    nav: {
+      ctaLabel: assertText((value.nav as Record<string, unknown> | undefined)?.ctaLabel, 'homepage nav cta label', 80)
+    },
+    garden: {
+      title: assertText((value.garden as Record<string, unknown> | undefined)?.title, 'homepage garden title', 120),
+      intro: assertText((value.garden as Record<string, unknown> | undefined)?.intro, 'homepage garden intro', 220),
+      hint: assertText((value.garden as Record<string, unknown> | undefined)?.hint, 'homepage garden hint', 140),
+      buttonLabel: assertText((value.garden as Record<string, unknown> | undefined)?.buttonLabel, 'homepage garden button label', 40)
+    },
+    sections: {
+      pinnedHeading: assertText((value.sections as Record<string, unknown> | undefined)?.pinnedHeading, 'homepage pinned heading', 80),
+      pinnedNote: assertText((value.sections as Record<string, unknown> | undefined)?.pinnedNote, 'homepage pinned note', 220),
+      allHeading: assertText((value.sections as Record<string, unknown> | undefined)?.allHeading, 'homepage all heading', 80),
+      allNote: assertText((value.sections as Record<string, unknown> | undefined)?.allNote, 'homepage all note', 220)
+    },
+    footer: {
+      text: assertText((value.footer as Record<string, unknown> | undefined)?.text, 'homepage footer text', 220)
+    }
   };
 }
 
@@ -138,20 +176,8 @@ function buildMarkdown(draft: DraftPayload) {
   return lines.join('\n');
 }
 
-function tsString(value: string) {
-  return JSON.stringify(value);
-}
-
 function buildHomepageModule(homepage: HomepagePayload) {
-  return [
-    'export const homepageCopy = {',
-    `  eyebrow: ${tsString(homepage.eyebrow)},`,
-    `  headline: ${tsString(homepage.headline)},`,
-    `  intro: ${tsString(homepage.intro)},`,
-    `  cta: ${tsString(homepage.cta)}`,
-    '} as const;',
-    ''
-  ].join('\n');
+  return `export const homepageCopy = ${JSON.stringify(homepage, null, 2)} as const;\n`;
 }
 
 async function writeAtomic(filePath: string, contents: string) {
@@ -174,17 +200,22 @@ export const POST: APIRoute = async ({ request }) => {
     const payload = await request.json();
     if (!payload || typeof payload !== 'object') throw new Error('Invalid payload.');
 
-    const action = payload.action === 'delete' ? 'delete' : 'save';
-    const draft = parseDraft(payload.draft ?? {});
+    const action =
+      payload.action === 'delete' ? 'delete' : payload.action === 'save-homepage' ? 'save-homepage' : 'save';
     const homepage = parseHomepage(payload.homepage ?? {});
-    const essayPath = safeEssayPath(draft.slug);
 
     await writeAtomic(siteCopyPath, buildHomepageModule(homepage));
 
-    if (action === 'delete') {
-      await rm(essayPath, { force: true });
-    } else {
-      await writeAtomic(essayPath, buildMarkdown(draft));
+    let essayPath: string | null = null;
+    if (action !== 'save-homepage') {
+      const draft = parseDraft(payload.draft ?? {});
+      essayPath = safeEssayPath(draft.slug);
+
+      if (action === 'delete') {
+        await rm(essayPath, { force: true });
+      } else {
+        await writeAtomic(essayPath, buildMarkdown(draft));
+      }
     }
 
     return jsonResponse({

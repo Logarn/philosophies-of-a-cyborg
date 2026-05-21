@@ -4,6 +4,7 @@ import EssayCard from '../components/EssayCard.astro';
 import { essaySlug, getPublishedEssays, splitPinned } from '../lib/essays';
 import { contact, contactHref } from '../lib/contact';
 import { socials } from '../lib/socials';
+import { homepageCopy } from '../lib/siteCopy';
 
 const essays = await getPublishedEssays();
 const { pinned, rest } = splitPinned(essays);
@@ -12,7 +13,7 @@ const isAgentMode = Astro.url.searchParams.get('mode') === 'agent';
 
 const navItems = [
   { label: 'Project OS', href: '/projects/' },
-  { label: 'Calculator', href: '/#calculator', modal: 'calculator' },
+  { label: 'Quantum Teacher', href: '/#quantum-teacher', modal: 'quantum-teacher' },
   { label: 'Essays', href: '/essays/' },
   { label: 'Values', href: '/values/' },
   { label: 'Archive', href: '/archive/' },
@@ -23,7 +24,7 @@ const navItems = [
 const leftIcons = [
   { label: 'home', action: 'home', icon: 'home', mark: '' },
   { label: 'Project OS', href: '/projects/', icon: 'compass', mark: 'OS' },
-  { label: 'Calculator', href: '/#calculator', modal: 'calculator', icon: 'calculator', mark: '$' },
+  { label: 'Quantum Teacher', href: '/#quantum-teacher', modal: 'quantum-teacher', icon: 'quantum', mark: 'Q' },
   { label: 'Movie List', href: movieListUrl, external: true, icon: 'movie', mark: 'MOV' },
   { label: 'Video', href: contactHref.youtube, external: true, icon: 'video', mark: 'PLAY' },
   { label: 'Essays', href: '/essays/', icon: 'typewriter', mark: 'E' },
@@ -37,6 +38,17 @@ const leftIcons = [
   { label: 'Company handbook', href: '/handbook/', icon: 'openbook', mark: 'H', external: false },
   { label: 'Store', href: '/store/', icon: 'bag', mark: 'S', external: false },
   { label: 'Archive', href: '/archive/', icon: 'trash', mark: 'A', external: false }
+];
+
+const fallbackGameLetters = [
+  { letter: '!', color: '#8fb247' },
+  { letter: 'C', color: '#5f9e5f' },
+  { letter: 'y', color: '#bb9b42' },
+  { letter: 't', color: '#58a6a9' },
+  { letter: 'o', color: '#9aa64b' },
+  { letter: 'u', color: '#7fb85a' },
+  { letter: 'n', color: '#d78b3b' },
+  { letter: 'u', color: '#e3c44e' }
 ];
 ---
 
@@ -60,7 +72,7 @@ const leftIcons = [
           ))}
         </nav>
         <div class="nav-tools" aria-label="Homepage tools">
-          <a class="nav-cta" href="/essays/">Read the rough notes</a>
+          <a class="nav-cta" href="/essays/">{homepageCopy.nav.ctaLabel}</a>
         </div>
       </header>
 
@@ -108,16 +120,37 @@ const leftIcons = [
           </div>
           <div class="garden-shadow"></div>
           <div class="garden-sign">
-            <h2>Play Game to win prize</h2>
-            <p>Organize these letters to reveal your prize.</p>
-            <span class="game-hint">Hint: You C***</span>
+            <h2>{homepageCopy.garden.title}</h2>
+            <p>{homepageCopy.garden.intro}</p>
+            <span class="game-hint">{homepageCopy.garden.hint}</span>
             <div class="letter-actions">
-              <button type="button" data-letter-shuffle>Replant</button>
+              <button type="button" data-letter-shuffle>{homepageCopy.garden.buttonLabel}</button>
             </div>
           </div>
-          <div class="letter-slots" data-letter-slots aria-label="Prize answer garden beds"></div>
-          <div class="letter-tray" data-letter-tray aria-label="Draggable scrambled garden letters"></div>
-          <output class="garden-status" data-letter-status>Drag the garden pieces into the answer beds.</output>
+          <div class="letter-slots" data-letter-slots aria-label="Prize answer garden beds">
+            {fallbackGameLetters.map((_, index) => (
+              <button
+                type="button"
+                class:list={['letter-slot', index === 3 && 'word-break']}
+                data-slot-index={String(index)}
+                aria-label={`Answer bed ${index + 1}`}
+              ></button>
+            ))}
+          </div>
+          <div class="letter-tray" data-letter-tray aria-label="Draggable scrambled garden letters">
+            {fallbackGameLetters.map((tile) => (
+              <button
+                type="button"
+                class="letter-tile"
+                draggable="true"
+                style={`--piece-color: ${tile.color}`}
+                aria-label={`Move garden piece ${tile.letter}`}
+              >
+                <span class="letter-face">{tile.letter}</span>
+              </button>
+            ))}
+          </div>
+          <output class="garden-status" data-letter-status>Tap or drag the garden pieces into the answer beds.</output>
           <dialog class="prize-dialog" data-prize-dialog aria-labelledby="prize-dialog-title">
             <div class="prize-window">
               <div class="einstein-dance" role="img" aria-label="Cartoon Albert Einstein dancing">
@@ -133,8 +166,8 @@ const leftIcons = [
                 <span class="einstein-leg leg-right"></span>
               </div>
               <h2 id="prize-dialog-title">CONGRATULATIONS!</h2>
-              <p>YOU HAVE WON A PRIZE - STUPID CUNT OF THE YEAR AWARD. TO CELEBRATE, GO TOUCH GRASS, GET OFF THE SCREEN...</p>
-              <button type="button" data-prize-close>Fine, grass.</button>
+              <p>You found it: YOU CUNT!</p>
+              <button type="button" data-prize-close>Claim prize</button>
             </div>
           </dialog>
           <dialog class="prize-dialog lose-dialog" data-lose-dialog aria-labelledby="lose-dialog-title" hidden>
@@ -142,7 +175,7 @@ const leftIcons = [
               <div class="fail-burst" aria-hidden="true">
                 <span></span><span></span><span></span><span></span>
               </div>
-              <h2 id="lose-dialog-title">BETTER LUCK NEXT TIME, SUCKER!</h2>
+              <h2 id="lose-dialog-title">TRY AGAIN</h2>
               <p>Wrong garden. The grass has declined your application.</p>
               <button type="button" data-lose-close>Try again</button>
             </div>
@@ -150,25 +183,29 @@ const leftIcons = [
         </section>
 
         <div class="desktop-modal-layer" data-modal-layer hidden>
-          <section id="calculator" class="desktop-modal calc-modal" data-modal-panel="calculator" role="dialog" aria-modal="true" aria-labelledby="calculator-title">
+          <section id="quantum-teacher" class="desktop-modal quantum-modal" data-modal-panel="quantum-teacher" role="dialog" aria-modal="true" aria-labelledby="quantum-title">
             <div class="window-bar">
-              <span id="calculator-title" class="window-title">CALCULATOR.EXE</span>
-              <button type="button" data-modal-close aria-label="Close calculator"><span aria-hidden="true"></span></button>
+              <span id="quantum-title" class="window-title">QUANTUM_TEACHER.EXE</span>
+              <button type="button" data-modal-close aria-label="Close Quantum Teacher"><span aria-hidden="true"></span></button>
             </div>
-            <div class="calc-body">
-              <div class="calc-screen" aria-live="polite">
-                <strong data-calc-display>0</strong>
-                <span data-calc-lesson>Tap constants and operators. This one rewards curiosity.</span>
+            <div class="quantum-body">
+              <div class="quantum-progress" aria-label="Quantum Teacher story progress">
+                <span data-quantum-progress></span>
               </div>
-              <div class="calc-grid">
-                {['7', '8', '9', '/', 'π', '4', '5', '6', '*', 'φ', '1', '2', '3', '-', 'c', '0', '.', '=', '+', 'E'].map((key) => (
-                  <button type="button" class:list={['calc-key', { 'is-easter': ['π', 'φ', 'c', 'E'].includes(key), 'is-equals': key === '=' }]} data-key={key}>
-                    {key}
-                  </button>
-                ))}
-                <button type="button" class="calc-key calc-wide" data-key="F=ma">F=ma</button>
-                <button type="button" class="calc-key calc-wide" data-key="∫">Integral</button>
-                <button type="button" class="calc-key calc-wide" data-key="clear">Clear</button>
+              <article class="quantum-card" aria-live="polite" aria-atomic="true">
+                <p class="quantum-kicker" data-quantum-kicker>Story 01 / 08</p>
+                <h2 data-quantum-title>Atomic fire</h2>
+                <p data-quantum-fact>
+                  In 1945, Oppenheimer's Los Alamos team helped build the first atomic bombs. The brutal trick was nuclear fission: split heavy uranium or plutonium atoms, release energy, and let flying neutrons split more atoms in a chain reaction.
+                </p>
+              </article>
+              <div class="quantum-controls">
+                <button type="button" data-quantum-prev>Previous</button>
+                <button type="button" data-quantum-next>Next fact</button>
+              </div>
+              <div class="quantum-links" aria-label="Quantum Teacher shortcuts">
+                <a href="/#desktop-home">Home</a>
+                <a href="/?mode=agent">Agent mode</a>
               </div>
             </div>
           </section>
@@ -178,8 +215,8 @@ const leftIcons = [
 
     <section class="home-reading-strip" aria-label="Pinned essays">
       <div class="section-head">
-        <h2>Pinned</h2>
-        <p class="section-note">A few notes I would probably point someone to first.</p>
+        <h2>{homepageCopy.sections.pinnedHeading}</h2>
+        <p class="section-note">{homepageCopy.sections.pinnedNote}</p>
       </div>
       <div class="essay-grid">
         {pinned.map((essay) => (
@@ -197,8 +234,8 @@ const leftIcons = [
 
     <section class="home-reading-strip" aria-label="All essays">
       <div class="section-head">
-        <h2>All essays</h2>
-        <p class="section-note">A long card wall for the public archive. No list view, no admin dashboard.</p>
+        <h2>{homepageCopy.sections.allHeading}</h2>
+        <p class="section-note">{homepageCopy.sections.allNote}</p>
       </div>
       <div class="essay-grid essay-grid-wide">
         {rest.map((essay) => (
@@ -237,7 +274,7 @@ const leftIcons = [
       <li><a href={contactHref.reddit}>Reddit profile</a></li>
       <li><a href={contactHref.youtube}>YouTube search</a></li>
       <li><a href={contactHref.email}>Email {contact.name}</a></li>
-      <li><a href="/#calculator">Calculator on human homepage</a></li>
+      <li><a href="/#quantum-teacher">Quantum Teacher on human homepage</a></li>
     </ul>
 
     <h2>Pinned essays</h2>

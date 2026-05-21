@@ -4,9 +4,12 @@ const modalLayer = document.querySelector<HTMLElement>('[data-modal-layer]');
 const modalButtons = Array.from(document.querySelectorAll<HTMLElement>('[data-modal]'));
 const modalPanels = Array.from(document.querySelectorAll<HTMLElement>('[data-modal-panel]'));
 const modalCloseButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-modal-close]'));
-const calcDisplay = document.querySelector<HTMLElement>('[data-calc-display]');
-const calcLesson = document.querySelector<HTMLElement>('[data-calc-lesson]');
-const calcKeys = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-key]'));
+const quantumProgress = document.querySelector<HTMLElement>('[data-quantum-progress]');
+const quantumKicker = document.querySelector<HTMLElement>('[data-quantum-kicker]');
+const quantumTitle = document.querySelector<HTMLElement>('[data-quantum-title]');
+const quantumFact = document.querySelector<HTMLElement>('[data-quantum-fact]');
+const quantumPrev = document.querySelector<HTMLButtonElement>('[data-quantum-prev]');
+const quantumNext = document.querySelector<HTMLButtonElement>('[data-quantum-next]');
 const letterTray = document.querySelector<HTMLElement>('[data-letter-tray]');
 const letterSlots = document.querySelector<HTMLElement>('[data-letter-slots]');
 const letterShuffle = document.querySelector<HTMLButtonElement>('[data-letter-shuffle]');
@@ -17,19 +20,50 @@ const prizeClose = document.querySelector<HTMLButtonElement>('[data-prize-close]
 const loseDialog = document.querySelector<HTMLDialogElement>('[data-lose-dialog]');
 const loseClose = document.querySelector<HTMLButtonElement>('[data-lose-close]');
 
-let expression = '';
+const quantumFacts = [
+  {
+    title: 'Atomic fire',
+    fact: 'In 1945, Oppenheimer, Enrico Fermi, Niels Bohr, Richard Feynman, and many others helped build the first atomic bombs. The core idea was nuclear fission: split heavy uranium or plutonium atoms, release energy, and let flying neutrons split more atoms in a chain reaction.'
+  },
+  {
+    title: 'Relativity without the headache',
+    fact: 'Einstein showed that space and time are not a fixed stage. They bend around speed and gravity, which is why fast satellites experience time slightly differently from us. GPS has to correct for that, or maps would drift into nonsense.'
+  },
+  {
+    title: 'Quantum superposition',
+    fact: 'A tiny particle can behave like several possibilities at once until it is measured. It is not magic mood lighting; it is more like nature keeping multiple answers open until an interaction forces one result.'
+  },
+  {
+    title: 'Entanglement',
+    fact: 'Two particles can share one linked state even when far apart. Measure one, and the shared description updates instantly. It does not let us send faster-than-light texts, sadly, but it does power serious quantum computing ideas.'
+  },
+  {
+    title: 'Black holes',
+    fact: 'A black hole is what happens when gravity wins so hard that escape velocity becomes faster than light. Cross the event horizon and every path points inward. Space itself has become a one-way trapdoor.'
+  },
+  {
+    title: 'The uncertainty principle',
+    fact: 'Heisenberg found that you cannot perfectly know both where a particle is and how fast it is moving. This is not bad equipment. It is a rule baked into reality at small scales, because particles act like waves too.'
+  },
+  {
+    title: 'Fusion',
+    fact: 'The Sun shines by fusion: hydrogen nuclei smash together and become helium. A tiny bit of mass turns into energy through E = mc². That small missing mass is the reason daylight exists. Casual cosmic accounting fraud.'
+  },
+  {
+    title: 'Dark matter',
+    fact: 'Galaxies spin as if they contain more mass than we can see. Dark matter is the name for that missing gravitational influence. We do not know what it is yet, only that the universe keeps leaving its fingerprints in the math.'
+  }
+];
 
-const lessons: Record<string, string> = {
-  'π': 'Pi is what circles keep whispering: circumference divided by diameter.',
-  'φ': 'Phi is the golden ratio. People overuse it, but it is still a lovely number.',
-  c: 'c is the speed of light. Fast enough to make most deadlines look unserious.',
-  E: 'E = mc². Mass is basically energy wearing a heavier jacket.',
-  'F=ma': 'Force equals mass times acceleration. Push more, or move smarter.',
-  '∫': 'An integral adds tiny pieces until the whole shape admits what it is.'
-};
+let quantumIndex = 0;
+let quantumTimer: number | null = null;
 
 function openModal(name: string) {
   if (!modalLayer) return;
+  if (name === 'quantum-teacher') {
+    quantumIndex = 0;
+    renderQuantumFact();
+  }
   modalLayer.hidden = false;
   modalPanels.forEach((panel) => {
     panel.hidden = panel.dataset.modalPanel !== name;
@@ -37,200 +71,95 @@ function openModal(name: string) {
   modalPanels.find((panel) => panel.dataset.modalPanel === name)?.querySelector<HTMLElement>('button')?.focus();
 }
 
-function closeModal() {
+function clearHashTarget() {
+  if (!window.location.hash) return;
+  const url = new URL(window.location.href);
+  url.hash = '';
+  window.history.replaceState(null, '', `${url.pathname}${url.search}`);
+}
+
+function closeModal(clearHash = false) {
   if (!modalLayer) return;
   modalLayer.hidden = true;
   modalPanels.forEach((panel) => {
     panel.hidden = true;
   });
+  if (clearHash) clearHashTarget();
 }
 
-function setLesson(text: string) {
-  if (calcLesson) calcLesson.textContent = text;
-}
-
-function setDisplay(value: string) {
-  if (calcDisplay) calcDisplay.textContent = value || '0';
-}
-
-function parseArithmetic(input: string) {
-  let index = 0;
-
-  function skipSpaces() {
-    while (input[index] === ' ') index += 1;
-  }
-
-  function parseNumber() {
-    skipSpaces();
-    const start = index;
-    while (/\d|\./.test(input[index] ?? '')) index += 1;
-    if (start === index) throw new Error('Expected number.');
-    const text = input.slice(start, index);
-    if ((text.match(/\./g) ?? []).length > 1) throw new Error('Invalid decimal.');
-    const value = Number(text);
-    if (!Number.isFinite(value)) throw new Error('Invalid number.');
-    return value;
-  }
-
-  function parseFactor(): number {
-    skipSpaces();
-    const char = input[index];
-    if (char === '+') {
-      index += 1;
-      return parseFactor();
-    }
-    if (char === '-') {
-      index += 1;
-      return -parseFactor();
-    }
-    if (char === '(') {
-      index += 1;
-      const value = parseExpression();
-      skipSpaces();
-      if (input[index] !== ')') throw new Error('Expected closing parenthesis.');
-      index += 1;
-      return value;
-    }
-    return parseNumber();
-  }
-
-  function parseTerm() {
-    let value = parseFactor();
-    while (true) {
-      skipSpaces();
-      const operator = input[index];
-      if (operator !== '*' && operator !== '/') break;
-      index += 1;
-      const right = parseFactor();
-      value = operator === '*' ? value * right : value / right;
-      if (!Number.isFinite(value)) throw new Error('Non-finite result.');
-    }
-    return value;
-  }
-
-  function parseExpression() {
-    let value = parseTerm();
-    while (true) {
-      skipSpaces();
-      const operator = input[index];
-      if (operator !== '+' && operator !== '-') break;
-      index += 1;
-      const right = parseTerm();
-      value = operator === '+' ? value + right : value - right;
-    }
-    return value;
-  }
-
-  const result = parseExpression();
-  skipSpaces();
-  if (index !== input.length) throw new Error('Unexpected input.');
-  if (!Number.isFinite(result)) throw new Error('Non-finite result.');
-  return result;
-}
-
-function evaluateExpression() {
-  if (!expression) return;
-  if (!/^[\d+\-*/. ()]+$/.test(expression)) {
-    setLesson('That expression got too weird. Clearing it is healthier.');
-    expression = '';
-    setDisplay('0');
-    return;
-  }
-
-  try {
-    const result = parseArithmetic(expression);
-    expression = String(Number(result.toFixed(8)));
-    setDisplay(expression || '0');
-    setLesson('The arithmetic worked. Suspicious, but acceptable.');
-  } catch {
-    setLesson('That did not parse. Very human. Try again.');
+function renderQuantumFact() {
+  const fact = quantumFacts[quantumIndex];
+  if (!fact) return;
+  if (quantumKicker) quantumKicker.textContent = `Story ${String(quantumIndex + 1).padStart(2, '0')} / ${String(quantumFacts.length).padStart(2, '0')}`;
+  if (quantumTitle) quantumTitle.textContent = fact.title;
+  if (quantumFact) quantumFact.textContent = fact.fact;
+  if (quantumProgress) {
+    quantumProgress.style.animation = 'none';
+    window.requestAnimationFrame(() => {
+      quantumProgress.style.animation = '';
+    });
   }
 }
 
-function pressCalculatorKey(key: string) {
-  if (key === 'clear') {
-    expression = '';
-    setDisplay('0');
-    setLesson('Clean slate. Rare gift.');
-    return;
-  }
+function advanceQuantumFact(direction = 1) {
+  quantumIndex = (quantumIndex + direction + quantumFacts.length) % quantumFacts.length;
+  renderQuantumFact();
+}
 
-  if (key === '=') {
-    evaluateExpression();
-    return;
-  }
-
-  if (key === 'π') {
-    expression += '3.14159265';
-    setDisplay(expression);
-    setLesson(lessons[key]);
-    return;
-  }
-
-  if (key === 'φ') {
-    expression += '1.61803399';
-    setDisplay(expression);
-    setLesson(lessons[key]);
-    return;
-  }
-
-  if (key === 'c') {
-    expression = '299792458';
-    setDisplay(expression);
-    setLesson(lessons[key]);
-    return;
-  }
-
-  if (key === 'E' || key === 'F=ma' || key === '∫') {
-    setLesson(lessons[key]);
-    return;
-  }
-
-  expression += key;
-  setDisplay(expression);
-  setLesson('Regular calculator behavior. Nobody panic.');
+function startQuantumTeacher() {
+  if (!quantumFact) return;
+  if (quantumTimer !== null) window.clearInterval(quantumTimer);
+  quantumTimer = window.setInterval(() => advanceQuantumFact(1), 30_000);
+  renderQuantumFact();
 }
 
 modalButtons.forEach((button) => {
-  button.addEventListener('click', () => {
+  button.addEventListener('click', (event) => {
     const modalName = button.dataset.modal;
-    if (modalName) openModal(modalName);
+    if (!modalName) return;
+    if (button instanceof HTMLAnchorElement) {
+      event.preventDefault();
+      const url = new URL(button.href, window.location.origin);
+      window.history.pushState(null, '', `${url.pathname}${url.search}${url.hash}`);
+    }
+    openModal(modalName);
   });
 });
 
 modalCloseButtons.forEach((button) => {
-  button.addEventListener('click', closeModal);
+  button.addEventListener('click', () => closeModal(true));
 });
 
 modalLayer?.addEventListener('click', (event) => {
-  if (event.target === modalLayer) closeModal();
+  if (event.target === modalLayer) closeModal(true);
 });
 
 function openHashTarget() {
-  if (window.location.hash === '#calculator') openModal('calculator');
+  if (window.location.hash === '#quantum-teacher') {
+    openModal('quantum-teacher');
+    return;
+  }
+  closeModal(false);
 }
 
 window.addEventListener('hashchange', openHashTarget);
 openHashTarget();
 
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') closeModal();
+  if (event.key === 'Escape') closeModal(true);
 });
 
-calcKeys.forEach((button) => {
-  button.addEventListener('click', () => pressCalculatorKey(button.dataset.key ?? ''));
-});
+quantumPrev?.addEventListener('click', () => advanceQuantumFact(-1));
+quantumNext?.addEventListener('click', () => advanceQuantumFact(1));
+startQuantumTeacher();
 
 homeButtons.forEach((button) => {
   button.addEventListener('click', () => {
-    closeModal();
+    closeModal(true);
     prizeDialog?.close();
     loseDialog?.close();
     if (loseDialog) loseDialog.hidden = true;
     desktopHome?.scrollIntoView({ block: 'start' });
-    if (window.location.hash) {
-      window.history.replaceState(null, '', window.location.pathname || '/');
-    }
   });
 });
 
@@ -238,16 +167,20 @@ if (letterTray && letterSlots) {
   const tray = letterTray;
   const slots = letterSlots;
   const targetWord = 'YOUCUNT!';
-  const prizeLetters = targetWord.split('');
+  const targetLetters = targetWord.split('');
+  const blockCount = targetLetters.length;
   const grassColors = ['#8fb247', '#5f9e5f', '#bb9b42', '#58a6a9', '#9aa64b', '#7fb85a', '#d78b3b', '#e3c44e'];
-  let scrambled = prizeLetters.map((letter, index) => ({ id: `${letter}-${index}`, letter, color: grassColors[index] }));
-  let selected: Array<(typeof scrambled)[number] | null> = Array.from({ length: prizeLetters.length }, () => null);
+  let scrambled = makePrizeBlocks();
+  let planted: Array<(typeof scrambled)[number] | null> = Array.from({ length: blockCount }, () => null);
   let draggingTileId: string | null = null;
   let draggingButton: HTMLButtonElement | null = null;
+  let draggingPointerId: number | null = null;
+  let draggingOriginKind: 'slot' | 'tile' | null = null;
+  let draggingOriginIndex: number | null = null;
   let dragOrigin = { x: 0, y: 0 };
   let pointerMoved = false;
-  let suppressClickTileId: string | null = null;
-  let selectedTileId: string | null = null;
+  let suppressClickKey: string | null = null;
+  let activeTileId: string | null = null;
 
   function shuffle<T>(items: T[]) {
     const copy = [...items];
@@ -258,6 +191,25 @@ if (letterTray && letterSlots) {
     return copy;
   }
 
+  function randomDisplayLetter(letter: string) {
+    if (letter === '!') return letter;
+    return Math.random() > 0.5 ? letter.toUpperCase() : letter.toLowerCase();
+  }
+
+  function makePrizeBlocks() {
+    const blocks = targetLetters.map((letter, index) => ({
+      id: `${letter}-${index}-${Math.random().toString(36).slice(2, 8)}`,
+      letter,
+      displayLetter: randomDisplayLetter(letter),
+      color: grassColors[index % grassColors.length]
+    }));
+    let shuffled = shuffle(blocks);
+    while (shuffled.map((tile) => tile.letter).join('') === targetWord) {
+      shuffled = shuffle(blocks);
+    }
+    return shuffled;
+  }
+
   function setLetterStatus(text: string) {
     if (letterStatus) letterStatus.textContent = text;
   }
@@ -266,6 +218,7 @@ if (letterTray && letterSlots) {
     slots.querySelectorAll('.letter-slot.is-hovered').forEach((slot) => {
       slot.classList.remove('is-hovered');
     });
+    tray.classList.remove('is-hovered');
   }
 
   function slotIndexFromPoint(x: number, y: number) {
@@ -289,67 +242,177 @@ if (letterTray && letterSlots) {
   function resetPointerDrag() {
     clearSlotHover();
     if (!draggingButton) return;
-    draggingButton.classList.remove('is-pointer-dragging');
+    draggingButton.classList.remove('is-dragging', 'is-pointer-dragging');
     draggingButton.style.transform = '';
     draggingButton.style.zIndex = '';
     draggingButton.style.pointerEvents = '';
     draggingButton = null;
+    draggingPointerId = null;
     draggingTileId = null;
+    draggingOriginKind = null;
+    draggingOriginIndex = null;
     pointerMoved = false;
   }
 
-  function beginPointerDrag(event: PointerEvent, button: HTMLButtonElement, tileId: string) {
+  function suppressClickFor(key: string) {
+    suppressClickKey = key;
+    window.setTimeout(() => {
+      if (suppressClickKey === key) suppressClickKey = null;
+    }, 80);
+  }
+
+  function getTile(tileId: string) {
+    return scrambled.find((item) => item.id === tileId) ?? null;
+  }
+
+  function findPlantedIndex(tileId: string) {
+    return planted.findIndex((item) => item?.id === tileId);
+  }
+
+  function trayContainsPoint(x: number, y: number) {
+    const rect = tray.getBoundingClientRect();
+    return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+  }
+
+  function setActiveTile(tileId: string | null) {
+    activeTileId = activeTileId === tileId ? null : tileId;
+    renderLetterGame();
+    const tile = activeTileId ? getTile(activeTileId) : null;
+    if (!tile) {
+      setLetterStatus('Selection cleared. Pick another letter.');
+      return;
+    }
+    const plantedIndex = findPlantedIndex(tile.id);
+    setLetterStatus(
+      plantedIndex >= 0
+        ? `Selected ${tile.displayLetter}. Tap another bed to move it, or tap the same bed to return it to the tray.`
+        : `Selected ${tile.displayLetter}. Tap an answer bed to place it.`
+    );
+  }
+
+  function beginPointerDrag(
+    event: PointerEvent,
+    button: HTMLButtonElement,
+    tileId: string,
+    originKind: 'slot' | 'tile',
+    originIndex: number | null = null
+  ) {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
     draggingTileId = tileId;
     draggingButton = button;
+    draggingPointerId = event.pointerId;
+    draggingOriginKind = originKind;
+    draggingOriginIndex = originIndex;
     dragOrigin = { x: event.clientX, y: event.clientY };
     pointerMoved = false;
-    button.setPointerCapture(event.pointerId);
   }
 
-  function movePointerDrag(event: PointerEvent, button: HTMLButtonElement, tileId: string) {
-    if (draggingTileId !== tileId || draggingButton !== button) return;
+  function movePointerDrag(event: PointerEvent) {
+    if (!draggingButton || !draggingTileId) return;
+    if (draggingPointerId !== null && event.pointerId !== draggingPointerId) return;
     const dx = event.clientX - dragOrigin.x;
     const dy = event.clientY - dragOrigin.y;
     if (!pointerMoved && Math.hypot(dx, dy) < 6) return;
     pointerMoved = true;
     event.preventDefault();
-    button.classList.add('is-pointer-dragging');
-    button.style.zIndex = '50';
-    button.style.transform = `translate(${dx}px, ${dy}px) rotate(0deg) scale(1.04)`;
+    draggingButton.classList.add('is-dragging', 'is-pointer-dragging');
+    draggingButton.style.zIndex = '50';
+    draggingButton.style.transform = `translate(${dx}px, ${dy}px) rotate(0deg) scale(1.04)`;
     hoverSlotFromPoint(event.clientX, event.clientY);
+    if (findPlantedIndex(draggingTileId) >= 0 && trayContainsPoint(event.clientX, event.clientY)) {
+      tray.classList.add('is-hovered');
+    }
   }
 
-  function endPointerDrag(event: PointerEvent, button: HTMLButtonElement, tileId: string) {
-    if (draggingTileId !== tileId || draggingButton !== button) return;
-    if (button.hasPointerCapture(event.pointerId)) button.releasePointerCapture(event.pointerId);
+  function activateSlot(index: number, tile: (typeof scrambled)[number] | null) {
+    const clickKey = tile ? `slot:${tile.id}` : `slot-empty:${index}`;
+    if (suppressClickKey === clickKey) {
+      suppressClickKey = null;
+      return;
+    }
+    if (!tile && activeTileId) {
+      moveTile(activeTileId, index);
+      return;
+    }
+    if (!tile) {
+      setLetterStatus('Pick a letter first, then tap an answer bed.');
+      return;
+    }
+    if (activeTileId && activeTileId !== tile.id) {
+      moveTile(activeTileId, index);
+      return;
+    }
+    if (activeTileId === tile.id) {
+      suppressClickFor(`slot-empty:${index}`);
+      releaseTile(tile.id);
+      return;
+    }
+    setActiveTile(tile.id);
+  }
+
+  function activateTrayTile(tile: (typeof scrambled)[number]) {
+    const clickKey = `tile:${tile.id}`;
+    if (suppressClickKey === clickKey) {
+      suppressClickKey = null;
+      return;
+    }
+    setActiveTile(tile.id);
+  }
+
+  function endPointerDrag(event: PointerEvent) {
+    if (!draggingButton || !draggingTileId) return;
+    if (draggingPointerId !== null && event.pointerId !== draggingPointerId) return;
+    const tileId = draggingTileId;
+    const originKind = draggingOriginKind;
+    const originIndex = draggingOriginIndex;
     if (!pointerMoved) {
+      if (originKind === 'slot' && originIndex !== null) {
+        const tile = getTile(tileId);
+        suppressClickFor(`slot:${tileId}`);
+        resetPointerDrag();
+        activateSlot(originIndex, tile);
+        return;
+      }
+      if (originKind === 'tile') {
+        const tile = getTile(tileId);
+        suppressClickFor(`tile:${tileId}`);
+        resetPointerDrag();
+        if (tile) activateTrayTile(tile);
+        return;
+      }
       resetPointerDrag();
       return;
     }
     event.preventDefault();
-    suppressClickTileId = tileId;
     const slotIndex = slotIndexFromPoint(event.clientX, event.clientY);
+    const releasedToTray = findPlantedIndex(tileId) >= 0 && trayContainsPoint(event.clientX, event.clientY);
+    suppressClickFor(originKind === 'slot' ? `slot:${tileId}` : `tile:${tileId}`);
     resetPointerDrag();
     if (slotIndex === null) {
-      setLetterStatus('Drop the piece into one of the answer beds.');
+      if (releasedToTray) {
+        releaseTile(tileId);
+      } else {
+        setLetterStatus('Drop the piece into one of the answer beds.');
+      }
     } else {
-      placeTile(tileId, slotIndex);
+      moveTile(tileId, slotIndex);
     }
-    window.setTimeout(() => {
-      if (suppressClickTileId === tileId) suppressClickTileId = null;
-    }, 0);
   }
 
   function showPrizeDialog() {
+    letterGame?.classList.remove('garden-lost');
     letterGame?.classList.add('garden-won');
+    loseDialog?.close();
+    if (loseDialog) loseDialog.hidden = true;
     if (prizeDialog && !prizeDialog.open) {
       prizeDialog.showModal();
     }
   }
 
   function showLoseDialog() {
+    letterGame?.classList.remove('garden-won');
     letterGame?.classList.add('garden-lost');
+    prizeDialog?.close();
     if (loseDialog && !loseDialog.open) {
       loseDialog.hidden = false;
       loseDialog.showModal();
@@ -357,117 +420,129 @@ if (letterTray && letterSlots) {
   }
 
   function checkGardenAnswer() {
-    const answer = selected.map((item) => item?.letter ?? '').join('');
-    const plantedCount = selected.filter(Boolean).length;
+    const answer = planted.map((item) => item?.letter ?? '').join('');
+    const plantedCount = planted.filter(Boolean).length;
     if (!answer) {
-      setLetterStatus('Drag the garden pieces into the answer beds.');
+      setLetterStatus('Tap a letter, then tap an answer bed. Dragging also works.');
       return;
     }
-    if (plantedCount < prizeLetters.length) {
-      setLetterStatus(`${plantedCount}/${prizeLetters.length} planted. Fill every bed, then the garden will judge.`);
+    if (plantedCount < blockCount) {
+      setLetterStatus(`${plantedCount}/${blockCount} planted. Fill every bed, then the garden will judge.`);
       return;
     }
     if (answer === targetWord) {
-      setLetterStatus('Prize unlocked. The grass is judging you.');
+      setLetterStatus('Prize unlocked. The chaos confessed.');
       showPrizeDialog();
       return;
     }
-    setLetterStatus('BETTER LUCK NEXT TIME, SUCKER!');
+    setLetterStatus('Wrong order. Shuffle the insult harder.');
     letterGame?.classList.add('garden-shake');
     window.setTimeout(() => letterGame?.classList.remove('garden-shake'), 420);
     showLoseDialog();
   }
 
-  function placeTile(tileId: string, slotIndex = selected.findIndex((item) => item === null)) {
+  function moveTile(tileId: string, slotIndex = planted.findIndex((item) => item === null)) {
     if (slotIndex < 0) return;
-    const tile = scrambled.find((item) => item.id === tileId);
+    const tile = getTile(tileId);
     if (!tile) return;
-    const existingIndex = selected.findIndex((item) => item?.id === tileId);
-    if (existingIndex >= 0) selected[existingIndex] = null;
-    selected[slotIndex] = tile;
-    selectedTileId = null;
+    const sourceIndex = findPlantedIndex(tileId);
+    const targetTile = planted[slotIndex];
+    if (sourceIndex === slotIndex) {
+      activeTileId = null;
+      renderLetterGame();
+      checkGardenAnswer();
+      return;
+    }
+    if (sourceIndex >= 0 && targetTile) {
+      planted[sourceIndex] = targetTile;
+    } else if (sourceIndex >= 0) {
+      planted[sourceIndex] = null;
+    }
+    planted[slotIndex] = tile;
+    activeTileId = null;
     renderLetterGame();
     checkGardenAnswer();
   }
 
+  function releaseTile(tileId: string) {
+    const sourceIndex = findPlantedIndex(tileId);
+    if (sourceIndex < 0) {
+      setActiveTile(tileId);
+      return;
+    }
+    planted[sourceIndex] = null;
+    activeTileId = null;
+    renderLetterGame();
+    checkGardenAnswer();
+    const tile = getTile(tileId);
+    if (tile) setLetterStatus(`${tile.displayLetter} returned to the tray.`);
+  }
+
   function renderLetterGame() {
     slots.innerHTML = '';
-    selected.forEach((tile, index) => {
+    planted.forEach((tile, index) => {
       const slot = document.createElement('button');
       slot.type = 'button';
-      slot.className = `letter-slot${index === 3 ? ' word-break' : ''}${tile ? ' is-planted' : ''}${selectedTileId && !tile ? ' is-targetable' : ''}`;
+      slot.className = `letter-slot${index === 3 ? ' word-break' : ''}${tile ? ' is-planted' : ''}${tile && activeTileId === tile.id ? ' is-selected' : ''}${activeTileId && !tile ? ' is-targetable' : ''}`;
       slot.dataset.slotIndex = String(index);
       if (tile) {
         const face = document.createElement('span');
         face.className = 'letter-face';
-        face.textContent = tile.letter;
+        face.textContent = tile.displayLetter;
         slot.append(face);
       }
       if (tile) slot.style.setProperty('--piece-color', tile.color);
-      slot.setAttribute('aria-label', tile ? `Remove ${tile.letter} from bed ${index + 1}` : `Place selected letter in bed ${index + 1}`);
-      slot.addEventListener('click', () => {
-        if (!selected[index] && selectedTileId) {
-          placeTile(selectedTileId, index);
-          return;
-        }
-        if (!selected[index]) {
-          setLetterStatus('Pick a letter first, then tap an answer bed.');
-          return;
-        }
-        selected[index] = null;
-        renderLetterGame();
-        checkGardenAnswer();
-      });
-      slot.addEventListener('dragover', (event) => {
-        event.preventDefault();
-        slot.classList.add('is-hovered');
-      });
-      slot.addEventListener('dragleave', () => slot.classList.remove('is-hovered'));
-      slot.addEventListener('drop', (event) => {
-        event.preventDefault();
-        slot.classList.remove('is-hovered');
-        const tileId = event.dataTransfer?.getData('text/plain');
-        if (tileId) placeTile(tileId, index);
-      });
+      slot.setAttribute(
+        'aria-label',
+        tile ? `Move ${tile.displayLetter} from bed ${index + 1}` : activeTileId ? `Place selected letter in bed ${index + 1}` : `Empty answer bed ${index + 1}`
+      );
+      slot.setAttribute('aria-pressed', String(Boolean(tile && activeTileId === tile.id)));
+      if (tile) {
+        slot.dataset.tileId = tile.id;
+        slot.dataset.letter = tile.letter;
+      }
+      slot.addEventListener('click', () => activateSlot(index, tile));
+      if (tile) {
+        slot.addEventListener('pointerdown', (event) => beginPointerDrag(event, slot, tile.id, 'slot', index));
+        slot.addEventListener('pointercancel', () => resetPointerDrag());
+      }
       slots.append(slot);
     });
 
     tray.innerHTML = '';
-    const plantedIds = new Set(selected.filter(Boolean).map((item) => item?.id));
+    const plantedIds = new Set(planted.filter(Boolean).map((item) => item?.id));
     scrambled.filter((tile) => !plantedIds.has(tile.id)).forEach((tile) => {
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = `letter-tile${selectedTileId === tile.id ? ' is-selected' : ''}`;
+      button.className = `letter-tile${activeTileId === tile.id ? ' is-selected' : ''}`;
       const face = document.createElement('span');
       face.className = 'letter-face';
-      face.textContent = tile.letter;
+      face.textContent = tile.displayLetter;
       button.append(face);
       button.style.setProperty('--piece-color', tile.color);
-      button.setAttribute('aria-label', `Move garden piece ${tile.letter}`);
-      button.setAttribute('aria-pressed', String(selectedTileId === tile.id));
-      button.addEventListener('pointerdown', (event) => beginPointerDrag(event, button, tile.id));
-      button.addEventListener('pointermove', (event) => movePointerDrag(event, button, tile.id));
-      button.addEventListener('pointerup', (event) => endPointerDrag(event, button, tile.id));
+      button.setAttribute('aria-label', `Move garden piece ${tile.displayLetter}`);
+      button.setAttribute('aria-pressed', String(activeTileId === tile.id));
+      button.dataset.tileId = tile.id;
+      button.dataset.letter = tile.letter;
+      button.addEventListener('pointerdown', (event) => beginPointerDrag(event, button, tile.id, 'tile'));
       button.addEventListener('pointercancel', () => resetPointerDrag());
-      button.addEventListener('click', () => {
-        if (suppressClickTileId === tile.id) {
-          suppressClickTileId = null;
-          return;
-        }
-        selectedTileId = selectedTileId === tile.id ? null : tile.id;
-        renderLetterGame();
-        setLetterStatus(selectedTileId ? `Selected ${tile.letter}. Tap an answer bed to plant it.` : 'Selection cleared. Pick another letter.');
-      });
+      button.addEventListener('click', () => activateTrayTile(tile));
       tray.append(button);
     });
   }
 
   function resetLetterGame(reshuffle = false) {
-    selected = Array.from({ length: prizeLetters.length }, () => null);
-    selectedTileId = null;
-    if (reshuffle) scrambled = shuffle(scrambled);
+    resetPointerDrag();
+    planted = Array.from({ length: blockCount }, () => null);
+    activeTileId = null;
+    suppressClickKey = null;
+    if (reshuffle) scrambled = makePrizeBlocks();
     letterGame?.classList.remove('garden-won');
     letterGame?.classList.remove('garden-lost');
+    letterGame?.classList.remove('garden-shake');
+    prizeDialog?.close();
+    loseDialog?.close();
+    if (loseDialog) loseDialog.hidden = true;
     setLetterStatus('Tap a letter, then tap an answer bed. Dragging also works.');
     renderLetterGame();
   }
@@ -479,6 +554,10 @@ if (letterTray && letterSlots) {
     if (loseDialog) loseDialog.hidden = true;
     resetLetterGame(true);
   });
+
+  window.addEventListener('pointermove', movePointerDrag, { passive: false });
+  window.addEventListener('pointerup', endPointerDrag, { passive: false });
+  window.addEventListener('pointercancel', () => resetPointerDrag());
 
   resetLetterGame(true);
 }
