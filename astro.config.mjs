@@ -1,13 +1,11 @@
 import { defineConfig } from 'astro/config';
-import node from '@astrojs/node';
+import vercel from '@astrojs/vercel';
 
 export default defineConfig({
-  site: 'https://philosophiesofacyborg.com',
+  site: 'https://ositukenegere.xyz',
   output: 'server',
   devToolbar: {
     enabled: false
   },
-  adapter: node({
-    mode: 'standalone'
-  })
+  adapter: vercel()
 });
