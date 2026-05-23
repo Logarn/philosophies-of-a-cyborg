@@ -490,12 +490,34 @@ body.home-desktop-page .topbar {
   background: #e8e1ce;
 }
 .icon-bookshelf::before {
-  inset: 0.25rem 0.2rem 0.55rem;
-  border-bottom: 3px solid #11110e;
+  left: 0.38rem;
+  top: 0.56rem;
+  width: 2.34rem;
+  height: 2.42rem;
+  border: 2px solid #11110e;
+  border-radius: 0.48rem;
   background:
-    linear-gradient(90deg, #3179bd 0 18%, transparent 18% 23%, #ed8135 23% 38%, transparent 38% 43%, #f1cd3f 43% 58%, transparent 58% 63%, #737373 63% 78%, transparent 78%),
-    transparent;
-  transform: skewY(-8deg);
+    linear-gradient(180deg, #ffffffcc 0 18%, transparent 18% 38%, #ffffff33 38% 42%, transparent 42%),
+    linear-gradient(180deg, #8de0ff 0 12%, #5dbbf3 12% 48%, #2679d8 48% 100%);
+  box-shadow:
+    inset 0 0.18rem 0 #ffffffc7,
+    inset 0 -0.28rem 0 #1f5fa2,
+    0 0.28rem 0 #11110e;
+}
+.icon-bookshelf::after {
+  left: 0.88rem;
+  top: 0.38rem;
+  width: 1.34rem;
+  height: 0.52rem;
+  border: 2px solid #11110e;
+  border-bottom: 0;
+  border-radius: 0.34rem 0.34rem 0.12rem 0.12rem;
+  background:
+    linear-gradient(180deg, #d2f2ff, #7dcaf6);
+  box-shadow: 0 0.14rem 0 #ffffffa0 inset;
+}
+.icon-bookshelf > span {
+  display: none;
 }
 .icon-calendar::before {
   inset: 0.32rem 0.46rem;
@@ -507,11 +529,35 @@ body.home-desktop-page .topbar {
     #d9eef5;
 }
 .icon-openbook::before {
-  inset: 0.35rem 0.18rem 0.5rem;
+  left: 0.52rem;
+  top: 0.5rem;
+  width: 2.24rem;
+  height: 2.54rem;
   border: 2px solid #11110e;
+  border-radius: 0.34rem;
   background:
-    linear-gradient(90deg, #f7f3e7 0 48%, #11110e 48% 52%, #f7f3e7 52% 100%);
-  transform: skewY(-6deg);
+    linear-gradient(180deg, #ffffffc8 0 14%, transparent 14% 30%, #ffffff33 30% 34%, transparent 34%),
+    repeating-linear-gradient(180deg, transparent 0 0.36rem, #224c7d22 0.36rem 0.42rem),
+    linear-gradient(180deg, #e7fbff 0 14%, #bfeaff 14% 52%, #84c7f3 52% 100%);
+  box-shadow:
+    inset 0 0.2rem 0 #ffffffd6,
+    inset 0 -0.26rem 0 #4d93d1,
+    0 0.28rem 0 #11110e;
+}
+.icon-openbook::after {
+  left: 0.24rem;
+  top: 0.62rem;
+  width: 0.52rem;
+  height: 2.18rem;
+  border: 2px solid #11110e;
+  border-radius: 0.42rem;
+  background:
+    radial-gradient(circle, #ffffff 0 0.12rem, transparent 0.14rem) 50% 0.16rem / 100% 0.44rem repeat-y,
+    linear-gradient(180deg, #f26e61, #cf4338);
+  box-shadow: inset 0 0.14rem 0 #ffd8d4;
+}
+.icon-openbook > span {
+  display: none;
 }
 .icon-bag::before {
   inset: 0.7rem 0.55rem 0.24rem;
@@ -556,21 +602,34 @@ body.home-desktop-page .topbar {
   display: none;
 }
 .icon-trash::before {
-  inset: 0.85rem 0.6rem 0.3rem;
+  left: 0.48rem;
+  top: 0.82rem;
+  width: 2.34rem;
+  height: 1.86rem;
   border: 2px solid #11110e;
+  border-radius: 0.42rem;
   background:
-    linear-gradient(90deg, transparent 0 32%, #d4e7db 32% 68%, transparent 68%),
-    #ecefeb;
-  transform: rotate(-8deg);
+    linear-gradient(180deg, #ffffffc9 0 16%, transparent 16% 34%, #ffffff33 34% 38%, transparent 38%),
+    linear-gradient(180deg, #d7f2ff 0 20%, #8ecff5 20% 58%, #4b95dd 58% 100%);
+  box-shadow:
+    inset 0 0.18rem 0 #ffffffd8,
+    inset 0 -0.24rem 0 #2e73b8,
+    0 0.28rem 0 #11110e;
 }
 .icon-trash::after {
   left: 1rem;
-  top: 0.68rem;
-  width: 1rem;
-  height: 0.18rem;
+  top: 0.34rem;
+  width: 1.28rem;
+  height: 0.66rem;
   border: 2px solid #11110e;
-  background: #ecefeb;
-  transform: rotate(-8deg);
+  border-radius: 0.28rem;
+  background:
+    linear-gradient(180deg, #ffffffbf, transparent 52%),
+    linear-gradient(180deg, #a4def8, #66b9ee);
+  box-shadow: inset 0 0.12rem 0 #ffffffd5;
+}
+.icon-trash > span {
+  display: none;
 }
 .garden-scene {
   position: absolute;
