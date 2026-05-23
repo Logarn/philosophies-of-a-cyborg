@@ -490,30 +490,32 @@ body.home-desktop-page .topbar {
   background: #e8e1ce;
 }
 .icon-bookshelf::before {
-  left: 0.38rem;
-  top: 0.56rem;
-  width: 2.34rem;
-  height: 2.42rem;
+  left: 0.44rem;
+  top: 0.44rem;
+  width: 2.22rem;
+  height: 2.54rem;
   border: 2px solid #11110e;
-  border-radius: 0.48rem;
+  border-radius: 0.38rem;
   background:
-    linear-gradient(180deg, #ffffffcc 0 18%, transparent 18% 38%, #ffffff33 38% 42%, transparent 42%),
-    linear-gradient(180deg, #8de0ff 0 12%, #5dbbf3 12% 48%, #2679d8 48% 100%);
+    radial-gradient(circle at 24% 28%, #ffffffd8 0 0.22rem, transparent 0.24rem),
+    linear-gradient(180deg, #ffffffc9 0 16%, transparent 16% 34%, #ffffff33 34% 38%, transparent 38%),
+    repeating-linear-gradient(180deg, transparent 0 0.42rem, #1e5c9f22 0.42rem 0.48rem),
+    linear-gradient(180deg, #dff6ff 0 14%, #8fd3f6 14% 60%, #4e97de 60% 100%);
   box-shadow:
     inset 0 0.18rem 0 #ffffffc7,
-    inset 0 -0.28rem 0 #1f5fa2,
+    inset 0 -0.26rem 0 #2b76bc,
     0 0.28rem 0 #11110e;
 }
 .icon-bookshelf::after {
-  left: 0.88rem;
-  top: 0.38rem;
-  width: 1.34rem;
-  height: 0.52rem;
+  left: 1.02rem;
+  top: 0.12rem;
+  width: 1.06rem;
+  height: 0.42rem;
   border: 2px solid #11110e;
   border-bottom: 0;
-  border-radius: 0.34rem 0.34rem 0.12rem 0.12rem;
+  border-radius: 0.26rem 0.26rem 0.08rem 0.08rem;
   background:
-    linear-gradient(180deg, #d2f2ff, #7dcaf6);
+    linear-gradient(180deg, #fef7c7, #efc84f);
   box-shadow: 0 0.14rem 0 #ffffffa0 inset;
 }
 .icon-bookshelf > span {
