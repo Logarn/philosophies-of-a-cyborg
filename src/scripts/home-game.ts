@@ -16,7 +16,6 @@ const letterShuffle = document.querySelector<HTMLButtonElement>('[data-letter-sh
 const letterStatus = document.querySelector<HTMLOutputElement>('[data-letter-status]');
 const letterGame = document.querySelector<HTMLElement>('[data-letter-game]');
 const prizeDialog = document.querySelector<HTMLDialogElement>('[data-prize-dialog]');
-const prizeClose = document.querySelector<HTMLButtonElement>('[data-prize-close]');
 const loseDialog = document.querySelector<HTMLDialogElement>('[data-lose-dialog]');
 const loseClose = document.querySelector<HTMLButtonElement>('[data-lose-close]');
 
@@ -548,7 +547,9 @@ if (letterTray && letterSlots) {
   }
 
   letterShuffle?.addEventListener('click', () => resetLetterGame(true));
-  prizeClose?.addEventListener('click', () => prizeDialog?.close());
+  prizeDialog?.addEventListener('click', (event) => {
+    if (event.target === prizeDialog) prizeDialog.close();
+  });
   loseClose?.addEventListener('click', () => {
     loseDialog?.close();
     if (loseDialog) loseDialog.hidden = true;
