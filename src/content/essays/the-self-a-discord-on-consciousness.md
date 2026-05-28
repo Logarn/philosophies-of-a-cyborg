@@ -15,10 +15,10 @@ Calm...
 The thought processes have slowed down.
 I am in the present. Which is perfect.
 
-Perfect in the sense that all that there is is is-ness.
+Perfect in the sense that all that there is, is is-ness.
 
 There's no sorrow or pain in the present.
-No joy or happiness either...
+No joy nor happiness neither...
 
 Only being.
 And in being, where is the self?
