@@ -82,6 +82,17 @@ function isAdminRoute(pathname: string) {
   );
 }
 
+function isLiveContentRoute(pathname: string) {
+  return (
+    pathname === '/' ||
+    pathname === '/essays' ||
+    pathname.startsWith('/essays/') ||
+    pathname === '/archive' ||
+    pathname.startsWith('/archive/') ||
+    pathname === '/sitemap.xml'
+  );
+}
+
 function secureResponse(response: Response, url: URL) {
   Object.entries(buildSecurityHeaders(url)).forEach(([key, value]) => {
     response.headers.set(key, value);
@@ -90,6 +101,10 @@ function secureResponse(response: Response, url: URL) {
   if (isAdminRoute(url.pathname)) {
     response.headers.set('Cache-Control', 'no-store, max-age=0');
     response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+  }
+
+  if (isLiveContentRoute(url.pathname)) {
+    response.headers.set('Cache-Control', 'no-store, max-age=0');
   }
 
   return response;

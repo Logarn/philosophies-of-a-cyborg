@@ -1,12 +1,16 @@
 import type { APIRoute } from 'astro';
-import { mkdir, rename, rm, writeFile } from 'node:fs/promises';
-import { dirname, resolve, sep } from 'node:path';
+import {
+  applyContentChanges,
+  essayRepoPath,
+  siteCopyRepoPath,
+  usingGithubContentStore,
+  type ContentChange
+} from '../../../lib/contentStore';
 
 export const prerender = false;
 
-const projectRoot = resolve(import.meta.env.POC_REPO_ROOT ?? process.cwd());
-const essaysDir = resolve(projectRoot, 'src/content/essays');
-const siteCopyPath = resolve(projectRoot, 'src/lib/siteCopy.ts');
+const fallbackFooterText =
+  "stop giving a fuck about what random normies think of u. That's like playing Oblivion and not jumping everywhere because u don't want the npcs to think you're weird!";
 
 type DraftPayload = {
   slug: string;
@@ -128,17 +132,9 @@ function parseHomepage(value: Record<string, unknown>): HomepagePayload {
       allNote: assertText((value.sections as Record<string, unknown> | undefined)?.allNote, 'homepage all note', 220)
     },
     footer: {
-      text: assertText((value.footer as Record<string, unknown> | undefined)?.text, 'homepage footer text', 220)
+      text: assertOptionalText((value.footer as Record<string, unknown> | undefined)?.text, 'homepage footer text', 220) || fallbackFooterText
     }
   };
-}
-
-function safeEssayPath(slug: string) {
-  const filePath = resolve(essaysDir, `${slug}.md`);
-  if (!filePath.startsWith(`${essaysDir}${sep}`)) {
-    throw new Error('invalid essay path.');
-  }
-  return filePath;
 }
 
 function yamlString(value: string) {
@@ -180,13 +176,6 @@ function buildHomepageModule(homepage: HomepagePayload) {
   return `export const homepageCopy = ${JSON.stringify(homepage, null, 2)} as const;\n`;
 }
 
-async function writeAtomic(filePath: string, contents: string) {
-  await mkdir(dirname(filePath), { recursive: true });
-  const tempPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
-  await writeFile(tempPath, contents, { encoding: 'utf8', mode: 0o644 });
-  await rename(tempPath, filePath);
-}
-
 export const POST: APIRoute = async ({ request }) => {
   if (request.headers.get('x-poc-admin-action') !== 'save-content') {
     return jsonResponse({ ok: false, error: 'Missing admin action header.' }, 403);
@@ -204,26 +193,40 @@ export const POST: APIRoute = async ({ request }) => {
       payload.action === 'delete' ? 'delete' : payload.action === 'save-homepage' ? 'save-homepage' : 'save';
     const homepage = parseHomepage(payload.homepage ?? {});
 
-    await writeAtomic(siteCopyPath, buildHomepageModule(homepage));
+    const changes: ContentChange[] = [
+      {
+        path: siteCopyRepoPath(),
+        content: buildHomepageModule(homepage)
+      }
+    ];
 
     let essayPath: string | null = null;
     if (action !== 'save-homepage') {
       const draft = parseDraft(payload.draft ?? {});
-      essayPath = safeEssayPath(draft.slug);
+      essayPath = essayRepoPath(draft.slug);
+      if (!essayPath) throw new Error('invalid essay path.');
 
       if (action === 'delete') {
-        await rm(essayPath, { force: true });
+        changes.push({ path: essayPath, delete: true });
       } else {
-        await writeAtomic(essayPath, buildMarkdown(draft));
+        changes.push({ path: essayPath, content: buildMarkdown(draft) });
       }
     }
+
+    const result = await applyContentChanges(
+      action === 'delete' ? `Delete essay from admin CMS` : `Publish content from admin CMS`,
+      changes
+    );
 
     return jsonResponse({
       ok: true,
       action,
+      backend: result.backend,
+      commit: result.commit,
+      live: usingGithubContentStore(),
       paths: {
         essay: essayPath,
-        homepage: siteCopyPath
+        homepage: siteCopyRepoPath()
       }
     });
   } catch (error) {

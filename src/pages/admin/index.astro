@@ -1,11 +1,10 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { contact } from '../../lib/contact';
-import { essaySlug } from '../../lib/essays';
+import { essaySlug, getAllEssays } from '../../lib/essays';
 import { homepageCopy } from '../../lib/siteCopy';
 
-const essays = await getCollection('essays');
+const essays = await getAllEssays();
 const sortedEssays = essays.sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 const primaryEssay = sortedEssays[0];
 
@@ -720,7 +719,15 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       els.copyFeedback.textContent = message;
     }
 
-    async function writeToBackend(action = 'save', draftOverride = appState.draft, message = 'Saved to site files.') {
+    function backendMessage(result, fallback) {
+      if (result.backend === 'github') {
+        const shortSha = result.commit?.sha ? result.commit.sha.slice(0, 7) : '';
+        return `${fallback} Published through GitHub${shortSha ? ` (${shortSha})` : ''}. Vercel will deploy it from the server.`;
+      }
+      return `${fallback} Saved locally for development.`;
+    }
+
+    async function writeToBackend(action = 'save', draftOverride = appState.draft, message = 'Saved.') {
       const payload = {
         action,
         homepage: appState.homepage
@@ -742,7 +749,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
         throw new Error(result.error || 'Server save failed.');
       }
 
-      els.copyFeedback.textContent = `${message} ${result.paths?.essay ? result.paths.essay : ''}`;
+      els.copyFeedback.textContent = backendMessage(result, message);
       return result;
     }
 
@@ -761,8 +768,8 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       render();
       els.copyFeedback.textContent = 'Saving homepage copy to site files...';
       try {
-        const result = await writeToBackend('save-homepage', null, 'Homepage copy saved to site files.');
-        els.copyFeedback.textContent = `Homepage copy saved to site files. ${result.paths?.homepage ?? ''}`;
+        const result = await writeToBackend('save-homepage', null, 'Homepage copy saved.');
+        els.copyFeedback.textContent = backendMessage(result, 'Homepage copy saved.');
       } catch (error) {
         els.copyFeedback.textContent = error.message;
       }
@@ -912,25 +919,25 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       persistAndRender();
     });
 
-    els.saveEssay.addEventListener('click', () => saveCurrentEssayToBackend('Essay saved to site files.'));
+    els.saveEssay.addEventListener('click', () => saveCurrentEssayToBackend('Essay saved.'));
 
     els.publishEssay.addEventListener('click', () => {
       els.status.value = 'published';
-      saveCurrentEssayToBackend('Essay saved and marked published in site files.');
+      saveCurrentEssayToBackend('Essay published.');
     });
 
     els.draftEssay.addEventListener('click', () => {
       els.status.value = 'draft';
-      saveCurrentEssayToBackend('Essay saved and moved to draft in site files.');
+      saveCurrentEssayToBackend('Essay moved to draft.');
     });
 
     els.pinEssay.addEventListener('click', () => {
       els.pinned.checked = !els.pinned.checked;
-      saveCurrentEssayToBackend(els.pinned.checked ? 'Essay pinned in site files.' : 'Essay unpinned in site files.');
+      saveCurrentEssayToBackend(els.pinned.checked ? 'Essay pinned.' : 'Essay unpinned.');
     });
 
     els.deleteEssay.addEventListener('click', async () => {
-      if (!window.confirm(`Delete "${appState.draft.title}" from local admin state?`)) return;
+      if (!window.confirm(`Delete "${appState.draft.title}" from the live content store?`)) return;
       readFields();
       const draftToDelete = { ...appState.draft };
       appState.articles = appState.articles.filter((article) => article.slug !== appState.draft.slug);
@@ -941,7 +948,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       renderArticleList();
       render();
       try {
-        await writeToBackend('delete', draftToDelete, 'Essay deleted from site files.');
+        await writeToBackend('delete', draftToDelete, 'Essay deleted.');
       } catch (error) {
         els.copyFeedback.textContent = error.message;
       }

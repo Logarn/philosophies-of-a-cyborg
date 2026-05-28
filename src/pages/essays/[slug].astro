@@ -1,22 +1,14 @@
 ---
-import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { contact } from '../../lib/contact';
-import { essaySlug } from '../../lib/essays';
+import { getPublishedEssayBySlug, renderMarkdown } from '../../lib/essays';
 
-export const prerender = true;
+export const prerender = false;
 
-export async function getStaticPaths() {
-  const essays = await getCollection('essays', ({ data }) => data.status === 'published');
-  return essays.map((essay) => ({
-    params: { slug: essaySlug(essay) },
-    props: { essay }
-  }));
-}
+const slug = Astro.params.slug ?? '';
+const essay = await getPublishedEssayBySlug(slug);
+if (!essay) return new Response('Essay not found', { status: 404 });
 
-const { essay } = Astro.props;
-const { Content } = await render(essay);
-const slug = essaySlug(essay);
 const canonicalPath = `/essays/${slug}/`;
 const articleJsonLd = {
   '@context': 'https://schema.org',
@@ -55,8 +47,6 @@ const articleJsonLd = {
     <time datetime={essay.data.publishedAt.toISOString()}>
       {essay.data.publishedAt.toLocaleDateString('en', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}
     </time>
-    <div class="article-body">
-      <Content />
-    </div>
+    <div class="article-body" set:html={renderMarkdown(essay.body)} />
   </article>
 </BaseLayout>

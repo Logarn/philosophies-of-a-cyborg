@@ -1,6 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
-import { essaySlug } from '../lib/essays';
+import { essaySlug, getPublishedEssays } from '../lib/essays';
 
 const site = 'https://philosophiesofacyborg.com';
 const staticPages = ['/', '/essays/', '/archive/', '/projects/', '/values/', '/handbook/', '/store/'];
@@ -11,7 +10,7 @@ function urlEntry(path: string, lastmod?: Date) {
 }
 
 export const GET: APIRoute = async () => {
-  const essays = await getCollection('essays', ({ data }) => data.status === 'published');
+  const essays = await getPublishedEssays();
   const body = [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
