@@ -16,8 +16,8 @@ export const homepageCopy = {
   "sections": {
     "pinnedHeading": "Pinned Essays",
     "pinnedNote": "Dropping Acid. Building Cool Shit. And Getting Rich While At It.",
-    "allHeading": "All essays",
-    "allNote": "my random shit"
+    "allHeading": "All my essays",
+    "allNote": "Drop Acid. Not Bombs"
   },
   "footer": {
     "text": "stop giving a fuck about what random normies think of u. That's like playing Oblivion and not jumping everywhere because u don't want the npcs to think you're weird!"
