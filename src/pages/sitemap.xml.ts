@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { essaySlug, getPublishedEssays } from '../lib/essays';
 
-const site = 'https://philosophiesofacyborg.com';
+const site = 'https://www.ositukengere.xyz';
 const staticPages = ['/', '/essays/', '/archive/', '/projects/', '/values/', '/handbook/', '/store/'];
 
 function urlEntry(path: string, lastmod?: Date) {

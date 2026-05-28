@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 
-const site = 'https://philosophiesofacyborg.com';
+const site = 'https://www.ositukengere.xyz';
 
 export const GET: APIRoute = () =>
   new Response(

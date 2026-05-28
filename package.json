@@ -3,11 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "verify:prod": "node scripts/verify-production.mjs",
     "test:e2e": "playwright test"
   },
   "dependencies": {
@@ -18,9 +22,10 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
-    "@types/node": "^25.9.0"
+    "@types/node": "^24.10.0"
   },
   "overrides": {
+    "path-to-regexp": "^6.3.0",
     "yaml": "^2.9.0"
   }
 }

@@ -15,6 +15,7 @@ const publicRoutes = [
   '/manifest.webmanifest'
 ];
 const adminAuth = `Basic ${Buffer.from('ositu:playwright-admin-password').toString('base64')}`;
+const productionSite = 'https://www.ositukengere.xyz';
 
 async function plantAnswer(page: import('@playwright/test').Page, answer: string, startIndex = 0) {
   for (const [offset, letter] of [...answer.slice(startIndex)].entries()) {
@@ -65,6 +66,21 @@ test.describe('public CMS surface', () => {
       data: {},
       headers: { 'content-type': 'application/json' }
     })).status());
+  });
+
+  test('robots and sitemap point at the canonical production domain', async ({ request }) => {
+    const robots = await request.get('/robots.txt');
+    await expect(robots).toBeOK();
+    const robotsText = await robots.text();
+    expect(robotsText).toContain(`Sitemap: ${productionSite}/sitemap.xml`);
+    expect(robotsText).not.toContain('philosophiesofacyborg.com');
+
+    const sitemap = await request.get('/sitemap.xml');
+    await expect(sitemap).toBeOK();
+    const sitemapText = await sitemap.text();
+    expect(sitemapText).toContain(`<loc>${productionSite}/</loc>`);
+    expect(sitemapText).toContain(`<loc>${productionSite}/essays/</loc>`);
+    expect(sitemapText).not.toContain('philosophiesofacyborg.com');
   });
 
   test('admin save serializes multiline homepage and essay content safely', async ({ request }, testInfo) => {
