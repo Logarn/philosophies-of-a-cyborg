@@ -17,7 +17,7 @@ I am in the present. Which is perfect.
 
 Perfect in the sense that all that there is, is is-ness.
 
-There's no sorrown or pain in the present.
+There's no sorrown nor pain in the present.
 Neither joy, nor happiness...
 
 Only being.
