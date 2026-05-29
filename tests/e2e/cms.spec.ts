@@ -144,8 +144,29 @@ test.describe('public CMS surface', () => {
   test('desktop shortcuts and internal links have valid targets', async ({ page, request, baseURL }) => {
     await page.goto('/');
     await expect(page.locator('.desktop-object')).toHaveCount(16);
+    await expect(page.locator('.desktop-label')).toHaveText([
+      'home',
+      'Project OS',
+      'Quantum Teacher',
+      'Movie List',
+      'Video',
+      'Essays',
+      'LinkedIn',
+      'Instagram',
+      'Substack',
+      'Reddit',
+      'talk2me',
+      'Switch to agent mode',
+      'My values',
+      'Company handbook',
+      'Store',
+      'Archive'
+    ]);
     await expect(page.locator('button[data-action="home"]')).toBeVisible();
     await expect(page.locator('.desktop-object[data-modal="quantum-teacher"]')).toBeVisible();
+
+    const stylesheet = await readFile(resolve('src/styles/global.css'), 'utf8');
+    expect(stylesheet).not.toContain('/desktop-icons/');
 
     const links = await page.locator('a.desktop-object').evaluateAll((anchors) => anchors.map((anchor) => ({
       text: anchor.textContent?.trim() ?? '',

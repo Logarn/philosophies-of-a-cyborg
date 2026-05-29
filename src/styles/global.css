@@ -93,9 +93,10 @@ body.home-desktop-page .topbar {
   gap: 1.45rem;
   min-height: 76px;
   padding: 0.72rem clamp(0.9rem, 2.2vw, 1.8rem);
-  border-bottom: 1px solid #c9c4b8;
-  background: #e7e5dc;
-  box-shadow: 0 1px 0 #fff8 inset;
+  border-bottom: 3px solid #17140f;
+  background:
+    linear-gradient(180deg, #fff8e8 0, #d6d2c5 100%);
+  box-shadow: 0 1px 0 #fff8 inset, 0 6px 0 #17140f24;
 }
 .posthog-logo {
   display: inline-grid;
@@ -175,18 +176,22 @@ body.home-desktop-page .topbar {
 }
 .icon-rail {
   position: absolute;
-  top: clamp(0.95rem, 2vh, 1.45rem);
+  top: clamp(1.2rem, 2.4vh, 1.9rem);
   z-index: 4;
   display: grid;
-  gap: clamp(0.14rem, 0.55vh, 0.42rem);
-  width: clamp(7.8rem, 8.4vw, 9.1rem);
+  column-gap: clamp(0.72rem, 1.2vw, 1.18rem);
+  row-gap: clamp(0.36rem, 0.9vh, 0.72rem);
+  width: max-content;
+  align-items: start;
+  justify-items: center;
+  overflow: hidden;
 }
 .icon-rail-left {
-  left: clamp(0.55rem, 1.25vw, 1.35rem);
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-content: space-between;
-  width: clamp(17.4rem, 21vw, 19.4rem);
-  height: min(79vh, calc(100% - 1.6rem));
+  left: clamp(1rem, 2.15vw, 2rem);
+  grid-template-columns: repeat(3, clamp(7.3rem, 8.65vw, 8.7rem));
+  grid-auto-rows: clamp(7.35rem, 9.6vw, 8.3rem);
+  align-content: start;
+  height: auto;
 }
 .icon-rail-right {
   right: clamp(1.2rem, 2vw, 2.2rem);
@@ -196,45 +201,68 @@ body.home-desktop-page .topbar {
 .desktop-object {
   display: grid;
   width: 100%;
-  min-height: clamp(4.45rem, 7.35vh, 5.28rem);
+  height: 100%;
+  min-height: 0;
+  grid-template-rows: clamp(4.7rem, 5.75vw, 5.55rem) minmax(1.55rem, auto);
   justify-items: center;
   align-content: start;
-  gap: 0.14rem;
+  align-items: start;
+  gap: 0.12rem;
   border: 0;
   border-radius: 0.4rem;
-  padding: 0.1rem 0.16rem 0.28rem;
+  padding: 0.18rem 0.22rem 0.3rem;
+  box-sizing: border-box;
   background: transparent;
   color: #57544a;
   font-weight: 760;
+  overflow: hidden;
   text-align: center;
   text-shadow: 0 1px 0 #fff7;
+  transition: transform 140ms ease, background-color 140ms ease, outline-color 140ms ease;
 }
 .desktop-object:hover,
 .desktop-object:focus-visible {
-  background: #ffffff61;
+  background: #fff8e8b8;
   outline: 2px solid #17130d99;
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 .desktop-label {
-  max-width: 8.1rem;
-  font-size: clamp(0.82rem, 0.96vw, 1rem);
+  width: 100%;
+  max-width: 7.4rem;
+  padding: 0;
+  background: transparent;
+  color: #18150f;
+  font-size: clamp(0.78rem, 0.82vw, 0.88rem);
+  font-weight: 900;
   line-height: 1.1;
+  text-align: center;
+  text-shadow: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 .desktop-glyph {
   position: relative;
   display: grid;
-  width: clamp(3.28rem, 5.75vh, 3.95rem);
-  height: clamp(3.28rem, 5.75vh, 3.95rem);
+  width: clamp(3.8rem, 6.5vh, 4.55rem);
+  height: clamp(3.8rem, 6.5vh, 4.55rem);
   place-items: center;
   color: #202019;
-  filter: drop-shadow(1px 2px 0 #0004);
+  image-rendering: auto;
+  filter:
+    drop-shadow(0 2px 0 #fff6)
+    drop-shadow(4px 5px 0 #17140f78);
+  transition: filter 140ms ease, transform 140ms ease;
+}
+.desktop-object:hover .desktop-glyph,
+.desktop-object:focus-visible .desktop-glyph {
+  filter:
+    drop-shadow(0 2px 0 #fff8)
+    drop-shadow(5px 7px 0 #17140f86);
+  transform: rotate(-2deg) scale(1.04);
 }
 .desktop-glyph > span {
-  position: relative;
-  z-index: 2;
-  font-size: 0.88rem;
-  font-weight: 980;
-  line-height: 1;
+  display: none;
 }
 .desktop-glyph::before,
 .desktop-glyph::after {
@@ -242,6 +270,52 @@ body.home-desktop-page .topbar {
   position: absolute;
   box-sizing: border-box;
 }
+.desktop-glyph::before {
+  inset: 0.08rem;
+}
+.desktop-glyph::after {
+  pointer-events: none;
+}
+.desktop-glyph {
+  --icon-ink: #0a0a08;
+  --icon-paper: #fff2cf;
+  --icon-paper-2: #dec48a;
+  --icon-blue: #35b9d4;
+  --icon-red: #ef5d61;
+  --icon-yellow: #ffd64a;
+  --icon-pink: #e84886;
+  --icon-shadow: #8b7851;
+  --icon-dither: radial-gradient(#0a0a08 0 0.8px, transparent 1px) 0 0 / 5px 5px;
+  --icon-highlight: radial-gradient(circle at 28% 25%, #ffffffd9 0 0.16rem, transparent 0.18rem);
+}
+.icon-rail .desktop-glyph {
+  width: clamp(6.95rem, 8.05vw, 8.15rem);
+  height: clamp(4.35rem, 4.95vw, 5.05rem);
+  background: var(--desktop-icon-image) center / calc(100% - 0.52rem) auto no-repeat;
+  filter:
+    drop-shadow(0 1px 0 #fff7)
+    drop-shadow(2px 3px 0 #17140f66);
+}
+.icon-rail .desktop-glyph::before,
+.icon-rail .desktop-glyph::after {
+  display: none;
+}
+.icon-rail .icon-home { --desktop-icon-image: url("/assets/icons/home.png"); }
+.icon-rail .icon-compass { --desktop-icon-image: url("/assets/icons/project-os.png"); }
+.icon-rail .icon-quantum { --desktop-icon-image: url("/assets/icons/quantum.png"); }
+.icon-rail .icon-movie { --desktop-icon-image: url("/assets/icons/movie.png"); }
+.icon-rail .icon-video { --desktop-icon-image: url("/assets/icons/video.png"); }
+.icon-rail .icon-typewriter { --desktop-icon-image: url("/assets/icons/essays.png"); }
+.icon-rail .icon-linkedin { --desktop-icon-image: url("/assets/icons/linkedin.png"); }
+.icon-rail .icon-instagram { --desktop-icon-image: url("/assets/icons/instagram.png"); }
+.icon-rail .icon-substack { --desktop-icon-image: url("/assets/icons/substack.png"); }
+.icon-rail .icon-reddit { --desktop-icon-image: url("/assets/icons/reddit.png"); }
+.icon-rail .icon-mail { --desktop-icon-image: url("/assets/icons/talk2me.png"); }
+.icon-rail .icon-switch { --desktop-icon-image: url("/assets/icons/switch.png"); }
+.icon-rail .icon-bookshelf { --desktop-icon-image: url("/assets/icons/values.png"); }
+.icon-rail .icon-openbook { --desktop-icon-image: url("/assets/icons/handbook.png"); }
+.icon-rail .icon-bag { --desktop-icon-image: url("/assets/icons/store.png"); }
+.icon-rail .icon-trash { --desktop-icon-image: url("/assets/icons/archive.png"); }
 .icon-doc::before,
 .icon-sheet::before {
   inset: 0.18rem 0.48rem 0.06rem 0.5rem;
@@ -262,36 +336,36 @@ body.home-desktop-page .topbar {
 .icon-doc > span { color: #f04a39; }
 .icon-sheet > span { color: #ef7f1a; }
 .icon-home::before {
-  left: 0.4rem;
-  right: 0.44rem;
-  bottom: 0.34rem;
+  left: 0.36rem;
+  right: 0.34rem;
+  bottom: 0.32rem;
   z-index: 1;
-  height: 1.84rem;
-  border: 2px solid #12120f;
-  border-radius: 0.1rem 0.1rem 0.22rem 0.22rem;
+  height: 2rem;
+  border: 4px solid var(--icon-ink);
+  border-radius: 0.08rem;
   background:
-    linear-gradient(90deg, transparent 0 35%, #2f8f9d 35% 57%, transparent 57%),
-    linear-gradient(90deg, transparent 0 66%, #f7f2dc 66% 82%, transparent 82%),
-    #ffe7a3;
-  box-shadow: inset 0 -0.24rem 0 #dfbb69;
+    radial-gradient(circle at 29% 53%, #f8ffff 0 0.08rem, transparent 0.1rem),
+    radial-gradient(#ffffffcc 0 1px, transparent 1.2px) 0.68rem 0.65rem / 0.18rem 0.18rem,
+    linear-gradient(#39bed8 0 0) 0.48rem 0.58rem / 0.78rem 0.62rem no-repeat,
+    linear-gradient(var(--icon-ink) 0 0) 0.36rem 0.46rem / 1rem 0.82rem no-repeat,
+    linear-gradient(90deg, transparent 0 67%, #cfa75a 67% 83%, transparent 83%),
+    var(--icon-dither),
+    var(--icon-paper);
+  box-shadow: inset -0.26rem -0.22rem 0 var(--icon-paper-2), 0.18rem 0.18rem 0 #0002;
 }
 .icon-home::after {
-  left: 0.24rem;
-  top: 0.46rem;
+  left: 0.2rem;
+  top: 0.38rem;
   z-index: 0;
-  width: 3rem;
-  height: 1.52rem;
-  border: 2px solid #12120f;
-  border-bottom-width: 3px;
-  border-radius: 1.35rem 1.35rem 0.18rem 0.18rem;
+  width: 3.18rem;
+  height: 1.58rem;
+  border: 4px solid var(--icon-ink);
+  border-bottom: 0;
+  border-radius: 0.08rem;
   background:
-    radial-gradient(circle at 83% 22%, #f5d24a 0 0.18rem, transparent 0.2rem),
-    #d94e36;
-  clip-path: polygon(0 64%, 18% 34%, 48% 7%, 82% 32%, 100% 63%, 100% 100%, 0 100%);
-  box-shadow: 0.16rem -0.18rem 0 -0.05rem #f5d24a;
-}
-.icon-home > span {
-  display: none;
+    repeating-linear-gradient(135deg, #b93a2d 0 0.2rem, #d95a3e 0.2rem 0.4rem);
+  clip-path: polygon(0 76%, 18% 48%, 48% 8%, 82% 48%, 100% 76%, 100% 100%, 0 100%);
+  box-shadow: 0.18rem 0.22rem 0 #0002;
 }
 .icon-book::before {
   inset: 0.25rem 0.62rem 0.2rem 0.58rem;
@@ -308,150 +382,225 @@ body.home-desktop-page .topbar {
   background: repeating-linear-gradient(#202019 0 2px, transparent 2px 6px), #d9ecf2;
 }
 .icon-quantum::before {
-  left: 0.42rem;
-  right: 0.42rem;
-  top: 0.42rem;
-  bottom: 0.42rem;
-  border: 2px solid #12120f;
-  border-radius: 50%;
+  left: 0.44rem;
+  right: 0.44rem;
+  top: 0.76rem;
+  bottom: 0.46rem;
+  border: 3px solid var(--icon-ink);
+  border-radius: 0.12rem;
   background:
-    radial-gradient(#f2bd22 0 0.28rem, transparent 0.3rem),
-    radial-gradient(circle at 30% 35%, #fff7 0 0.24rem, transparent 0.26rem),
-    #4274d8;
-  box-shadow:
-    inset 0 -0.38rem 0 #2550a2,
-    0 0 0 0.18rem #fff8 inset;
+    radial-gradient(circle at 50% 43%, #f2c94c 0 0.16rem, transparent 0.18rem),
+    linear-gradient(var(--icon-ink) 0 0) 46% 0.38rem / 0.14rem 1.18rem no-repeat,
+    linear-gradient(58deg, transparent 0 43%, var(--icon-ink) 43% 49%, transparent 49%) 50% 40% / 1.9rem 1.24rem no-repeat,
+    linear-gradient(-58deg, transparent 0 43%, var(--icon-ink) 43% 49%, transparent 49%) 50% 40% / 1.9rem 1.24rem no-repeat,
+    radial-gradient(ellipse at 50% 42%, transparent 0 0.56rem, var(--icon-ink) 0.58rem 0.64rem, transparent 0.66rem),
+    var(--icon-blue);
+  box-shadow: inset -0.16rem -0.16rem 0 #2e7b9b;
 }
 .icon-quantum::after {
-  left: 0.28rem;
-  right: 0.28rem;
-  top: 50%;
-  height: 0.32rem;
-  border: 2px solid #12120f;
-  border-radius: 999px;
-  background: transparent;
-  transform: translateY(-50%) rotate(-24deg);
-}
-.icon-quantum > span {
-  color: #fff8e8;
-  font-size: 0.95rem;
+  left: 0.76rem;
+  right: 0.76rem;
+  top: 0.28rem;
+  height: 0.72rem;
+  border: 3px solid var(--icon-ink);
+  border-bottom: 0;
+  border-radius: 0.18rem 0.18rem 0 0;
+  background: var(--icon-paper);
 }
 .icon-video::before {
-  left: 0.76rem;
-  top: 1.02rem;
-  width: 1.62rem;
-  height: 1.28rem;
-  border: 2px solid #12120f;
-  border-radius: 0.28rem;
+  left: 0.18rem;
+  top: 0.92rem;
+  width: 2.78rem;
+  height: 1.7rem;
+  border: 3px solid var(--icon-ink);
+  border-radius: 0.1rem;
   background:
-    radial-gradient(circle at 50% 52%, #10100d 0 0.32rem, #f7efd8 0.34rem 0.48rem, transparent 0.5rem),
-    #6f8f58;
+    radial-gradient(circle at 24% 50%, #78c6e3 0 0.22rem, #11110e 0.24rem 0.38rem, transparent 0.4rem),
+    linear-gradient(#35342f 0 0) 66% 42% / 0.78rem 0.42rem no-repeat,
+    var(--icon-dither),
+    #77736a;
   box-shadow:
-    -0.62rem -0.62rem 0 -0.2rem #d94e36,
-    0.62rem -0.62rem 0 -0.2rem #f1c84b,
-    0.15rem 1.05rem 0 -0.3rem #12120f;
+    inset -0.24rem -0.2rem 0 #4a4944,
+    0.3rem -0.54rem 0 -0.18rem #2f2d2a;
 }
 .icon-video::after {
-  right: 0.16rem;
-  top: 1.16rem;
-  border-left: 0.88rem solid #12120f;
-  border-top: 0.46rem solid transparent;
-  border-bottom: 0.46rem solid transparent;
-}
-.icon-video > span {
-  display: none;
+  right: 0.12rem;
+  top: 1.14rem;
+  width: 0.82rem;
+  height: 1.22rem;
+  border: 3px solid var(--icon-ink);
+  border-left: 0;
+  background: #bdb7a8;
+  clip-path: polygon(0 14%, 100% 0, 100% 100%, 0 86%);
 }
 .icon-linkedin::before,
 .icon-instagram::before,
 .icon-substack::before,
 .icon-reddit::before {
-  inset: 0.36rem;
-  border: 2px solid #12120f;
-  border-radius: 0.24rem;
+  border: 4px solid var(--icon-ink);
 }
 .icon-linkedin::before {
-  background: #1d72b8;
+  left: 0.34rem;
+  right: 0.62rem;
+  top: 0.92rem;
+  bottom: 0.34rem;
+  border-radius: 0.08rem;
+  background:
+    linear-gradient(var(--icon-ink) 0 0) 0.58rem 0.5rem / 0.5rem 0.14rem no-repeat,
+    linear-gradient(var(--icon-ink) 0 0) 0.58rem 0.86rem / 1.16rem 0.14rem no-repeat,
+    linear-gradient(var(--icon-ink) 0 0) 0.58rem 1.22rem / 0.9rem 0.14rem no-repeat,
+    radial-gradient(circle at 0.32rem 0.58rem, var(--icon-ink) 0 0.12rem, transparent 0.14rem),
+    linear-gradient(90deg, #35b9d4 0 18%, transparent 18%),
+    var(--icon-dither),
+    var(--icon-paper);
+  box-shadow:
+    0.44rem -0.22rem 0 -0.02rem #d5be7c,
+    0.7rem -0.02rem 0 -0.04rem var(--icon-blue),
+    inset -0.18rem -0.16rem 0 #b9a271;
 }
-.icon-linkedin > span,
-.icon-instagram > span { color: #fff; font-size: 1.02rem; }
+.icon-linkedin::after {
+  left: 0.62rem;
+  top: 0.52rem;
+  width: 1.74rem;
+  height: 0.54rem;
+  border: 3px solid var(--icon-ink);
+  border-bottom: 0;
+  border-radius: 0.12rem 0.12rem 0 0;
+  background: repeating-linear-gradient(90deg, #c7ad66 0 0.22rem, #e5d08d 0.22rem 0.44rem);
+}
 .icon-instagram::before {
-  border-radius: 0.78rem;
-  background: linear-gradient(135deg, #ffd15a, #f04f3b 48%, #7a45c7);
+  left: 0.28rem;
+  right: 0.32rem;
+  top: 0.78rem;
+  bottom: 0.44rem;
+  border-radius: 0.08rem;
+  background:
+    radial-gradient(circle at 58% 56%, #263040 0 0.34rem, #78c6e3 0.36rem 0.5rem, transparent 0.52rem),
+    var(--icon-highlight),
+    linear-gradient(90deg, #e85d68 0 22%, #f2c94c 22% 44%, #4aa7d1 44% 66%, transparent 66%) 0.26rem 0.28rem / 1.36rem 0.22rem no-repeat,
+    linear-gradient(#32302c 0 0) 0.42rem -0.32rem / 0.86rem 0.36rem no-repeat,
+    var(--icon-paper);
+  box-shadow:
+    -0.18rem -0.28rem 0 -0.06rem #4b4941,
+    inset -0.22rem -0.2rem 0 #cbb981;
+}
+.icon-instagram::after {
+  left: 0.88rem;
+  top: 0.54rem;
+  width: 1.02rem;
+  height: 0.42rem;
+  border: 3px solid var(--icon-ink);
+  border-bottom: 0;
+  border-radius: 0.12rem 0.12rem 0 0;
+  background: #605d55;
 }
 .icon-substack::before {
+  left: 0.58rem;
+  right: 0.5rem;
+  top: 0.36rem;
+  bottom: 0.34rem;
+  border-radius: 0.08rem;
   background:
-    linear-gradient(#fff 0 14%, transparent 14% 26%, #fff 26% 40%, transparent 40%),
-    #f68b21;
+    linear-gradient(var(--icon-ink) 0 0) 0.34rem 0.48rem / 1.34rem 0.13rem no-repeat,
+    linear-gradient(var(--icon-ink) 0 0) 0.34rem 0.82rem / 1.72rem 0.13rem no-repeat,
+    linear-gradient(var(--icon-ink) 0 0) 0.34rem 1.16rem / 1.42rem 0.13rem no-repeat,
+    linear-gradient(35deg, transparent 0 47%, var(--icon-ink) 47% 53%, transparent 53%) 0 1.52rem / 100% 0.84rem no-repeat,
+    linear-gradient(-35deg, transparent 0 47%, var(--icon-ink) 47% 53%, transparent 53%) 0 1.52rem / 100% 0.84rem no-repeat,
+    #fff3cf;
+  box-shadow:
+    -0.32rem 0.4rem 0 -0.08rem #e2bf4c,
+    0.18rem 0.18rem 0 #d9c487;
 }
-.icon-substack > span { color: #fff; font-size: 1rem; }
-.icon-reddit::before {
-  border-radius: 50%;
+.icon-substack::after {
+  left: 0.36rem;
+  bottom: 0.52rem;
+  width: 1.36rem;
+  height: 0.9rem;
+  border: 3px solid var(--icon-ink);
+  border-radius: 0.06rem;
   background:
-    radial-gradient(circle at 63% 38%, #ff4500 0 0.18rem, transparent 0.2rem),
-    radial-gradient(circle at 50% 55%, #fff 0 0.72rem, transparent 0.74rem),
-    #ff4500;
+    linear-gradient(35deg, transparent 0 47%, var(--icon-ink) 47% 53%, transparent 53%),
+    linear-gradient(-35deg, transparent 0 47%, var(--icon-ink) 47% 53%, transparent 53%),
+    #f0ca48;
+}
+.icon-reddit::before {
+  left: 0.42rem;
+  right: 0.42rem;
+  top: 0.76rem;
+  bottom: 0.4rem;
+  border-radius: 0.16rem;
+  background:
+    radial-gradient(circle at 38% 46%, var(--icon-ink) 0 0.08rem, transparent 0.1rem),
+    radial-gradient(circle at 62% 46%, var(--icon-ink) 0 0.08rem, transparent 0.1rem),
+    radial-gradient(ellipse at 50% 66%, transparent 0 0.26rem, var(--icon-ink) 0.28rem 0.34rem, transparent 0.36rem),
+    var(--icon-dither),
+    var(--icon-paper);
 }
 .icon-reddit::after {
-  left: 1.64rem;
-  top: 0.34rem;
-  width: 0.72rem;
-  height: 0.44rem;
-  border-top: 2px solid #12120f;
-  border-right: 2px solid #12120f;
-  transform: rotate(-18deg);
-}
-.icon-reddit > span {
-  color: #12120f;
-  font-size: 0.72rem;
+  left: 1.12rem;
+  top: 0.3rem;
+  width: 1.2rem;
+  height: 0.72rem;
+  border-left: 3px solid var(--icon-ink);
+  border-top: 3px solid var(--icon-ink);
+  border-radius: 0.8rem 0 0 0;
+  transform: rotate(16deg);
 }
 .icon-mail::before {
-  inset: 0.84rem 0.36rem 0.38rem;
-  border: 2px solid #12120f;
-  border-radius: 0.18rem;
+  inset: 0.94rem 0.26rem 0.46rem;
+  border: 4px solid var(--icon-ink);
+  border-radius: 0.08rem;
   background:
-    linear-gradient(35deg, transparent 0 47%, #12120f 47% 53%, transparent 53%),
-    linear-gradient(-35deg, transparent 0 47%, #12120f 47% 53%, transparent 53%),
+    radial-gradient(circle at 50% 54%, #d94e36 0 0.23rem, transparent 0.25rem),
+    linear-gradient(35deg, transparent 0 47%, var(--icon-ink) 47% 53%, transparent 53%),
+    linear-gradient(-35deg, transparent 0 47%, var(--icon-ink) 47% 53%, transparent 53%),
     linear-gradient(180deg, #fff8df, #efd59a);
-  transform: rotate(-4deg);
+  transform: rotate(-2deg);
 }
 .icon-mail::after {
-  right: 0.58rem;
-  top: 0.62rem;
-  width: 0.58rem;
-  height: 0.58rem;
-  border: 2px solid #12120f;
-  border-radius: 0.08rem;
+  right: 0.54rem;
+  top: 0.66rem;
+  width: 0.62rem;
+  height: 0.62rem;
+  border: 3px solid var(--icon-ink);
+  border-radius: 0.06rem;
   background:
     radial-gradient(circle at 50% 50%, #f7e65d 0 0.1rem, transparent 0.12rem),
     #d94e36;
   transform: rotate(8deg);
 }
-.icon-mail > span {
-  display: none;
-}
 .icon-compass::before {
-  inset: 0.35rem;
-  border: 3px solid #11110e;
-  border-radius: 50%;
+  inset: 0.34rem 0.38rem 0.38rem 0.34rem;
+  border: 4px solid var(--icon-ink);
+  border-radius: 0.08rem;
   background:
-    conic-gradient(from 0deg, #f15a42 0 12%, #fff 12% 25%, #1a5fa7 25% 37%, #fff 37% 50%, #f15a42 50% 62%, #fff 62% 75%, #1a5fa7 75% 87%, #fff 87% 100%);
+    linear-gradient(90deg, #4b4c4c 0 15%, transparent 15% 85%, #4b4c4c 85% 100%),
+    linear-gradient(#226fd3 0 0) 76% 14% / 0.38rem 0.84rem no-repeat,
+    linear-gradient(var(--icon-ink) 0 0) 50% 50% / 1.15rem 0.14rem no-repeat,
+    linear-gradient(var(--icon-ink) 0 0) 50% 65% / 1.6rem 0.14rem no-repeat,
+    radial-gradient(circle at 50% 61%, #f2bd22 0 0.34rem, #f2553d 0.36rem 0.5rem, #35b9d4 0.52rem 0.72rem, transparent 0.74rem),
+    var(--icon-dither),
+    var(--icon-paper);
+  box-shadow: inset -0.28rem -0.24rem 0 var(--icon-paper-2), 0.18rem 0.18rem 0 #0002;
 }
 .icon-compass::after {
-  inset: 0.86rem;
-  border: 2px solid #11110e;
-  border-radius: 50%;
-  background: #f5d24a;
-}
-.icon-compass > span {
-  color: #11110e;
-  font-size: 0.72rem;
+  left: 0.84rem;
+  top: 0.18rem;
+  width: 1.72rem;
+  height: 0.9rem;
+  border: 4px solid var(--icon-ink);
+  border-bottom-width: 3px;
+  border-radius: 0.08rem;
+  background:
+    radial-gradient(#ffffffcc 0 1px, transparent 1.2px) 0 0 / 0.16rem 0.16rem,
+    #eee0b9;
 }
 .icon-movie::before {
   left: 0.62rem;
   right: 0.62rem;
   bottom: 0.28rem;
   height: 2.18rem;
-  border: 2px solid #11110e;
+  border: 4px solid #11110e;
   border-radius: 0.16rem 0.16rem 0.34rem 0.34rem;
   background:
     repeating-linear-gradient(90deg, #d94e36 0 0.34rem, #fff2d0 0.34rem 0.68rem),
@@ -463,7 +612,7 @@ body.home-desktop-page .topbar {
   top: 0.28rem;
   width: 0.62rem;
   height: 0.62rem;
-  border: 2px solid #11110e;
+  border: 3px solid #11110e;
   border-radius: 50%;
   background: #f5d24a;
   box-shadow:
@@ -472,22 +621,28 @@ body.home-desktop-page .topbar {
     1.28rem -0.1rem 0 0 #f5d24a,
     1.72rem 0.08rem 0 -0.02rem #ffe777;
 }
-.icon-movie > span {
-  display: none;
-}
 .icon-switch::before {
-  inset: 0.2rem 0.55rem;
-  border: 3px solid #11110e;
-  background: #f8f3e4;
+  left: 0.54rem;
+  right: 0.54rem;
+  top: 0.68rem;
+  bottom: 0.44rem;
+  border: 3px solid var(--icon-ink);
+  border-radius: 0.08rem;
+  background:
+    linear-gradient(var(--icon-ink) 0 0) 0.44rem 0.54rem / 0.74rem 0.14rem no-repeat,
+    linear-gradient(var(--icon-ink) 0 0) 0.44rem 0.88rem / 0.48rem 0.14rem no-repeat,
+    radial-gradient(circle at 72% 56%, var(--icon-red) 0 0.14rem, transparent 0.16rem),
+    var(--icon-paper);
+  box-shadow: inset -0.18rem -0.18rem 0 #c9b77f;
 }
 .icon-switch::after {
-  left: 1.38rem;
-  top: 0.9rem;
-  width: 0.65rem;
-  height: 1rem;
-  border: 2px solid #11110e;
-  border-radius: 0.16rem;
-  background: #e8e1ce;
+  left: 2.18rem;
+  top: 1.22rem;
+  width: 0.74rem;
+  height: 0.3rem;
+  border: 3px solid var(--icon-ink);
+  background: var(--icon-blue);
+  transform: rotate(-24deg);
 }
 .icon-bookshelf::before {
   left: 0.44rem;
@@ -517,9 +672,6 @@ body.home-desktop-page .topbar {
   background:
     linear-gradient(180deg, #fef7c7, #efc84f);
   box-shadow: 0 0.14rem 0 #ffffffa0 inset;
-}
-.icon-bookshelf > span {
-  display: none;
 }
 .icon-calendar::before {
   inset: 0.32rem 0.46rem;
@@ -558,22 +710,24 @@ body.home-desktop-page .topbar {
     linear-gradient(180deg, #f26e61, #cf4338);
   box-shadow: inset 0 0.14rem 0 #ffd8d4;
 }
-.icon-openbook > span {
-  display: none;
-}
 .icon-bag::before {
-  inset: 0.7rem 0.55rem 0.24rem;
-  border: 2px solid #11110e;
-  background: #f26488;
+  inset: 0.76rem 0.58rem 0.26rem;
+  border: 4px solid var(--icon-ink);
+  background:
+    linear-gradient(180deg, transparent 0 28%, #f2553d 28% 44%, #35b9d4 44% 60%, #f2bd22 60% 76%, transparent 76%),
+    radial-gradient(#17140f55 0 1px, transparent 1.2px) 0 0 / 0.34rem 0.34rem,
+    #c99655;
+  box-shadow: inset -0.28rem -0.2rem 0 #8f6337;
 }
 .icon-bag::after {
-  top: 0.38rem;
-  left: 1.26rem;
-  width: 0.9rem;
-  height: 0.72rem;
-  border: 2px solid #11110e;
+  left: 0.42rem;
+  right: 0.42rem;
+  top: 0.48rem;
+  height: 0.78rem;
+  border: 4px solid var(--icon-ink);
   border-bottom: 0;
-  border-radius: 0.6rem 0.6rem 0 0;
+  border-radius: 0.12rem 0.12rem 0 0;
+  background: #d8ad66;
 }
 .icon-typewriter::before {
   left: 0.64rem;
@@ -600,39 +754,33 @@ body.home-desktop-page .topbar {
     linear-gradient(#f2bd22 0 28%, #d94e36 28% 100%);
   transform: rotate(35deg);
 }
-.icon-typewriter > span {
-  display: none;
-}
 .icon-trash::before {
-  left: 0.48rem;
-  top: 0.82rem;
-  width: 2.34rem;
-  height: 1.86rem;
-  border: 2px solid #11110e;
-  border-radius: 0.42rem;
+  left: 0.42rem;
+  top: 1rem;
+  width: 2.5rem;
+  height: 1.68rem;
+  border: 3px solid var(--icon-ink);
+  border-radius: 0.08rem;
   background:
-    linear-gradient(180deg, #ffffffc9 0 16%, transparent 16% 34%, #ffffff33 34% 38%, transparent 38%),
-    linear-gradient(180deg, #d7f2ff 0 20%, #8ecff5 20% 58%, #4b95dd 58% 100%);
+    linear-gradient(90deg, #ddc989 0 24%, #4aa7d1 24% 44%, #e95b59 44% 64%, #f2c94c 64% 84%, #ddc989 84%),
+    var(--icon-dither),
+    #cfae68;
   box-shadow:
-    inset 0 0.18rem 0 #ffffffd8,
-    inset 0 -0.24rem 0 #2e73b8,
-    0 0.28rem 0 #11110e;
+    inset -0.24rem -0.2rem 0 #a8874d,
+    0 0.26rem 0 #0002;
 }
 .icon-trash::after {
-  left: 1rem;
-  top: 0.34rem;
-  width: 1.28rem;
-  height: 0.66rem;
-  border: 2px solid #11110e;
-  border-radius: 0.28rem;
+  left: 0.72rem;
+  top: 0.62rem;
+  width: 1.9rem;
+  height: 0.52rem;
+  border: 3px solid var(--icon-ink);
+  border-bottom: 0;
+  border-radius: 0.08rem 0.08rem 0 0;
   background:
-    linear-gradient(180deg, #ffffffbf, transparent 52%),
-    linear-gradient(180deg, #a4def8, #66b9ee);
-  box-shadow: inset 0 0.12rem 0 #ffffffd5;
+    linear-gradient(180deg, #e3c078, #b89451);
 }
-.icon-trash > span {
-  display: none;
-}
+
 .garden-scene {
   position: absolute;
   right: clamp(0.65rem, 1.4vw, 1.6rem);
@@ -680,13 +828,19 @@ body.home-desktop-page .topbar {
   line-height: 1.2;
 }
 .game-hint {
-  width: max-content;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   border: 1px dashed #181510;
   border-radius: 0.28rem;
-  padding: 0.16rem 0.38rem;
+  padding: 0.22rem 0.42rem;
   background: #fbf0c0;
   color: #33291e;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .letter-slots,
 .letter-tray {
@@ -1032,13 +1186,16 @@ body.home-desktop-page .topbar {
   top: 1.4%;
   z-index: 8;
   display: grid;
-  gap: 0.46rem;
-  width: min(20.5rem, 40%);
+  gap: 0.58rem;
+  width: min(26rem, 48%);
+  max-width: calc(100% - 1.5rem);
+  box-sizing: border-box;
   border: 3px solid #17140f;
   border-radius: 0.32rem;
-  padding: 0.58rem;
-  background: #fff8e8f0;
-  box-shadow: 5px 5px 0 #17140f;
+  padding: 0.78rem;
+  background:
+    linear-gradient(180deg, #fffaf0 0, #f1dfaf 100%);
+  box-shadow: 5px 5px 0 #17140f, inset 0 0 0 0.16rem #fff8e899;
   font-weight: 850;
   transform: rotate(2deg);
 }
@@ -1052,22 +1209,27 @@ body.home-desktop-page .topbar {
   margin: 0;
 }
 .garden-sign h2 {
-  font-size: clamp(1rem, 1.65vw, 1.32rem);
-  line-height: 0.96;
+  font-size: clamp(1.1rem, 1.9vw, 1.58rem);
+  line-height: 1.03;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .garden-sign p {
   color: #5f5548;
   line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 .letter-actions {
   display: flex;
-  width: fit-content;
+  width: 100%;
 }
 .letter-actions button {
   border: 2px solid #181510;
   border-radius: 0.28rem;
   min-height: 2.45rem;
   min-width: 8.2rem;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 0.42rem 0.76rem;
   background: #f2bd22;
   box-shadow: 3px 3px 0 #181510, inset 0 -2px 0 #b67810;
@@ -1103,7 +1265,7 @@ body.home-desktop-page .topbar {
   display: grid;
   flex: 1 1 0;
   min-width: 0;
-  height: clamp(3.85rem, 5.8vw, 4.82rem);
+  height: clamp(3.45rem, 5.1vw, 4.32rem);
   place-items: center;
   border: 3px solid #17140f;
   border-radius: 0.38rem;
@@ -1113,7 +1275,7 @@ body.home-desktop-page .topbar {
   box-shadow: inset 0 -7px 0 #0000001f;
   color: #fff8e8;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: clamp(2.25rem, 3.3vw, 3.08rem);
+  font-size: clamp(2.02rem, 3vw, 2.76rem);
   font-weight: 1000;
   cursor: pointer;
   transition: transform 160ms ease, filter 160ms ease;
@@ -1185,21 +1347,21 @@ body.home-desktop-page .topbar {
 }
 .letter-tray {
   position: absolute;
-  left: 6%;
-  top: 36%;
+  left: 3%;
+  top: 31%;
   z-index: 7;
   display: grid;
-  grid-template-columns: repeat(4, minmax(5rem, 1fr));
-  gap: clamp(0.95rem, 1.65vw, 1.35rem);
-  width: min(40rem, 70%);
+  grid-template-columns: repeat(4, minmax(4rem, 1fr));
+  gap: clamp(0.7rem, 1.25vw, 1rem);
+  width: min(32rem, 52%);
   transform: rotate(-3deg);
 }
 .letter-tile {
   position: relative;
   display: grid;
   --tile-tilt: -2deg;
-  width: clamp(4.3rem, 7.2vw, 6.05rem);
-  height: clamp(3.82rem, 6.45vw, 5.42rem);
+  width: clamp(3.72rem, 6.05vw, 5.12rem);
+  height: clamp(3.32rem, 5.42vw, 4.62rem);
   place-items: center;
   border: 3px solid #17140f;
   border-radius: 0.54rem;
@@ -1210,7 +1372,7 @@ body.home-desktop-page .topbar {
   color: #17140f;
   cursor: grab;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: clamp(2.35rem, 4vw, 3.42rem);
+  font-size: clamp(2rem, 3.4vw, 2.92rem);
   font-weight: 1000;
   line-height: 1;
   touch-action: none;
@@ -1232,7 +1394,7 @@ body.home-desktop-page .topbar {
     linear-gradient(180deg, #fffef8 0 52%, #f3e7bd 52% 100%);
   color: #080806;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: clamp(2.8rem, 4.55vw, 3.9rem);
+  font-size: clamp(2.36rem, 3.85vw, 3.32rem);
   font-weight: 1000;
   line-height: 1;
   text-shadow:
@@ -1253,7 +1415,7 @@ body.home-desktop-page .topbar {
   background:
     linear-gradient(180deg, #fffef8 0 62%, #f3e7bd 62% 100%);
   color: #080806;
-  font-size: clamp(2.32rem, 3.75vw, 3.22rem);
+  font-size: clamp(2rem, 3.25vw, 2.8rem);
   text-shadow: 2px 2px 0 #17140f33;
 }
 .letter-tile:nth-child(2n) { --tile-tilt: 4deg; animation-delay: -0.34s; }
@@ -1314,7 +1476,7 @@ body.home-desktop-page .topbar {
 .garden-status {
   position: absolute;
   left: 18%;
-  bottom: 1.2rem;
+  bottom: 0.35rem;
   z-index: 11;
   max-width: min(35rem, 68%);
   border: 2px solid #17140f;
@@ -1980,6 +2142,15 @@ body.agent-mode .agent-readable {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+@media (min-width: 861px) and (max-height: 950px) {
+  .garden-scene {
+    right: clamp(0.85rem, 1.4vw, 1.35rem);
+    bottom: clamp(0.55rem, 0.9vh, 0.85rem);
+    width: min(680px, 52vw);
+    min-width: min(680px, 52vw);
+    height: min(590px, 68vh);
+  }
+}
 @media (max-width: 1040px) {
   .posthog-nav {
     grid-template-columns: auto 1fr;
@@ -1996,11 +2167,26 @@ body.agent-mode .agent-readable {
     height: calc(100svh - 137px);
   }
   .garden-scene {
-    right: -1.4rem;
-    bottom: -2.2rem;
-    width: min(700px, 70vw);
-    min-width: min(700px, 70vw);
-    height: min(660px, 76vh);
+    right: 0.75rem;
+    bottom: 0.55rem;
+    width: min(560px, 51vw);
+    min-width: min(560px, 51vw);
+    height: min(560px, 72vh);
+  }
+  .icon-rail-left {
+    left: clamp(0.75rem, 1.6vw, 1.15rem);
+    grid-template-columns: repeat(3, clamp(6.1rem, 9.85vw, 6.55rem));
+    grid-auto-rows: clamp(6.5rem, 10vw, 7rem);
+  }
+  .icon-rail .desktop-glyph {
+    width: clamp(5.75rem, 9vw, 6.2rem);
+    height: clamp(3.6rem, 5.7vw, 3.9rem);
+  }
+  .desktop-object {
+    grid-template-rows: clamp(3.85rem, 6.2vw, 4.15rem) minmax(1.38rem, auto);
+  }
+  .desktop-label {
+    font-size: 0.74rem;
   }
   .desktop-hero { grid-template-columns: 1fr; min-height: auto; }
   .hero-window h1 { max-width: 12ch; font-size: 4.2rem; }
@@ -2035,13 +2221,14 @@ body.agent-mode .agent-readable {
     inset: auto;
   }
   .icon-rail {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    width: 100%;
-    gap: 0.38rem;
+    order: 1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: min(100%, 42rem);
+    gap: clamp(0.52rem, 1.6vw, 0.95rem);
     margin: 0 auto;
   }
   .icon-rail-left {
-    order: 1;
+    order: 3;
   }
   .icon-rail-right {
     order: 3;
@@ -2049,17 +2236,22 @@ body.agent-mode .agent-readable {
   }
   .desktop-object {
     width: 100%;
-    min-height: 4.45rem;
+    height: 7rem;
+    grid-template-rows: 5.65rem auto;
     padding: 0.16rem 0.12rem 0.24rem;
   }
   .desktop-label {
     max-width: 100%;
-    font-size: 0.74rem;
+    font-size: clamp(0.9rem, 2vw, 1.04rem);
     line-height: 1.05;
   }
   .desktop-glyph {
-    width: 2.85rem;
-    height: 2.85rem;
+    width: clamp(3.45rem, 8vw, 4.45rem);
+    height: clamp(3.45rem, 8vw, 4.45rem);
+  }
+  .icon-rail .desktop-glyph {
+    width: clamp(6.25rem, 18vw, 7.5rem);
+    height: clamp(4.45rem, 13vw, 5.4rem);
   }
   .garden-scene {
     order: 2;
@@ -2072,8 +2264,10 @@ body.agent-mode .agent-readable {
   .garden-sign {
     left: 50%;
     right: auto;
-    top: 0.75rem;
+    top: 0.45rem;
     width: min(92%, 24rem);
+    gap: 0.42rem;
+    padding: 0.64rem;
     transform: translateX(-50%);
   }
   .garden-sign::before,
@@ -2164,12 +2358,23 @@ body.agent-mode .agent-readable {
   }
   .garden-sign {
     width: min(96%, 21.5rem);
+    gap: 0.34rem;
+    padding: 0.54rem;
   }
   .garden-sign h2 {
-    font-size: 1.08rem;
+    font-size: 1rem;
   }
   .garden-sign p {
-    font-size: 0.9rem;
+    font-size: 0.84rem;
+    line-height: 1.12;
+  }
+  .garden-sign .game-hint {
+    padding: 0.18rem 0.34rem;
+    font-size: 0.84rem;
+    line-height: 1.18;
+  }
+  .garden-sign .letter-actions button {
+    min-height: 2.18rem;
   }
   .letter-tray {
     top: 11.1rem;
@@ -2191,8 +2396,13 @@ body.agent-mode .agent-readable {
     width: 2.65rem;
     height: 2.65rem;
   }
+  .icon-rail .desktop-glyph {
+    width: 5rem;
+    height: 3.65rem;
+  }
   .desktop-object {
-    min-height: 4.35rem;
+    height: 5.45rem;
+    grid-template-rows: 3.85rem auto;
   }
   .desktop-label {
     font-size: 0.72rem;
