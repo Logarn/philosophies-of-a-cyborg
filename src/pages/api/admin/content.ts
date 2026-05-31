@@ -51,6 +51,17 @@ type HomepagePayload = {
   };
 };
 
+type ProjectPayload = {
+  slug: string;
+  title: string;
+  summary: string;
+  status: string;
+  domain: string;
+  repo: string;
+  highlight: string;
+  detail: string;
+};
+
 function jsonResponse(payload: unknown, status = 200) {
   return new Response(JSON.stringify(payload), {
     status,
@@ -137,6 +148,41 @@ function parseHomepage(value: Record<string, unknown>): HomepagePayload {
   };
 }
 
+function parseProject(value: Record<string, unknown>): ProjectPayload {
+  const slug = assertText(value.slug, 'project slug', 72);
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+    throw new Error('project slug must be lowercase letters, numbers, and hyphens.');
+  }
+
+  const repo = assertOptionalText(value.repo, 'project repo', 260);
+  if (repo && !/^https?:\/\//.test(repo)) throw new Error('project repo must be a URL.');
+
+  return {
+    slug,
+    title: assertText(value.title, 'project title', 180),
+    summary: assertText(value.summary, 'project summary', 520),
+    status: assertText(value.status, 'project status', 80),
+    domain: assertOptionalText(value.domain, 'project domain', 160),
+    repo,
+    highlight: assertText(value.highlight, 'project detail intro', 700),
+    detail: assertText(value.detail, 'project detail body', 80_000)
+  };
+}
+
+function parseProjects(value: unknown): ProjectPayload[] {
+  if (!Array.isArray(value)) return [];
+  const projects = value.map((project) => {
+    if (!project || typeof project !== 'object') throw new Error('project entry is invalid.');
+    return parseProject(project as Record<string, unknown>);
+  });
+  const slugs = new Set<string>();
+  projects.forEach((project) => {
+    if (slugs.has(project.slug)) throw new Error(`duplicate project slug: ${project.slug}`);
+    slugs.add(project.slug);
+  });
+  return projects;
+}
+
 function yamlString(value: string) {
   const normalized = value.replace(/\r\n?/g, '\n');
   if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/u.test(normalized)) {
@@ -172,8 +218,8 @@ function buildMarkdown(draft: DraftPayload) {
   return lines.join('\n');
 }
 
-function buildHomepageModule(homepage: HomepagePayload) {
-  return `export const homepageCopy = ${JSON.stringify(homepage, null, 2)} as const;\n`;
+function buildHomepageModule(homepage: HomepagePayload, projects: ProjectPayload[]) {
+  return `export const homepageCopy = ${JSON.stringify(homepage, null, 2)} as const;\n\nexport const projectCopy = ${JSON.stringify(projects, null, 2)} as const;\n`;
 }
 
 export const POST: APIRoute = async ({ request }) => {
@@ -192,11 +238,12 @@ export const POST: APIRoute = async ({ request }) => {
     const action =
       payload.action === 'delete' ? 'delete' : payload.action === 'save-homepage' ? 'save-homepage' : 'save';
     const homepage = parseHomepage(payload.homepage ?? {});
+    const projects = parseProjects(payload.projects ?? []);
 
     const changes: ContentChange[] = [
       {
         path: siteCopyRepoPath(),
-        content: buildHomepageModule(homepage)
+        content: buildHomepageModule(homepage, projects)
       }
     ];
 

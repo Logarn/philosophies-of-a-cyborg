@@ -1,16 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { contact } from '../../lib/contact';
+import { projectCopy } from '../../lib/siteCopy';
 
-const projects = [
-  {
-    title: 'Philosophies Of A Cyborg',
-    summary: 'The live site and writing studio: homepage, essays, Project OS, and the locked admin used to manage the copy.',
-    status: 'live build',
-    domain: 'ositukenegere.xyz',
-    repo: 'https://github.com/Logarn/philosophies-of-a-cyborg'
-  }
-] as const;
+const projects = projectCopy;
 ---
 
 <BaseLayout title={`Project OS | ${contact.siteName}`}>
@@ -30,7 +23,13 @@ const projects = [
               Domain: {project.domain}
             </p>
             <p>
-              <a href={project.repo}>View repo</a>
+              <a href={`/projects/${project.slug}/`}>View details</a>
+              {project.repo && (
+                <>
+                  {' / '}
+                  <a href={project.repo}>View repo</a>
+                </>
+              )}
             </p>
             <span class="read-time">{project.status}</span>
           </article>

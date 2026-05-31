@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { essaySlug, getPublishedEssays } from '../lib/essays';
+import { projectCopy } from '../lib/siteCopy';
 
 const site = 'https://www.ositukengere.xyz';
 const staticPages = ['/', '/essays/', '/archive/', '/projects/', '/values/', '/handbook/', '/store/'];
@@ -15,6 +16,7 @@ export const GET: APIRoute = async () => {
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
     ...staticPages.map((path) => urlEntry(path)),
+    ...projectCopy.map((project) => urlEntry(`/projects/${project.slug}/`)),
     ...essays.map((essay) => urlEntry(`/essays/${essaySlug(essay)}/`, essay.data.updatedAt ?? essay.data.publishedAt)),
     '</urlset>'
   ].join('');

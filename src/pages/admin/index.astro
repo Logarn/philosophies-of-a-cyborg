@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { contact } from '../../lib/contact';
 import { essaySlug, getAllEssays } from '../../lib/essays';
-import { homepageCopy } from '../../lib/siteCopy';
+import { homepageCopy, projectCopy } from '../../lib/siteCopy';
 
 const essays = await getAllEssays();
 const sortedEssays = essays.sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
@@ -11,8 +11,9 @@ const primaryEssay = sortedEssays[0];
 const formatDate = (date: Date) => date.toISOString().slice(0, 10);
 
 const adminSeed = {
-  storageKey: 'poc-admin-cms-editor-v1',
+  storageKey: 'poc-admin-cms-editor-v2',
   homepage: homepageCopy,
+  projects: projectCopy,
   articles: sortedEssays.map((essay) => ({
     slug: essaySlug(essay),
     title: essay.data.title,
@@ -186,6 +187,14 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
           </div>
         </section>
 
+        <section aria-label="Existing projects">
+          <div class="subhead">
+            <h3>Projects</h3>
+            <button class="solid-command" type="button" id="new-project">New project</button>
+          </div>
+          <div class="article-list" id="project-list"></div>
+        </section>
+
         <section aria-label="Existing articles">
           <div class="subhead">
             <h3>Articles</h3>
@@ -199,12 +208,17 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
         <div class="panel-head">
           <div>
             <p class="panel-label">Editor</p>
-            <h2>Article draft</h2>
+            <h2 id="editor-title">Article draft</h2>
           </div>
           <span class="save-state" id="save-state" aria-live="polite">Local draft ready</span>
         </div>
 
-        <div class="essential-actions" aria-label="Essential essay actions">
+        <div class="content-tabs" role="tablist" aria-label="Content type">
+          <button class="content-tab is-active" type="button" id="article-tab" data-mode-tab="article">Article</button>
+          <button class="content-tab" type="button" id="project-tab" data-mode-tab="project">Project</button>
+        </div>
+
+        <div class="essential-actions" aria-label="Essential essay actions" data-article-editor>
           <button class="solid-command" type="button" id="save-essay">Save essay</button>
           <button class="text-command" type="button" id="publish-essay">Publish</button>
           <button class="text-command" type="button" id="draft-essay">Move to draft</button>
@@ -217,7 +231,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
           <span id="ready-detail">Title, slug, date, and export path will be validated here.</span>
         </div>
 
-        <div class="metadata-grid">
+        <div class="metadata-grid" data-article-editor>
           <label class="wide-field">
             Title
             <input id="field-title" type="text" autocomplete="off" />
@@ -265,7 +279,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
           </div>
         </div>
 
-        <div class="toolbar" role="toolbar" aria-label="Markdown formatting controls">
+        <div class="toolbar" role="toolbar" aria-label="Markdown formatting controls" data-article-editor>
           <button type="button" data-format="h1" title="Heading 1">H1</button>
           <button type="button" data-format="h2" title="Heading 2">H2</button>
           <button type="button" data-format="h3" title="Heading 3">H3</button>
@@ -282,8 +296,49 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
           </button>
         </div>
 
-        <label class="body-label" for="field-body">Markdown body</label>
-        <textarea id="field-body" class="body-editor" spellcheck="true"></textarea>
+        <label class="body-label" for="field-body" data-article-editor>Markdown body</label>
+        <textarea id="field-body" class="body-editor" spellcheck="true" data-article-editor></textarea>
+
+        <div class="project-editor" data-project-editor hidden>
+          <div class="essential-actions" aria-label="Essential project actions">
+            <button class="solid-command" type="button" id="save-project">Save project</button>
+            <button class="danger-command" type="button" id="delete-project">Delete</button>
+          </div>
+
+          <div class="metadata-grid">
+            <label class="wide-field">
+              Project title
+              <input id="project-title" type="text" autocomplete="off" />
+            </label>
+            <label>
+              Slug
+              <input id="project-slug" type="text" autocomplete="off" />
+            </label>
+            <label>
+              Status
+              <input id="project-status" type="text" autocomplete="off" />
+            </label>
+            <label>
+              Domain
+              <input id="project-domain" type="text" autocomplete="off" />
+            </label>
+            <label class="wide-field">
+              Repo URL
+              <input id="project-repo" type="url" autocomplete="off" />
+            </label>
+            <label class="wide-field">
+              Card summary
+              <textarea id="project-summary" rows="3"></textarea>
+            </label>
+            <label class="wide-field">
+              Detail page intro
+              <textarea id="project-highlight" rows="4"></textarea>
+            </label>
+          </div>
+
+          <label class="body-label" for="project-detail">Detail page body</label>
+          <textarea id="project-detail" class="body-editor project-body-editor" spellcheck="true"></textarea>
+        </div>
       </section>
 
       <aside class="preview-column" aria-label="Preview and export">
@@ -307,7 +362,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
           <div class="panel-head compact">
             <div>
               <p class="panel-label">Export</p>
-              <h2>Frontmatter</h2>
+              <h2 id="export-title">Frontmatter</h2>
             </div>
           </div>
           <details class="export-details">
@@ -345,11 +400,18 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
 
     const els = {
       articleList: document.getElementById('article-list'),
+      projectList: document.getElementById('project-list'),
       app: document.querySelector('[data-admin-app]'),
       focusMode: document.getElementById('focus-mode'),
       resetDraft: document.getElementById('reset-draft'),
       newDraft: document.getElementById('new-draft'),
+      newProject: document.getElementById('new-project'),
+      articleTab: document.getElementById('article-tab'),
+      projectTab: document.getElementById('project-tab'),
+      articleEditors: document.querySelectorAll('[data-article-editor]'),
+      projectEditor: document.querySelector('[data-project-editor]'),
       saveState: document.getElementById('save-state'),
+      editorTitle: document.getElementById('editor-title'),
       readyState: document.getElementById('ready-state'),
       readyDetail: document.getElementById('ready-detail'),
       readinessBar: document.getElementById('readiness-bar'),
@@ -385,12 +447,23 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       pinEssay: document.getElementById('pin-essay'),
       deleteEssay: document.getElementById('delete-essay'),
       body: document.getElementById('field-body'),
+      projectTitle: document.getElementById('project-title'),
+      projectSlug: document.getElementById('project-slug'),
+      projectSummary: document.getElementById('project-summary'),
+      projectStatus: document.getElementById('project-status'),
+      projectDomain: document.getElementById('project-domain'),
+      projectRepo: document.getElementById('project-repo'),
+      projectHighlight: document.getElementById('project-highlight'),
+      projectDetail: document.getElementById('project-detail'),
+      saveProject: document.getElementById('save-project'),
+      deleteProject: document.getElementById('delete-project'),
       previewStatus: document.getElementById('preview-status'),
       previewMeta: document.getElementById('preview-meta'),
       previewTitle: document.getElementById('preview-title'),
       previewSummary: document.getElementById('preview-summary'),
       previewBody: document.getElementById('preview-body'),
       exportPath: document.getElementById('export-path'),
+      exportTitle: document.getElementById('export-title'),
       exportOutput: document.getElementById('export-output'),
       homeExportPath: document.getElementById('home-export-path'),
       homeExportOutput: document.getElementById('home-export-output'),
@@ -414,6 +487,32 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       mood: 'sharp',
       body: '# Working title\n\nOpen with the uncomfortable truth.\n\n## Make it useful\n\nThen turn the premise into something a reader can use.'
     };
+
+    const blankProject = {
+      slug: 'new-project',
+      title: 'New Project',
+      summary: 'A concise public card summary for Project OS.',
+      status: 'draft',
+      domain: '',
+      repo: '',
+      highlight: 'The short detail-page opener that explains why this project exists.',
+      detail: '## What it is\n\nDescribe the project clearly.\n\n## Current state\n\nExplain what is live, what is still rough, and what should happen next.'
+    };
+
+    function normalizeProject(project) {
+      const source = project && typeof project === 'object' ? project : {};
+      const title = source.title ?? 'Untitled Project';
+      return {
+        slug: source.slug ?? slugify(title),
+        title,
+        summary: source.summary ?? '',
+        status: source.status ?? 'draft',
+        domain: source.domain ?? '',
+        repo: source.repo ?? '',
+        highlight: source.highlight ?? source.summary ?? '',
+        detail: source.detail ?? ''
+      };
+    }
 
     function normalizeHomepage(homepage) {
       const source = homepage && typeof homepage === 'object' ? homepage : {};
@@ -450,16 +549,21 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     }
 
     const defaultHomepage = normalizeHomepage(seed.homepage);
+    const defaultProjects = Array.isArray(seed.projects) ? seed.projects.map(normalizeProject) : [];
     let appState = loadState();
 
     function loadState() {
       try {
         const saved = JSON.parse(localStorage.getItem(storageKey));
         if (saved && saved.draft) {
+          const projects = Array.isArray(saved.projects) ? saved.projects.map(normalizeProject) : defaultProjects;
           return {
+            mode: saved.mode === 'project' ? 'project' : 'article',
             homepage: normalizeHomepage(saved.homepage ?? defaultHomepage),
+            projects,
             articles: [...seed.articles],
-            draft: { ...seed.draft, ...saved.draft }
+            draft: { ...seed.draft, ...saved.draft },
+            projectDraft: normalizeProject(saved.projectDraft ?? projects[0] ?? blankProject)
           };
         }
       } catch {
@@ -467,9 +571,12 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       }
 
       return {
+        mode: 'article',
         homepage: defaultHomepage,
+        projects: defaultProjects,
         articles: [...seed.articles],
-        draft: { ...seed.draft }
+        draft: { ...seed.draft },
+        projectDraft: normalizeProject(defaultProjects[0] ?? blankProject)
       };
     }
 
@@ -478,6 +585,9 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
         storageKey,
         JSON.stringify({
           homepage: appState.homepage,
+          projects: appState.projects,
+          projectDraft: appState.projectDraft,
+          mode: appState.mode,
           draft: appState.draft
         })
       );
@@ -513,11 +623,21 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       els.pinned.checked = appState.draft.pinned;
       els.quickPublish.checked = appState.draft.status === 'published';
       els.body.value = appState.draft.body;
+      els.projectTitle.value = appState.projectDraft.title;
+      els.projectSlug.value = appState.projectDraft.slug;
+      els.projectSummary.value = appState.projectDraft.summary;
+      els.projectStatus.value = appState.projectDraft.status;
+      els.projectDomain.value = appState.projectDraft.domain;
+      els.projectRepo.value = appState.projectDraft.repo;
+      els.projectHighlight.value = appState.projectDraft.highlight;
+      els.projectDetail.value = appState.projectDraft.detail;
     }
 
     function readFields() {
       appState = {
+        mode: appState.mode,
         articles: appState.articles,
+        projects: appState.projects,
         homepage: {
           hero: {
             eyebrow: els.homeEyebrow.value.trim(),
@@ -554,6 +674,16 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
           status: els.status.value,
           pinned: els.pinned.checked,
           body: els.body.value
+        },
+        projectDraft: {
+          title: els.projectTitle.value.trim(),
+          slug: slugify(els.projectSlug.value),
+          summary: els.projectSummary.value.trim(),
+          status: els.projectStatus.value.trim(),
+          domain: els.projectDomain.value.trim(),
+          repo: els.projectRepo.value.trim(),
+          highlight: els.projectHighlight.value.trim(),
+          detail: els.projectDetail.value.trim()
         }
       };
     }
@@ -655,19 +785,29 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     }
 
     function buildHomepageModule() {
-      return `export const homepageCopy = ${JSON.stringify(appState.homepage, null, 2)} as const;\n`;
+      return `export const homepageCopy = ${JSON.stringify(appState.homepage, null, 2)} as const;\n\nexport const projectCopy = ${JSON.stringify(appState.projects, null, 2)} as const;\n`;
     }
 
     function validateDraft(slug) {
       const issues = [];
-      if (!appState.draft.title.trim()) issues.push('title');
-      if (!slug) issues.push('slug');
-      if (!appState.draft.publishedAt) issues.push('published date');
+      if (appState.mode === 'project') {
+        if (!appState.projectDraft.title.trim()) issues.push('project title');
+        if (!appState.projectDraft.slug) issues.push('project slug');
+        if (!appState.projectDraft.summary.trim()) issues.push('project summary');
+        const duplicateProject = appState.projects.some((project) => {
+          return project.slug === appState.projectDraft.slug && project.title !== appState.projectDraft.title;
+        });
+        if (duplicateProject) issues.push('duplicate project slug');
+      } else {
+        if (!appState.draft.title.trim()) issues.push('title');
+        if (!slug) issues.push('slug');
+        if (!appState.draft.publishedAt) issues.push('published date');
 
-      const duplicate = appState.articles.some((article) => {
-        return article.slug === slug && article.title !== appState.draft.title;
-      });
-      if (duplicate) issues.push('duplicate slug');
+        const duplicate = appState.articles.some((article) => {
+          return article.slug === slug && article.title !== appState.draft.title;
+        });
+        if (duplicate) issues.push('duplicate slug');
+      }
 
       if (issues.length) {
         els.readinessBar.dataset.state = 'needs-work';
@@ -678,8 +818,25 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
 
       els.readinessBar.dataset.state = 'ready';
       els.readyState.textContent = 'Ready to export';
-      els.readyDetail.textContent = `${slug}.md and src/lib/siteCopy.ts are generated below.`;
+      els.readyDetail.textContent =
+        appState.mode === 'project'
+          ? `/projects/${appState.projectDraft.slug}/ and src/lib/siteCopy.ts are generated below.`
+          : `${slug}.md and src/lib/siteCopy.ts are generated below.`;
       return true;
+    }
+
+    function setMode(mode) {
+      appState.mode = mode === 'project' ? 'project' : 'article';
+      els.articleEditors.forEach((element) => {
+        element.hidden = appState.mode === 'project';
+      });
+      els.projectEditor.hidden = appState.mode !== 'project';
+      els.articleTab.classList.toggle('is-active', appState.mode === 'article');
+      els.projectTab.classList.toggle('is-active', appState.mode === 'project');
+      els.editorTitle.textContent = appState.mode === 'project' ? 'Project draft' : 'Article draft';
+      els.exportTitle.textContent = appState.mode === 'project' ? 'Site module' : 'Frontmatter';
+      els.copyMarkdown.textContent = appState.mode === 'project' ? 'Copy project' : 'Copy article';
+      els.downloadMarkdown.textContent = appState.mode === 'project' ? 'Export TS' : 'Export .md';
     }
 
     function renderArticleList() {
@@ -705,6 +862,30 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       });
     }
 
+    function renderProjectList() {
+      els.projectList.innerHTML = '';
+      appState.projects.forEach((project) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'article-row';
+        button.dataset.slug = project.slug;
+        button.innerHTML = `
+          <span>
+            <strong>${escapeHtml(project.title)}</strong>
+            <small>${escapeHtml(project.domain || 'No domain')} · ${escapeHtml(project.status)}</small>
+          </span>
+          <em>Project</em>
+        `;
+        button.addEventListener('click', () => {
+          appState.projectDraft = { ...project };
+          setMode('project');
+          writeFields();
+          persistAndRender();
+        });
+        els.projectList.append(button);
+      });
+    }
+
     function saveCurrentEssay(message = 'Essay saved locally.') {
       readFields();
       const index = appState.articles.findIndex((article) => article.slug === appState.draft.slug);
@@ -715,6 +896,20 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       }
       saveState();
       renderArticleList();
+      render();
+      els.copyFeedback.textContent = message;
+    }
+
+    function saveCurrentProject(message = 'Project saved locally.') {
+      readFields();
+      const index = appState.projects.findIndex((project) => project.slug === appState.projectDraft.slug);
+      if (index >= 0) {
+        appState.projects[index] = { ...appState.projectDraft };
+      } else {
+        appState.projects = [{ ...appState.projectDraft }, ...appState.projects];
+      }
+      saveState();
+      renderProjectList();
       render();
       els.copyFeedback.textContent = message;
     }
@@ -730,7 +925,8 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     async function writeToBackend(action = 'save', draftOverride = appState.draft, message = 'Saved.') {
       const payload = {
         action,
-        homepage: appState.homepage
+        homepage: appState.homepage,
+        projects: appState.projects
       };
       if (draftOverride) {
         payload.draft = draftOverride;
@@ -776,6 +972,7 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     }
 
     function render() {
+      setMode(appState.mode);
       const slug = appState.draft.slug || slugify(appState.draft.title);
       const exportPath = `src/content/essays/${slug}.md`;
       const homeExportPath = 'src/lib/siteCopy.ts';
@@ -791,16 +988,26 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
 
       els.slug.value = slug;
       appState.draft.slug = slug;
-      els.metricStatus.textContent = appState.draft.status;
-      els.metricPin.textContent = pinText;
-      els.metricPath.textContent = `${slug}.md`;
+      appState.projectDraft.slug = appState.projectDraft.slug || slugify(appState.projectDraft.title);
+      els.projectSlug.value = appState.projectDraft.slug;
+      els.metricStatus.textContent = appState.mode === 'project' ? appState.projectDraft.status || 'draft' : appState.draft.status;
+      els.metricPin.textContent = appState.mode === 'project' ? 'Project' : pinText;
+      els.metricPath.textContent = appState.mode === 'project' ? `${appState.projectDraft.slug}/` : `${slug}.md`;
       els.quickPublish.checked = appState.draft.status === 'published';
       els.pinEssay.textContent = appState.draft.pinned ? 'Unpin' : 'Pin';
-      els.previewStatus.textContent = appState.draft.status;
-      els.previewTitle.textContent = appState.draft.title || 'Untitled';
-      els.previewSummary.textContent = appState.draft.summary;
-      els.previewMeta.textContent = metaParts.join(' / ');
-      els.previewBody.innerHTML = markdownToHtml(appState.draft.body);
+      if (appState.mode === 'project') {
+        els.previewStatus.textContent = appState.projectDraft.status || 'project';
+        els.previewTitle.textContent = appState.projectDraft.title || 'Untitled project';
+        els.previewSummary.textContent = appState.projectDraft.highlight || appState.projectDraft.summary;
+        els.previewMeta.textContent = [appState.projectDraft.domain, appState.projectDraft.status].filter(Boolean).join(' / ');
+        els.previewBody.innerHTML = markdownToHtml(appState.projectDraft.detail || '');
+      } else {
+        els.previewStatus.textContent = appState.draft.status;
+        els.previewTitle.textContent = appState.draft.title || 'Untitled';
+        els.previewSummary.textContent = appState.draft.summary;
+        els.previewMeta.textContent = metaParts.join(' / ');
+        els.previewBody.innerHTML = markdownToHtml(appState.draft.body);
+      }
       els.exportPath.textContent = exportPath;
       els.exportOutput.value = markdown;
       els.homeExportPath.textContent = homeExportPath;
@@ -878,7 +1085,14 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       els.updatedAt,
       els.status,
       els.pinned,
-      els.body
+      els.body,
+      els.projectSlug,
+      els.projectSummary,
+      els.projectStatus,
+      els.projectDomain,
+      els.projectRepo,
+      els.projectHighlight,
+      els.projectDetail
     ].forEach((control) => {
       control.addEventListener('input', persistAndRender);
       control.addEventListener('change', persistAndRender);
@@ -896,18 +1110,33 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       persistAndRender();
     });
 
+    els.projectTitle.addEventListener('input', () => {
+      if (!els.projectSlug.dataset.touched) {
+        els.projectSlug.value = slugify(els.projectTitle.value);
+      }
+      persistAndRender();
+    });
+
     els.slug.addEventListener('input', () => {
       els.slug.dataset.touched = 'true';
+    });
+
+    els.projectSlug.addEventListener('input', () => {
+      els.projectSlug.dataset.touched = 'true';
     });
 
     els.resetDraft.addEventListener('click', () => {
       localStorage.removeItem(storageKey);
       appState = {
+        mode: 'article',
         homepage: defaultHomepage,
+        projects: defaultProjects,
         articles: [...seed.articles],
-        draft: { ...seed.draft }
+        draft: { ...seed.draft },
+        projectDraft: normalizeProject(defaultProjects[0] ?? blankProject)
       };
       els.slug.dataset.touched = '';
+      els.projectSlug.dataset.touched = '';
       writeFields();
       persistAndRender();
     });
@@ -915,6 +1144,14 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     els.newDraft.addEventListener('click', () => {
       appState.draft = { ...blankDraft };
       els.slug.dataset.touched = '';
+      writeFields();
+      persistAndRender();
+    });
+
+    els.newProject.addEventListener('click', () => {
+      appState.projectDraft = { ...blankProject };
+      setMode('project');
+      els.projectSlug.dataset.touched = '';
       writeFields();
       persistAndRender();
     });
@@ -956,13 +1193,43 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
 
     els.saveSite.addEventListener('click', saveHomepageToBackend);
 
-    els.copyMarkdown.addEventListener('click', async () => {
+    els.saveProject.addEventListener('click', async () => {
+      saveCurrentProject('Saving project to site files...');
       try {
-        await navigator.clipboard.writeText(els.exportOutput.value);
-        els.copyFeedback.textContent = 'Article markdown copied.';
+        const result = await writeToBackend('save-homepage', null, 'Project saved.');
+        els.copyFeedback.textContent = backendMessage(result, 'Project saved.');
+      } catch (error) {
+        els.copyFeedback.textContent = error.message;
+      }
+    });
+
+    els.deleteProject.addEventListener('click', async () => {
+      if (!window.confirm(`Delete "${appState.projectDraft.title}" from Project OS?`)) return;
+      readFields();
+      appState.projects = appState.projects.filter((project) => project.slug !== appState.projectDraft.slug);
+      appState.projectDraft = normalizeProject(appState.projects[0] ?? blankProject);
+      els.projectSlug.dataset.touched = '';
+      writeFields();
+      saveState();
+      renderProjectList();
+      render();
+      try {
+        const result = await writeToBackend('save-homepage', null, 'Project deleted.');
+        els.copyFeedback.textContent = backendMessage(result, 'Project deleted.');
+      } catch (error) {
+        els.copyFeedback.textContent = error.message;
+      }
+    });
+
+    els.copyMarkdown.addEventListener('click', async () => {
+      const exportValue = appState.mode === 'project' ? els.homeExportOutput.value : els.exportOutput.value;
+      try {
+        await navigator.clipboard.writeText(exportValue);
+        els.copyFeedback.textContent = appState.mode === 'project' ? 'Project site module copied.' : 'Article markdown copied.';
       } catch {
-        els.exportOutput.focus();
-        els.exportOutput.select();
+        const fallback = appState.mode === 'project' ? els.homeExportOutput : els.exportOutput;
+        fallback.focus();
+        fallback.select();
         els.copyFeedback.textContent = 'Clipboard blocked. Export text selected for manual copy.';
       }
     });
@@ -979,14 +1246,15 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
     });
 
     els.downloadMarkdown.addEventListener('click', () => {
-      const blob = new Blob([els.exportOutput.value], { type: 'text/markdown' });
+      const exportValue = appState.mode === 'project' ? els.homeExportOutput.value : els.exportOutput.value;
+      const blob = new Blob([exportValue], { type: appState.mode === 'project' ? 'text/typescript' : 'text/markdown' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${appState.draft.slug || 'essay'}.md`;
+      link.download = appState.mode === 'project' ? 'siteCopy.ts' : `${appState.draft.slug || 'essay'}.md`;
       link.click();
       URL.revokeObjectURL(url);
-      els.copyFeedback.textContent = 'Markdown file exported from the browser.';
+      els.copyFeedback.textContent = appState.mode === 'project' ? 'Site copy module exported from the browser.' : 'Markdown file exported from the browser.';
     });
 
     els.focusMode.addEventListener('click', () => {
@@ -995,7 +1263,18 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       els.focusMode.textContent = enabled ? 'Show panels' : 'Focus editor';
     });
 
+    els.articleTab.addEventListener('click', () => {
+      setMode('article');
+      persistAndRender();
+    });
+
+    els.projectTab.addEventListener('click', () => {
+      setMode('project');
+      persistAndRender();
+    });
+
     renderArticleList();
+    renderProjectList();
     writeFields();
     render();
   </script>
@@ -1146,6 +1425,10 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       box-shadow: 5px 5px 0 var(--ink);
     }
 
+    .admin-cms [hidden] {
+      display: none !important;
+    }
+
     .inventory-panel,
     .editor-panel,
     .preview-column {
@@ -1180,6 +1463,27 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       margin: -0.3rem 0 0.9rem;
       padding-bottom: 0.85rem;
       border-bottom: 1px solid var(--admin-line);
+    }
+
+    .content-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.55rem;
+      margin: -0.15rem 0 1rem;
+    }
+
+    .content-tab {
+      min-height: 2.7rem;
+      border: 1.5px solid var(--ink);
+      border-radius: 6px;
+      background: var(--admin-panel-strong);
+      color: var(--admin-ink);
+      font-weight: 900;
+    }
+
+    .content-tab.is-active {
+      background: var(--admin-yellow);
+      box-shadow: 3px 3px 0 var(--ink);
     }
 
     .panel-head h2,
@@ -1403,6 +1707,15 @@ const seedJson = JSON.stringify(adminSeed).replace(/</g, '\\u003c');
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       font-size: 0.95rem;
       line-height: 1.55;
+    }
+
+    .project-editor {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .project-body-editor {
+      min-height: 24rem;
     }
 
     .article-list {

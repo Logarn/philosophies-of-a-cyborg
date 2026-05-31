@@ -1,0 +1,103 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { contact } from '../../lib/contact';
+import { projectCopy } from '../../lib/siteCopy';
+
+export const prerender = false;
+
+const project = projectCopy.find((item) => item.slug === Astro.params.slug);
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function inlineMarkdown(value: string) {
+  return escapeHtml(value)
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+|#[^\s)]+|\/[^\s)]+)\)/g, '<a href="$2">$1</a>');
+}
+
+function markdownToHtml(markdown: string) {
+  const blocks: string[] = [];
+  let paragraph: string[] = [];
+  const flushParagraph = () => {
+    if (!paragraph.length) return;
+    blocks.push(`<p>${inlineMarkdown(paragraph.join(' '))}</p>`);
+    paragraph = [];
+  };
+
+  markdown.split('\n').forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      flushParagraph();
+      return;
+    }
+    if (trimmed.startsWith('### ')) {
+      flushParagraph();
+      blocks.push(`<h3>${inlineMarkdown(trimmed.slice(4))}</h3>`);
+      return;
+    }
+    if (trimmed.startsWith('## ')) {
+      flushParagraph();
+      blocks.push(`<h2>${inlineMarkdown(trimmed.slice(3))}</h2>`);
+      return;
+    }
+    if (trimmed.startsWith('# ')) {
+      flushParagraph();
+      blocks.push(`<h2>${inlineMarkdown(trimmed.slice(2))}</h2>`);
+      return;
+    }
+    paragraph.push(trimmed);
+  });
+
+  flushParagraph();
+  return blocks.join('');
+}
+
+if (!project) {
+  return Astro.redirect('/projects/');
+}
+
+const detailHtml = markdownToHtml(project.detail);
+---
+
+<BaseLayout
+  title={`${project.title} | Project OS | ${contact.siteName}`}
+  description={project.summary}
+  canonicalPath={`/projects/${project.slug}/`}
+>
+  <main class="page">
+    <article class="article project-detail">
+      <p class="pin">Project</p>
+      <h1>{project.title}</h1>
+      <p class="dek">{project.highlight || project.summary}</p>
+
+      <dl class="project-facts">
+        <div>
+          <dt>Status</dt>
+          <dd>{project.status}</dd>
+        </div>
+        {project.domain && (
+          <div>
+            <dt>Domain</dt>
+            <dd>{project.domain}</dd>
+          </div>
+        )}
+        {project.repo && (
+          <div>
+            <dt>Repo</dt>
+            <dd><a href={project.repo}>View repo</a></dd>
+          </div>
+        )}
+      </dl>
+
+      <div class="article-body" set:html={detailHtml}></div>
+    </article>
+  </main>
+</BaseLayout>
